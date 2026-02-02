@@ -1,6 +1,6 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using TradingApp.Models;
+using TradingApp.ViewModels;
 
 namespace TradingApp.Controllers
 {

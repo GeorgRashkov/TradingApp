@@ -1,4 +1,4 @@
-namespace TradingApp.Models
+namespace TradingApp.ViewModels
 {
     public class ErrorViewModel
     {
