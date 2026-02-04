@@ -39,8 +39,8 @@ namespace TradingApp.Data.Models
         
 
         public virtual Product? Product { get; set; }
-        public virtual IdentityUser? Buyer { get; set; }
-        public virtual IdentityUser? Seller { get; set; }
+        public virtual User? Buyer { get; set; }
+        public virtual User? Seller { get; set; }
 
     }
 }

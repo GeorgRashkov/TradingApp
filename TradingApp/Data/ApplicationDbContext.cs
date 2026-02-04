@@ -4,7 +4,7 @@ using TradingApp.Data.Models;
 
 namespace TradingApp.Data
 {
-    public class ApplicationDbContext : IdentityDbContext
+    public class ApplicationDbContext : IdentityDbContext<User>
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
@@ -69,12 +69,12 @@ namespace TradingApp.Data
                 .OnDelete(DeleteBehavior.NoAction);
 
                 e.HasOne(co => co.Buyer).
-                WithMany()
+                WithMany(b => b.CompletedPurchaseOrders)
                 .HasForeignKey(co => co.BuyerId)
                 .OnDelete(DeleteBehavior.NoAction);
 
                 e.HasOne(co => co.Seller)
-                .WithMany()
+                .WithMany(s => s.CompletedSellOrders)
                 .HasForeignKey(co => co.SellerId)
                 .OnDelete(DeleteBehavior.NoAction);
             });

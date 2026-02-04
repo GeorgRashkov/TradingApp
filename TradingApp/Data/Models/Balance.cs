@@ -16,6 +16,6 @@ namespace TradingApp.Data.Models
 
 
 
-        public virtual IdentityUser User { get; set; } = null!;
+        public virtual User User { get; set; } = null!;
     }
 }

@@ -29,7 +29,7 @@ namespace TradingApp.Data.Models
 
 
 
-        public virtual IdentityUser Creator { get; set; } = null!;
+        public virtual User Creator { get; set; } = null!;
 
         public virtual Product Product { get; set; } = null!;
 
