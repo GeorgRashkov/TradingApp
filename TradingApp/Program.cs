@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 using TradingApp.Data;
 using TradingApp.Data.Models;
-
+using TradingApp.Data.Seed;
 
 namespace TradingApp
 {
@@ -25,7 +25,15 @@ namespace TradingApp
 
 
 
-           
+            //<in testing state
+            //add the seeder classes to the services
+            builder.Services.AddTransient<UserSeeder>();
+            builder.Services.AddTransient<BalanceSeeder>();
+            builder.Services.AddTransient<ProductSeeder>();
+            builder.Services.AddTransient<PurchaseOrderSeeder>();
+            builder.Services.AddTransient<SellOrderSeeder>();
+            builder.Services.AddTransient<SellOrderSuggestionSeeder>();
+            //in testing state>
 
 
 
@@ -57,8 +65,41 @@ namespace TradingApp
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
             app.MapRazorPages();           
-                       
+
+            //seed some data to the database
+            await new Program().SeedDataAsync(app);
+
             await app.RunAsync();            
-        }       
+        }
+
+
+        //<in testing state
+        //seeding some data to the database
+        public async Task SeedDataAsync(WebApplication app)
+        {
+            using (var scope = app.Services.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+
+                UserSeeder userSeeder = services.GetRequiredService<UserSeeder>();
+                await userSeeder.SeedAsync();
+
+                BalanceSeeder balanceSeeder = services.GetRequiredService<BalanceSeeder>();
+                await balanceSeeder.SeedAsync();
+
+                ProductSeeder productSeeder = services.GetRequiredService<ProductSeeder>();
+                await productSeeder.SeedAsync();
+
+                PurchaseOrderSeeder purchaseOrderSeeder = services.GetRequiredService<PurchaseOrderSeeder>();
+                await purchaseOrderSeeder.SeedAsync();
+
+                SellOrderSeeder sellOrderSeeder = services.GetRequiredService<SellOrderSeeder>();
+                await sellOrderSeeder.SeedAsync();
+
+                SellOrderSuggestionSeeder sellOrderSuggestionSeeder = services.GetRequiredService<SellOrderSuggestionSeeder>();
+                await sellOrderSuggestionSeeder.SeedAsync();
+            }
+        }
+        //in testing state>
     }
 }

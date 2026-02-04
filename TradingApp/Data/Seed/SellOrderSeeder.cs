@@ -26,19 +26,16 @@ namespace TradingApp.Data.Seed
                .Take(9)
                .ToListAsync();
 
-            int activeSellOrdersCount = productsAndCreatorsIds.Count-1;
-            int SellOrdersPerUser = 2;
+            int activeSellOrdersCount = productsAndCreatorsIds.Count-1;           
             List<SellOrder> sellOrders = new List<SellOrder>();
 
-            for (int i = 1; i <= activeSellOrdersCount; i++)
-            {
-                int userIdIndex = i % SellOrdersPerUser;
-
+            for (int i = 0; i < activeSellOrdersCount; i++)
+            {              
                 SellOrder activeSellOrder = new SellOrder()
                 {
                     Status = Enums.SellOrderStatus.active,
                     CreatedAt = DateTime.UtcNow,
-                    CreatorId = productsAndCreatorsIds[userIdIndex].CreatorId,
+                    CreatorId = productsAndCreatorsIds[i].CreatorId,
                     ProductId = productsAndCreatorsIds[i].Id,
                 };
                 sellOrders.Add(activeSellOrder);

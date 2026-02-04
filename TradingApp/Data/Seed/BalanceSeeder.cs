@@ -13,6 +13,9 @@ namespace TradingApp.Data.Seed
 
         public async Task SeedAsync()
         {
+            if (await _context.Balances.AnyAsync())
+            { return; }
+
             decimal initialBalanceAmount = 1000m;
 
             var userIds = await _context
