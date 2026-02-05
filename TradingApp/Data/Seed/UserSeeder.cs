@@ -16,13 +16,13 @@ namespace TradingApp.Data.Seed
         {
             var users = new[]
             {
-                new { UserName = "alice",   Email = "alice@test.com" },
-                new { UserName = "bob",     Email = "bob@test.com" },
-                new { UserName = "charlie", Email = "charlie@test.com" },
-                new { UserName = "diana",   Email = "diana@test.com" },
-                new { UserName = "edward",  Email = "edward@test.com" },
-                new { UserName = "frank",   Email = "frank@test.com" },
-                new { UserName = "grace",   Email = "grace@test.com" }
+                new { UserName = "alice@test.com",   Email = "alice@test.com" },
+                new { UserName = "bob@test.com",     Email = "bob@test.com" },
+                new { UserName = "charlie@test.com", Email = "charlie@test.com" },
+                new { UserName = "diana@test.com",   Email = "diana@test.com" },
+                new { UserName = "edward@test.com",  Email = "edward@test.com" },
+                new { UserName = "frank@test.com",   Email = "frank@test.com" },
+                new { UserName = "grace@test.com",   Email = "grace@test.com" }
             };
 
             int userIndex = 1;
