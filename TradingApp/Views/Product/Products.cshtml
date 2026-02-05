@@ -1,0 +1,85 @@
+﻿
+@using TradingApp.ViewModels.Product;
+@model List<ProductViewModel>
+@{    
+    bool isPrivate = ViewData["isPrivate"] as bool? ?? false;     
+    ViewData["Title"] = isPrivate == true ? "My products" : "Products";
+}
+
+<div class="row row-cols-1 row-cols-sm-2 g-2">
+    <div style="text-align:left">
+<h1>@(ViewData["Title"])</h1>
+    </div>
+@if (isPrivate){
+   
+    <div style="text-align:right">
+        <a class="btn btn-sm btn-primary" asp-controller="Product" asp-action="CreateProduct">
+            Create product
+        </a>
+    </div>
+    
+}
+</div>
+<br />
+
+
+
+<div class="container py-4">
+
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+
+        @foreach (var product in Model)
+        {
+            <div class="col">
+
+                <div class="card h-100 shadow-sm">
+
+                    <img class="card-img-top img-fluid product-img"
+                         src="~/Creators/@(product.CreatorName)/@(product.ProductName)/front.jpg"
+                         alt="@product.ProductName" />
+
+                    <div class="card-body text-center">
+
+                        <h6 class="card-title fw-semibold">
+                            @product.ProductName
+                        </h6>
+
+                        <p class="card-text text-muted mb-2">
+                            $@product.Price
+                        </p>
+
+                        <a class="btn btn-sm btn-primary" asp-controller="Product" asp-action="Product" asp-route-creatorName="@(product.CreatorName)" asp-route-productName="@(product.ProductName)">
+                            View
+                        </a>
+
+                        @if (isPrivate)
+                        {
+                            <a class="btn btn-sm btn-primary" asp-controller="Product" asp-action="DeleteProduct" asp-route-creatorName="@(product.CreatorName)" asp-route-productName="@(product.ProductName)">
+                                Delete
+                            </a>
+                        }
+                        else
+                        {
+                            <a class="btn btn-sm btn-primary" asp-controller="Product" asp-action="Product" asp-route-creatorName="@(product.CreatorName)" asp-route-productName="@(product.ProductName)">
+                                Buy
+                            </a>
+                        }
+
+                    </div>
+
+                </div>
+
+            </div>
+        }
+
+    </div>
+
+</div>
+
+<style>
+    .product-img {
+        height: 300px;
+        object-fit: contain;
+        padding: 15px;
+    }
+</style>
