@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
+using System.Threading.Tasks;
 using TradingApp.Common;
 using TradingApp.Data;
 using TradingApp.Data.Models;
@@ -108,6 +109,40 @@ namespace TradingApp.Services
                 .Where(so => so.CreatorId == userId)
                 .CountAsync();
             return sellOrdersCount;
-        }        
+        }
+
+
+
+
+
+
+
+
+
+
+
+        public async Task<bool> DoesCreatorExistAsync(string userId)
+        {
+            return await _context.Users
+                    .AsNoTracking()
+                    .AnyAsync(u => u.Id == userId);
+        }
+
+        public async Task<bool> DoesProductCreatedByCreatorExistAsync(string userId, string productName)
+        {
+            return await _context.Products
+                    .AsNoTracking()
+                    .AnyAsync(p => p.CreatorId == userId && p.Name == productName);
+        }
+
+
+
+        //saves the product in the database
+        public async Task SaveProductAsync(Product product)
+        {
+            await _context.Products.AddAsync(product);
+            await _context.SaveChangesAsync();
+        }
+
     }
 }

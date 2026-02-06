@@ -8,24 +8,25 @@ namespace TradingApp.InputModels
         public IFormFile FrontImageFile { get; set; } = null!;
 
        
-        public IFormFile? BackImageFile { get; set; } = null!;
+        public IFormFile? BackImageFile { get; set; }
                 
-        public IFormFile? TopImageFile { get; set; } = null!;
+        public IFormFile? TopImageFile { get; set; }
                
-        public IFormFile? BottomImageFile { get; set; } = null!;
+        public IFormFile? BottomImageFile { get; set; }
                 
-        public IFormFile? LeftImageFile { get; set; } = null!;
+        public IFormFile? LeftImageFile { get; set; }
                
-        public IFormFile? RightImageFile { get; set; } = null!;
+        public IFormFile? RightImageFile { get; set; }
 
 
         [Required]
-        public IFormFile File3DModel { get; set; } = null!;
+        public IFormFile File3DModel { get; set; }
 
 
         [Required]
         [MinLength(EntityValidation.Product.NameMinLength)]
         [MaxLength(EntityValidation.Product.NameMaxLength)]
+        [RegularExpression(@"^[a-zA-Z0-9 ]*$")]
         public string ProductName { get; set; } = string.Empty;
 
         [Required]
