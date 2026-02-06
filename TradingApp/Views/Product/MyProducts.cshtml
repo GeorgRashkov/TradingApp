@@ -1,7 +1,7 @@
 ﻿@using TradingApp.ViewModels.Product;
-@model List<ProductsViewModel>
+@model List<MyProductsViewModel>
 @{
-    ViewData["Title"] = "Products";
+    ViewData["Title"] = "My products";
     int pageIndex = (int)(ViewData["page"] ?? 0);
 }
 
@@ -10,8 +10,16 @@
         <h1>@(ViewData["Title"])</h1>
     </div>
 
+    <div style="text-align:right">
+        <a class="btn btn-sm btn-primary" asp-controller="ProductOperations" asp-action="CreateProduct">
+            Create product
+        </a>
+    </div>
+
+
 </div>
 <br />
+
 
 @if (Model is null)
 {
@@ -40,7 +48,7 @@ else
                             </h6>
 
                             <h6>
-                                Created by @product.CreatorName
+                                Status: @product.ProductStatus
                             </h6>
 
                             <p class="card-text text-muted mb-2">
@@ -50,10 +58,11 @@ else
                             <a class="btn btn-sm btn-primary" asp-controller="Product" asp-action="Product" asp-route-creatorName="@(product.CreatorName)" asp-route-productName="@(product.ProductName)">
                                 View
                             </a>
-
-
-                            <a class="btn btn-sm btn-primary" asp-controller="ProductOperations" asp-action="BuyProduct" asp-route-creatorName="@(product.CreatorName)" asp-route-productName="@(product.ProductName)">
-                                Buy
+                            <a class="btn btn-sm btn-primary" asp-controller="ProductOperations" asp-action="EditProduct" asp-route-creatorName="@(product.CreatorName)" asp-route-productName="@(product.ProductName)">
+                                Edit
+                            </a>
+                            <a class="btn btn-sm btn-primary" asp-controller="ProductOperations" asp-action="DeleteProduct" asp-route-creatorName="@(product.CreatorName)" asp-route-productName="@(product.ProductName)">
+                                Delete
                             </a>
 
 
@@ -71,13 +80,13 @@ else
 
     <div>
         <div style="text-align:left">
-            <a asp-controller="Product" asp-action="Products" asp-route-pageIndex="@(pageIndex - 1)">
+            <a asp-controller="Product" asp-action="MyProducts" asp-route-pageIndex="@(pageIndex - 1)">
                 <img src="~/Common/PreviousElementsButton.jpg" style="width:30px; height:30px" />
             </a>
 
         </div>
         <div style="text-align:right">
-            <a asp-controller="Product" asp-action="Products" asp-route-pageIndex="@(pageIndex + 1)">
+            <a asp-controller="Product" asp-action="MyProducts" asp-route-pageIndex="@(pageIndex + 1)">
                 <img src="~/Common/NextElementsButton.jpg" style="width:30px; height:30px" />
             </a>
 
