@@ -15,7 +15,17 @@ namespace TradingApp.Common
         //if the value is null the products will not be filtered by their sell order status (products with no sell orders will be selected);
         public SellOrderStatus? SellOrderStatus { get; set; }
 
-        //determines the username which will be used when searching for products;
+        //determines the product id which will be used when searching for products;
+        //since each product has unique id the filter will select at most one product;
+        //if the value is null the products will not be filtered by their id
+        public Guid? PorductId { get; set; }
+
+        //determines the user id of the creator which will be used when searching for products;
+        //if the value is null the products will not be filtered by their creator's id
+        public string? UserId { get; set; }
+
+
+        //determines the username of the creator which will be used when searching for products;
         //if the value is null the products will not be filtered by their creator's username
         public string? Username { get; set; }
 

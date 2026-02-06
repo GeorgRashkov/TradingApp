@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 using System.Linq.Expressions;
 using System.Security.Claims;
 using System.Text;
@@ -20,6 +21,7 @@ namespace TradingApp.Controllers
     {
         private ApplicationDbContext _context;
         private int _productsPerPage = 4;
+        private int _maxActiveSellOrdersPerUser = 3;
         public ProductController(ApplicationDbContext context)
         {
             _context = context;
@@ -42,18 +44,18 @@ namespace TradingApp.Controllers
         [HttpGet]
         public async Task<IActionResult> Products(int pageIndex)
         {
-            pageIndex = pageIndex<0 ? 0: pageIndex;
-            
+            pageIndex = pageIndex < 0 ? 0 : pageIndex;
+
             ProductFilter filter = new ProductFilter()
             {
                 ProductStatus = ProductStatus.approved,
-                SellOrderStatus = SellOrderStatus.active,                
+                SellOrderStatus = SellOrderStatus.active,
             };
 
-            int productsCount = GetProductsCount(filter);            
+            int productsCount = await GetProductsCountAsync(filter);
             if (productsCount == 0)
             { return View(model: null); }
-            pageIndex = pageIndex * _productsPerPage >= productsCount ? (int)Math.Ceiling((decimal)productsCount/ (decimal)_productsPerPage)-1 : pageIndex; ;//pageIndex-1 : pageIndex;
+            pageIndex = pageIndex * _productsPerPage >= productsCount ? (int)Math.Ceiling((decimal)productsCount / (decimal)_productsPerPage) - 1 : pageIndex; ;//pageIndex-1 : pageIndex;
 
 
             filter.Skip = pageIndex * _productsPerPage;
@@ -65,14 +67,46 @@ namespace TradingApp.Controllers
             selector: (p) =>
                new ProductsViewModel
                {
-                   CreatorName = p.Creator.UserName,                   
+                   Id = p.Id.ToString(),
+                   CreatorName = p.Creator.UserName,
                    Price = p.Price.ToString("f2"),
                    ProductName = p.Name
                }
-            );          
+            );
 
             return View(model: products);
         }
+
+        [HttpGet]
+        public async Task<IActionResult> Product(Guid productId)
+        {
+            ProductFilter filter = new ProductFilter()
+            {
+                PorductId = productId,
+                ProductStatus = ProductStatus.approved,
+                SellOrderStatus = SellOrderStatus.active,
+            };
+
+
+            ProductViewModel? product = await GetProductAsync<ProductViewModel>(productFilter: filter, selector:
+                p => new ProductViewModel
+                {
+                    ProductName = p.Name,
+                    Description = p.Description,
+                    Price = p.Price.ToString("f2"),
+                    CreatorName = p.Creator.UserName,
+                    SellOrderCreationDate = p.SellOrders.SingleOrDefault().CreatedAt.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture)
+                }
+
+                );
+
+            if (product == null)
+            { return NotFound(); }
+
+
+            return View(model: product);
+        }
+
 
         [HttpGet]
         [Authorize]
@@ -82,11 +116,11 @@ namespace TradingApp.Controllers
 
             ProductFilter filter = new ProductFilter()
             {
-                Username = LoggedUserUsername,                
+                Username = LoggedUserUsername,
             };
 
-            int productsCount = GetProductsCount(filter);
-            if(productsCount == 0) 
+            int productsCount = await GetProductsCountAsync(filter);
+            if (productsCount == 0)
             { return View(model: null); }
 
             pageIndex = pageIndex * _productsPerPage >= productsCount ? (int)Math.Ceiling((decimal)productsCount / (decimal)_productsPerPage) - 1 : pageIndex; ;//pageIndex-1 : pageIndex;
@@ -94,21 +128,59 @@ namespace TradingApp.Controllers
 
             filter.Skip = pageIndex * _productsPerPage;
             filter.Take = _productsPerPage;
-            ViewData["page"] = pageIndex;            
+            ViewData["page"] = pageIndex;
 
             List<MyProductsViewModel> products = await GetProductsAsync(productFilter: filter,
                 selector: (p) =>
                 new MyProductsViewModel
-                {                                        
+                {
+                    Id = p.Id.ToString(),
                     Price = p.Price.ToString("f2"),
                     ProductName = p.Name,
-                    ProductStatus = p.Status.ToString(),                    
+                    ProductStatus = p.Status.ToString(),
                     CreatorName = p.Creator.UserName
                 }
-                );           
+                );
 
             return View(model: products);
-        }       
+        }
+
+
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> MyProduct(Guid productId)
+        {
+            ProductFilter filter = new ProductFilter()
+            {
+                PorductId = productId
+            };
+
+            MyProductViewModel? product = await GetProductAsync<MyProductViewModel>(productFilter: filter, selector:
+                p => new MyProductViewModel
+                {
+                    ProductName = p.Name,
+                    Description = p.Description,
+                    CreatorName = p.Creator.UserName,
+                    Price = p.Price.ToString("f2"),
+                    HasActiveSellOrder = p.SellOrders.Any(so => so.Status == SellOrderStatus.active)
+                }
+
+                );
+
+            if(product == null)
+            {
+                return NotFound();
+            }
+            else if (LoggedUserUsername != product.CreatorName)
+            {
+                return Forbid();
+            }         
+
+            int activeSellOrdersCount = await GetSellOrdersCountAsync(LoggedUserId);
+            ViewData["maxSellOrdersCountReached"] = activeSellOrdersCount >= _maxActiveSellOrdersPerUser ? true:false;
+
+            return View(model: product);
+        }
 
 
         //<DB calls
@@ -120,9 +192,19 @@ namespace TradingApp.Controllers
             IQueryable<Product> query = _context.Products
                .AsNoTracking();
 
+            if (productFilter.PorductId != null)
+            {
+                query = query.Where(p => p.Id == productFilter.PorductId);
+            }
+
+            if (productFilter.UserId != null)
+            {
+                query = query.Where(p => p.CreatorId == productFilter.UserId);
+            }
+
             if (productFilter.ProductStatus != null)
             {
-                //query = query.Where(p => p.Status == productFilter.ProductStatus);
+                query = query.Where(p => p.Status == productFilter.ProductStatus);
             }
 
             if (productFilter.SellOrderStatus != null)
@@ -177,11 +259,21 @@ namespace TradingApp.Controllers
 
             return productViewModel;
         }
-
-        private int GetProductsCount(ProductFilter productFilter)
+                
+        private async Task<int> GetProductsCountAsync(ProductFilter productFilter)
         {
-            int productsCount = FilterProducts(productFilter).Count();
+            int productsCount = await FilterProducts(productFilter).CountAsync();
             return productsCount;
+        }
+
+
+        private async Task<int> GetSellOrdersCountAsync(string userId)
+        {
+            int sellOrdersCount = await _context.SellOrders
+                .AsNoTracking()
+                .Where(so => so.CreatorId == userId)
+                .CountAsync();
+            return sellOrdersCount;
         }
         //DB calls> 
     }

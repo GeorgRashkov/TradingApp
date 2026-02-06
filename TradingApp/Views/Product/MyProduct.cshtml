@@ -1,18 +1,17 @@
 ﻿
 @using TradingApp.ViewModels.Product;
-@model ProductViewModel
+@model MyProductViewModel
 @{
     ViewData["Title"] = Model.ProductName;
     List<string> imageNames = new List<string>() { "front", "back", "top", "bottom", "left", "right" };
-    bool isPrivate = ViewData["isPrivate"] as bool? ?? false;
+    bool maxSellOrdersCountReached = (bool)(ViewData["maxSellOrdersCountReached"] as bool?);
 }
 
 
 
 
 <h1>@Model.ProductName</h1>
-<h2>Created by @Model.CreatorName</h2>
-<h3>Sell order active from @Model.SellOrderCreationDate</h3>
+
 
 <div class="container py-4">
 
@@ -32,7 +31,7 @@
 
                         <h6 class="card-title fw-semibold">
                             @imageNames[i]
-                        </h6>                                       
+                        </h6>
 
                     </div>
 
@@ -57,14 +56,24 @@
 <p>Price: @(Model.Price)$</p>
 
 
-@if(isPrivate == true)
+<a class="btn btn-sm btn-primary" asp-controller="ProductOperations" asp-action="EditProduct">Edit</a>
+<a class="btn btn-sm btn-primary" asp-controller="ProductOperations" asp-action="DeleteProduct">Delete</a>
+<br />
+<br />
+
+@if (Model.HasActiveSellOrder == true)
 {
-    <a class="btn btn-sm btn-primary" asp-controller="Product" asp-action="EditCreateProduct">Edit</a>
+    <a class="btn btn-sm btn-primary" asp-controller="ProductOperations" asp-action="CancelSellOrder">Cancel sell order</a>
+}
+else if (maxSellOrdersCountReached == true)
+{
+    <p><b>Active sales maximum amount reached!</b></p>
 }
 else
 {
-    <a class="btn btn-sm btn-primary" asp-controller="Product" asp-action="EditCreateProduct">Buy</a>
+    <a class="btn btn-sm btn-primary" asp-controller="ProductOperations" asp-action="CreateSellOrder">Create sell order</a>
 }
+
 
 
 <style>

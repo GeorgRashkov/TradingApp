@@ -1,12 +1,14 @@
-﻿namespace TradingApp.ViewModels.Product
+﻿using TradingApp.Data.Enums;
+
+namespace TradingApp.ViewModels.Product
 {
-    public class ProductViewModel
+    public class MyProductViewModel
     {
         public string ProductName { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public string Price { get; set; } = string.Empty;
         public string CreatorName { get; set; } = string.Empty;
 
-        public string SellOrderCreationDate { get; set; } = string.Empty;
+        public bool HasActiveSellOrder { get; set; }        
     }
 }

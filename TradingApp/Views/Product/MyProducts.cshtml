@@ -55,7 +55,7 @@ else
                                 $@product.Price
                             </p>
 
-                            <a class="btn btn-sm btn-primary" asp-controller="Product" asp-action="Product" asp-route-creatorName="@(product.CreatorName)" asp-route-productName="@(product.ProductName)">
+                            <a class="btn btn-sm btn-primary" asp-controller="Product" asp-action="MyProduct" asp-route-productId="@(product.Id)">
                                 View
                             </a>
                             <a class="btn btn-sm btn-primary" asp-controller="ProductOperations" asp-action="EditProduct" asp-route-creatorName="@(product.CreatorName)" asp-route-productName="@(product.ProductName)">
