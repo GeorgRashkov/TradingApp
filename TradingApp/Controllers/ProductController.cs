@@ -14,18 +14,28 @@ using TradingApp.Data.Enums;
 using TradingApp.Data.Models;
 using TradingApp.InputModels;
 using TradingApp.ViewModels.Product;
+using TradingApp.Services;
 
 namespace TradingApp.Controllers
 {
     public class ProductController : Controller
     {
-        private ApplicationDbContext _context;
+        
         private int _productsPerPage = 4;
         private int _maxActiveSellOrdersPerUser = 3;
+        private CrudDb _crudDb;
+
+        public  ProductController(ApplicationDbContext context)
+        {
+            _crudDb = new CrudDb(context);
+        }
+        /*
+        private ApplicationDbContext _context;
         public ProductController(ApplicationDbContext context)
         {
             _context = context;
         }
+        */
 
         //this is the Id of the currently logged user; if the user is not logged the value will be null 
         private string LoggedUserId
@@ -52,7 +62,7 @@ namespace TradingApp.Controllers
                 SellOrderStatus = SellOrderStatus.active,
             };
 
-            int productsCount = await GetProductsCountAsync(filter);
+            int productsCount = await _crudDb.GetProductsCountAsync(filter);
             if (productsCount == 0)
             { return View(model: null); }
             pageIndex = pageIndex * _productsPerPage >= productsCount ? (int)Math.Ceiling((decimal)productsCount / (decimal)_productsPerPage) - 1 : pageIndex; ;//pageIndex-1 : pageIndex;
@@ -63,7 +73,7 @@ namespace TradingApp.Controllers
             ViewData["page"] = pageIndex;
 
 
-            List<ProductsViewModel> products = await GetProductsAsync<ProductsViewModel>(productFilter: filter,
+            List<ProductsViewModel> products = await _crudDb.GetProductsAsync<ProductsViewModel>(productFilter: filter,
             selector: (p) =>
                new ProductsViewModel
                {
@@ -88,7 +98,7 @@ namespace TradingApp.Controllers
             };
 
 
-            ProductViewModel? product = await GetProductAsync<ProductViewModel>(productFilter: filter, selector:
+            ProductViewModel? product = await _crudDb.GetProductAsync<ProductViewModel>(productFilter: filter, selector:
                 p => new ProductViewModel
                 {
                     ProductName = p.Name,
@@ -119,7 +129,7 @@ namespace TradingApp.Controllers
                 Username = LoggedUserUsername,
             };
 
-            int productsCount = await GetProductsCountAsync(filter);
+            int productsCount = await _crudDb.GetProductsCountAsync(filter);
             if (productsCount == 0)
             { return View(model: null); }
 
@@ -130,7 +140,7 @@ namespace TradingApp.Controllers
             filter.Take = _productsPerPage;
             ViewData["page"] = pageIndex;
 
-            List<MyProductsViewModel> products = await GetProductsAsync(productFilter: filter,
+            List<MyProductsViewModel> products = await _crudDb.GetProductsAsync(productFilter: filter,
                 selector: (p) =>
                 new MyProductsViewModel
                 {
@@ -155,7 +165,7 @@ namespace TradingApp.Controllers
                 PorductId = productId
             };
 
-            MyProductViewModel? product = await GetProductAsync<MyProductViewModel>(productFilter: filter, selector:
+            MyProductViewModel? product = await _crudDb.GetProductAsync<MyProductViewModel>(productFilter: filter, selector:
                 p => new MyProductViewModel
                 {
                     ProductName = p.Name,
@@ -176,13 +186,13 @@ namespace TradingApp.Controllers
                 return Forbid();
             }         
 
-            int activeSellOrdersCount = await GetSellOrdersCountAsync(LoggedUserId);
+            int activeSellOrdersCount = await _crudDb.GetSellOrdersCountAsync(LoggedUserId);
             ViewData["maxSellOrdersCountReached"] = activeSellOrdersCount >= _maxActiveSellOrdersPerUser ? true:false;
 
             return View(model: product);
         }
 
-
+        /*
         //<DB calls
 
         //this method filters the products based on the parameter values in the filter
@@ -276,5 +286,6 @@ namespace TradingApp.Controllers
             return sellOrdersCount;
         }
         //DB calls> 
+        */
     }
 }
