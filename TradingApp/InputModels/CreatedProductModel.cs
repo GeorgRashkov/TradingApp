@@ -5,7 +5,7 @@ namespace TradingApp.InputModels
     public class CreatedProductModel
     {
         [Required]
-        public IFormFile FrontImageFile { get; set; } = null!;
+        public virtual IFormFile FrontImageFile { get; set; } = null!;
 
        
         public IFormFile? BackImageFile { get; set; }
@@ -20,13 +20,13 @@ namespace TradingApp.InputModels
 
 
         [Required]
-        public IFormFile File3DModel { get; set; }
+        public virtual IFormFile File3DModel { get; set; } = null!;
 
 
         [Required]
         [MinLength(EntityValidation.Product.NameMinLength)]
         [MaxLength(EntityValidation.Product.NameMaxLength)]
-        [RegularExpression(@"^[a-zA-Z0-9 ]*$")]
+        [RegularExpression(EntityValidation.Product.NameRegex)]
         public string ProductName { get; set; } = string.Empty;
 
         [Required]
