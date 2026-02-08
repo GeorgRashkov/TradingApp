@@ -1,4 +1,5 @@
 ﻿using TradingApp.InputModels;
+using Microsoft.VisualBasic.FileIO;
 
 namespace TradingApp.Services
 {
@@ -30,6 +31,55 @@ namespace TradingApp.Services
             string product3DModelPath = Path.Combine(productPath, product.ProductName + ".jpg");
             using (var stream = new FileStream(product3DModelPath, FileMode.Create))
             { await product.File3DModel.CopyToAsync(stream); }
+        }
+
+        public async Task UpdateProductInFolder(UpdatedProductModel product, string creatorName, string oldProductName)
+        {
+            string creatorPath = Path.Combine("wwwroot", "Creators", creatorName);
+
+            if (product.ProductName != oldProductName)
+            {
+                //rename the 3D model file
+                FileSystem.RenameFile(
+                    file: Path.Combine(creatorPath, oldProductName, oldProductName + ".jpg"),
+                    newName: Path.Combine(product.ProductName + ".jpg")
+                );
+
+                //remane the product directory
+                FileSystem.RenameDirectory(
+                    directory: Path.Combine(creatorPath, oldProductName),
+                    newName: Path.Combine(product.ProductName)
+                );
+            }
+
+            //gets the path to the product directory (inclusive)
+            string productPath = Path.Combine(creatorPath, product.ProductName);
+
+            Dictionary<string, IFormFile> imageFiles = product.GetDictOfImageFiles();
+
+            //this code replaces old images of the product with the new ones
+            foreach ((string imageName, IFormFile imageFile) in imageFiles)
+            {
+                if (imageFile is null)
+                { continue; }
+
+                string imagePath = Path.Combine(productPath, imageName + ".jpg");
+                using (var stream = new FileStream(imagePath, FileMode.Create))
+                {
+                    await imageFile.CopyToAsync(stream);
+                }
+            }
+
+            //this code replaces the 3D model file of the product with with the new one
+            if (product.File3DModel is not null)
+            {
+                string product3DModelPath = Path.Combine(productPath, product.ProductName + ".jpg");
+                using (var stream = new FileStream(product3DModelPath, FileMode.Create))
+                { await product.File3DModel.CopyToAsync(stream); }
+            }
+
+
+
         }
     }
 }

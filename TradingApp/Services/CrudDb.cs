@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using TradingApp.Common;
 using TradingApp.Data;
 using TradingApp.Data.Models;
+using TradingApp.InputModels;
 
 namespace TradingApp.Services
 {
@@ -19,7 +20,7 @@ namespace TradingApp.Services
         
 
         //this method filters the products based on the parameter values in the filter
-        public IQueryable<Product> FilterProducts(ProductFilter productFilter)
+        private IQueryable<Product> FilterProducts(ProductFilter productFilter)
         {
             IQueryable<Product> query = _context.Products
                .AsNoTracking();
@@ -101,12 +102,22 @@ namespace TradingApp.Services
             return productsCount;
         }
 
-        //get's the sell orders count of the products created by the user with the specified id
+        //get's the sell orders count of all products created by the user with the specified id
         public async Task<int> GetSellOrdersCountAsync(string userId)
         {
             int sellOrdersCount = await _context.SellOrders
                 .AsNoTracking()
                 .Where(so => so.CreatorId == userId)
+                .CountAsync();
+            return sellOrdersCount;
+        }
+
+        //get's the sell orders count of one specific product created by the user with the specified id
+        public async Task<int> GetSellOrdersCountAsync(string userId, Guid productId)
+        {
+            int sellOrdersCount = await _context.SellOrders
+                .AsNoTracking()
+                .Where(so => so.ProductId == productId && so.CreatorId == userId)
                 .CountAsync();
             return sellOrdersCount;
         }
@@ -136,11 +147,45 @@ namespace TradingApp.Services
         }
 
 
+        public async Task<bool> DoesProductCreatedByCreatorExistAsync(string userId, Guid productId)
+        {
+            return await _context.Products
+                    .AsNoTracking()
+                    .AnyAsync(p => p.CreatorId == userId && p.Id == productId);
+        }
+
+
 
         //saves the product in the database
         public async Task SaveProductAsync(Product product)
         {
             await _context.Products.AddAsync(product);
+            await _context.SaveChangesAsync();
+        }
+
+
+        public async Task UpdateProductAsync(Product dtoProduct)
+        {
+            Product? dbProduct = await _context.Products
+                .FindAsync(dtoProduct.Id);
+            
+            if(dbProduct == null)
+            {
+                throw new InvalidOperationException("Product could not be updated in the DB because it's ID was not in the DB!");
+            }
+
+            if(dbProduct.CreatorId != dtoProduct.CreatorId)
+            {
+                throw new UnauthorizedAccessException("The product cannot be updated by anyone except it's creator.");
+            }
+
+            //update the product
+            dbProduct.Name = dtoProduct.Name;
+            dbProduct.Description = dtoProduct.Description;
+            dbProduct.Price = dtoProduct.Price;            
+            dbProduct.Status = dtoProduct.Status;
+
+            //apply change to DB
             await _context.SaveChangesAsync();
         }
 
