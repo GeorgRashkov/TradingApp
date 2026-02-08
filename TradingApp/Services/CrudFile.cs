@@ -81,5 +81,17 @@ namespace TradingApp.Services
 
 
         }
+
+
+        public void DeleteProductFolder(string creatorName, string productName)
+        {
+            string productPath = Path.Combine("wwwroot", "Creators", creatorName, productName);
+            if(Directory.Exists(productPath) == false)
+            {
+                throw new DirectoryNotFoundException(productPath);
+            }
+            
+            Directory.Delete(productPath, true);
+        }
     }
 }

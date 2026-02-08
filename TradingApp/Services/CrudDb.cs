@@ -189,5 +189,21 @@ namespace TradingApp.Services
             await _context.SaveChangesAsync();
         }
 
+
+
+        public async Task DeleteProductAsync(Guid productId)
+        {
+            Product product = (await _context.Products.FindAsync(productId))!;
+
+            if(product == null)
+            {
+                throw new InvalidOperationException("Product could not be deleted from the DB because it's ID was not in the DB!");
+            }
+
+            _context.Products.Attach(product);
+            _context.Products.Remove(product);
+            await _context.SaveChangesAsync();
+        }
+
     }
 }

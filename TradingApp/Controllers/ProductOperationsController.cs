@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using System.Threading.Tasks;
 using TradingApp.Common;
 using TradingApp.Data;
 using TradingApp.Data.Enums;
@@ -33,6 +34,10 @@ namespace TradingApp.Controllers
             get { return User.Identity?.Name; }
         }
 
+        private string Referer
+        {
+            get { return Request.Headers["Referer"].ToString(); }
+        }
 
 
         [HttpGet]
@@ -210,11 +215,94 @@ namespace TradingApp.Controllers
         }
 
 
+        
 
         [HttpGet]
         public IActionResult Message()
         {
             return View();
+        }
+
+
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> DeleteProduct(Guid productId)
+        {
+            //product existance validation
+            bool doesProductCreatedByCreatorExist = await _crudDb.DoesProductCreatedByCreatorExistAsync(userId: LoggedUserId, productId: productId);
+
+            if (doesProductCreatedByCreatorExist == false)
+            {
+                return NotFound();
+            }
+
+          
+            DeletedProductModel model = new DeletedProductModel() 
+            { 
+                ProductId = productId.ToString(), 
+                ProductName = (await _crudDb.GetProductAsync(
+                    productFilter: new ProductFilter() { PorductId =  productId },
+                    selector: p => p.Name))!
+            };
+
+            if(string.IsNullOrEmpty(Referer) == false)
+            { TempData["ReturnUrl"] = Referer; }
+
+            return View(model);
+        }
+
+
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> DeleteProduct(Guid productId, string productName)
+        {
+            //product existance validation
+            bool doesProductCreatedByCreatorExist = await _crudDb.DoesProductCreatedByCreatorExistAsync(userId: LoggedUserId, productId: productId);
+
+            if (doesProductCreatedByCreatorExist == false)
+            {
+                TempData["title"] = "Not found";
+                TempData["message"] = "The product you are trying to delete could not be found!";
+                RedirectToAction(nameof(Message));
+            }
+
+
+            string creatorName = (await _crudDb.GetProductAsync(
+                   productFilter: new ProductFilter() { PorductId = productId },
+                   selector: p => p.Creator.UserName))!;
+
+            //attempting to delete the product folder and it's content (the 6 images and the 3D model file)
+            try
+            {
+                _crudFile.DeleteProductFolder(creatorName: creatorName, productName: productName);
+            }
+            catch (Exception e)
+            {
+                Console.Write(e.Message.ToString());
+
+                TempData["title"] = "Error";
+                TempData["message"] = $"An error occured while attempting to delete you product!";
+                return RedirectToAction(nameof(Message));
+            }
+
+
+            //attempting to delete the product in the database
+            try
+            {
+                await _crudDb.DeleteProductAsync(productId);
+            }
+            catch (Exception e)
+            {
+                Console.Write(e.Message.ToString());
+
+                TempData["title"] = "Error";
+                TempData["message"] = $"An error occured while attempting to delete you product!";
+                return RedirectToAction(nameof(Message));
+            }
+
+            TempData["title"] = "Success";
+            TempData["message"] = $"The 3D model {productName} was deleted succesfully.";
+            return RedirectToAction(nameof(Message));
         }
     }
 }
