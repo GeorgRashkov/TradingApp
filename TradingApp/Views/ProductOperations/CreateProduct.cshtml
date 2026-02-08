@@ -5,7 +5,7 @@
     ViewData["Title"] = "Create Product";
 
     List<string> imageNames = new List<string>() { "front", "back", "top", "bottom", "left", "right" };
-    string frontImageName = imageNames[0];    
+    string frontImageName = imageNames[0];
 }
 
 <h1>@(ViewData["Title"])</h1>
@@ -14,7 +14,6 @@
 
 <form asp-controller="ProductOperations"
       asp-action="CreateProduct"
-
       method="post"
       enctype="multipart/form-data">
 
@@ -25,7 +24,7 @@
     <br />
     <br />
 
-    <label asp-for="Description">Description</label> <input asp-for="Description" type="text"/>
+    <label asp-for="Description">Description</label> <input asp-for="Description" type="text" />
     <span asp-validation-for="Description" class="text-danger"></span>
     <br />
     <br />
@@ -39,43 +38,123 @@
 
         <div class="row row-cols-1 row-cols-sm-2 g-2">
 
-            @for (int i = 0; i < 6; i++)
-            {
-                <div class="col">
 
-                    <div class="card h-100 shadow-sm">
+            <div class="col">
+                <div class="card h-100 shadow-sm">
+                    <input type="file"
+                           accept=".jpg,.jpeg"
+                           asp-for="FrontImageFile" />
+                    <span asp-validation-for="FrontImageFile" class="text-danger"></span>
+                    <div class="card-body text-center">
 
-                        @if (imageNames[i] == frontImageName)
-                        {
-                            <input type="file"
-                            accept=".jpg,.jpeg"
-                            asp-for="FrontImageFile" />
-                            <span asp-validation-for="FrontImageFile" class="text-danger"></span>
-                        }
-                        else
-                        {
-                            <input type="file" accept=".jpg,.jpeg" />
-                        }
-
-                        <div class="card-body text-center">
-
-                            <h6 class="card-title fw-semibold">
-                                @imageNames[i]
-                            </h6>
-
-                        </div>
+                        <h6 class="card-title fw-semibold">
+                            @imageNames[0]
+                        </h6>
 
                     </div>
-
                 </div>
-            }
+            </div>
+
+
+
+            <div class="col">
+                <div class="card h-100 shadow-sm">
+                    <input type="file"
+                           accept=".jpg,.jpeg"
+                           asp-for="BackImageFile" />
+                    <span asp-validation-for="BackImageFile" class="text-danger"></span>
+                    <div class="card-body text-center">
+
+                        <h6 class="card-title fw-semibold">
+                            @imageNames[1]
+                        </h6>
+
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="col">
+                <div class="card h-100 shadow-sm">
+                    <input type="file"
+                           accept=".jpg,.jpeg"
+                           asp-for="TopImageFile" />
+                    <span asp-validation-for="TopImageFile" class="text-danger"></span>
+                    <div class="card-body text-center">
+
+                        <h6 class="card-title fw-semibold">
+                            @imageNames[2]
+                        </h6>
+
+                    </div>
+                </div>
+            </div>
+
+
+
+
+            <div class="col">
+                <div class="card h-100 shadow-sm">
+                    <input type="file"
+                           accept=".jpg,.jpeg"
+                           asp-for="BottomImageFile" />
+                    <span asp-validation-for="BottomImageFile" class="text-danger"></span>
+                    <div class="card-body text-center">
+
+                        <h6 class="card-title fw-semibold">
+                            @imageNames[3]
+                        </h6>
+
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="col">
+                <div class="card h-100 shadow-sm">
+                    <input type="file"
+                           accept=".jpg,.jpeg"
+                           asp-for="LeftImageFile" />
+                    <span asp-validation-for="LeftImageFile" class="text-danger"></span>
+                    <div class="card-body text-center">
+
+                        <h6 class="card-title fw-semibold">
+                            @imageNames[4]
+                        </h6>
+
+                    </div>
+                </div>
+            </div>
+
+
+
+            <div class="col">
+                <div class="card h-100 shadow-sm">
+                    <input type="file"
+                           accept=".jpg,.jpeg"
+                           asp-for="RightImageFile" />
+                    <span asp-validation-for="RightImageFile" class="text-danger"></span>
+                    <div class="card-body text-center">
+
+                        <h6 class="card-title fw-semibold">
+                            @imageNames[5]
+                        </h6>
+
+                    </div>
+                </div>
+            </div>
+
+
 
         </div>
 
     </div>
 
+
+  
+
     <br />
-    <input type="file" asp-for="File3DModel"/>
+    <input type="file" asp-for="File3DModel" />
     <span asp-validation-for="File3DModel" class="text-danger"></span>
     <br />
     <br />
