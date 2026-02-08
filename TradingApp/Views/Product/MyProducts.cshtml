@@ -58,7 +58,7 @@ else
                             <a class="btn btn-sm btn-primary" asp-controller="Product" asp-action="MyProduct" asp-route-productId="@(product.Id)">
                                 View
                             </a>
-                            <a class="btn btn-sm btn-primary" asp-controller="ProductOperations" asp-action="EditProduct" asp-route-creatorName="@(product.CreatorName)" asp-route-productName="@(product.ProductName)">
+                            <a class="btn btn-sm btn-primary" asp-controller="ProductOperations" asp-action="UpdateProduct" asp-route-productId="@(product.Id)">
                                 Edit
                             </a>
                             <a class="btn btn-sm btn-primary" asp-controller="ProductOperations" asp-action="DeleteProduct" asp-route-creatorName="@(product.CreatorName)" asp-route-productName="@(product.ProductName)">

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using TradingApp.Common;
 using TradingApp.Data;
 using TradingApp.Data.Enums;
 using TradingApp.Data.Models;
@@ -12,6 +13,7 @@ namespace TradingApp.Controllers
     public class ProductOperationsController : Controller
     {
         private ProductStatus _createdProductDefaultStatus = ProductStatus.approved;
+        private const int MaxSellOrdersPerProduct = 2;
 
 
         private CrudDb _crudDb;
@@ -39,8 +41,8 @@ namespace TradingApp.Controllers
         {
             return View();
         }
-      
-        //<code for creating a product
+
+
         [HttpPost]
         [Authorize]
         public async Task<IActionResult> CreateProduct([FromForm] CreatedProductModel createdProductModel)
@@ -56,9 +58,6 @@ namespace TradingApp.Controllers
 
                 if (doesProductCreatedByCreatorExist == true)
                 {
-                    //TempData["title"] = "error";
-                    //TempData["message"] = "An error occurred: a product with the same name already exists!\n Consider using unique name for your 3D model file.\n If you want to replace an existing product make sure you delete it first.";
-                    //return RedirectToAction(nameof(Message));
                     ModelState.AddModelError(string.Empty, "A product with the same name already exists!\n Consider using unique name before creating your 3D model file.");
                     return View(createdProductModel);
                 }
@@ -88,10 +87,126 @@ namespace TradingApp.Controllers
                 TempData["message"] = $"An error occured while attempting to save you product!";
                 return RedirectToAction(nameof(Message));
             }
-            
 
         }
 
+
+
+
+
+
+
+
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> UpdateProduct(Guid productId)
+        {
+            bool doesProductCreatedByCreatorExist = await _crudDb.DoesProductCreatedByCreatorExistAsync(userId: LoggedUserId, productId: productId);
+
+            if (doesProductCreatedByCreatorExist == false)
+            {
+                return NotFound();
+            }
+
+
+            int currentProductSellOrdersCount = await _crudDb.GetSellOrdersCountAsync(userId: LoggedUserId, productId: productId);
+
+            if (currentProductSellOrdersCount > 0)
+            {
+                TempData["title"] = "Not allowed";
+                TempData["message"] = $"The product you are trying to update has at least one sell order! Make sure you cancel all sell orders of the product before editing it!";
+                return RedirectToAction(nameof(Message));
+            }
+
+            ProductFilter filter = new ProductFilter
+            {
+                PorductId = productId,
+            };
+
+            UpdatedProductModel product = (await _crudDb.GetProductAsync<UpdatedProductModel>(productFilter: filter,
+                selector: p => new UpdatedProductModel()
+                {
+                    Id = productId,
+                    ProductName = p.Name,
+                    Description = p.Description,
+                    Price = p.Price
+                }))!;
+
+            return View(product);
+        }
+
+
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> UpdateProduct([FromForm] UpdatedProductModel createdProductModel)
+        {
+            //throw new NotImplementedException("This method is not implemented yet!"); // The implementation of this method will be added in the next stages of the project development. The implementation will be similar to the CreateProduct method, but with some differences regarding the file handling and the database update operation.
+
+            //model state validation
+            if (ModelState.IsValid == false)
+            {
+                return View(createdProductModel);
+            }
+
+            //product existance validation
+            bool doesProductCreatedByCreatorExist = await _crudDb.DoesProductCreatedByCreatorExistAsync(userId: LoggedUserId, productId: createdProductModel.Id);
+            if (doesProductCreatedByCreatorExist == false)
+            {
+                ModelState.AddModelError(string.Empty, "The product you are trying to edit could not be found!");
+                return View(createdProductModel);
+            }
+
+            //attempting to update the product folder and the 3D model file in it
+            try
+            {
+                string oldProductName = (await _crudDb.GetProductAsync(
+                    productFilter: new ProductFilter() { PorductId = createdProductModel.Id },
+                    selector: p => p.Name)
+                    )!;
+                await _crudFile.UpdateProductInFolder(product: createdProductModel, creatorName: LoggedUserUsername, oldProductName: oldProductName);
+            }
+            catch (Exception e)
+            {
+                Console.Write(e.Message.ToString());
+
+                TempData["title"] = "Error";
+                TempData["message"] = $"An error occured while attempting to save you product!";
+                return RedirectToAction(nameof(Message));
+            }
+
+            Product product = new Product
+            {
+                Id = createdProductModel.Id,
+                Name = createdProductModel.ProductName,
+                Description = createdProductModel.Description,
+                Price = createdProductModel.Price,
+                Status = _createdProductDefaultStatus,
+                CreatorId = LoggedUserId
+            };
+
+            //attempting to update the product in the database
+            try
+            {
+                await _crudDb.UpdateProductAsync(product);
+            }
+            catch (Exception e)
+            {
+                Console.Write(e.Message.ToString());
+
+                TempData["title"] = "Error";
+                TempData["message"] = $"An error occured while attempting to save you product!";
+                return RedirectToAction(nameof(Message));
+            }
+            TempData["title"] = "Success";
+            TempData["message"] = $"The 3D model {createdProductModel.ProductName} was updated succesfully.";
+            return RedirectToAction(nameof(Message));
+
+
+        }
+
+
+
+        [HttpGet]
         public IActionResult Message()
         {
             return View();

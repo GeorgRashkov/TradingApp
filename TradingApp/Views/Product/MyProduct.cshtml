@@ -1,5 +1,7 @@
 ﻿
 @using TradingApp.ViewModels.Product;
+@using TradingApp.Data.Enums;
+
 @model MyProductViewModel
 @{
     ViewData["Title"] = Model.ProductName;
@@ -56,12 +58,16 @@
 <p>Price: @(Model.Price)$</p>
 
 
-<a class="btn btn-sm btn-primary" asp-controller="ProductOperations" asp-action="EditProduct">Edit</a>
+<a class="btn btn-sm btn-primary" asp-controller="ProductOperations" asp-action="UpdateProduct" asp-route-productId="@(Model.Id)">Edit</a>
 <a class="btn btn-sm btn-primary" asp-controller="ProductOperations" asp-action="DeleteProduct">Delete</a>
 <br />
 <br />
 
-@if (Model.HasActiveSellOrder == true)
+@if (Model.ProductStatus != ProductStatus.approved.ToString())
+{
+    <p><b>This product cannot be sold currently because it's status is @(Model.ProductStatus)!</b></p>
+}
+else if (Model.HasActiveSellOrder == true)
 {
     <a class="btn btn-sm btn-primary" asp-controller="ProductOperations" asp-action="CancelSellOrder">Cancel sell order</a>
 }
