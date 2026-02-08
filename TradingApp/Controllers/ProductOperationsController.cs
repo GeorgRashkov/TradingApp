@@ -54,6 +54,8 @@ namespace TradingApp.Controllers
                     return View(createdProductModel);
                 }
 
+                createdProductModel.ProductName = createdProductModel.ProductName.Trim();
+
                 bool doesProductCreatedByCreatorExist = await _crudDb.DoesProductCreatedByCreatorExistAsync(userId: LoggedUserId, productName: createdProductModel.ProductName);
 
                 if (doesProductCreatedByCreatorExist == true)
@@ -138,32 +140,35 @@ namespace TradingApp.Controllers
 
         [HttpPost]
         [Authorize]
-        public async Task<IActionResult> UpdateProduct([FromForm] UpdatedProductModel createdProductModel)
-        {
-            //throw new NotImplementedException("This method is not implemented yet!"); // The implementation of this method will be added in the next stages of the project development. The implementation will be similar to the CreateProduct method, but with some differences regarding the file handling and the database update operation.
-
+        public async Task<IActionResult> UpdateProduct([FromForm] UpdatedProductModel updatedProductModel)
+        {           
             //model state validation
             if (ModelState.IsValid == false)
             {
-                return View(createdProductModel);
+                return View(updatedProductModel);
             }
 
             //product existance validation
-            bool doesProductCreatedByCreatorExist = await _crudDb.DoesProductCreatedByCreatorExistAsync(userId: LoggedUserId, productId: createdProductModel.Id);
+            bool doesProductCreatedByCreatorExist = await _crudDb.DoesProductCreatedByCreatorExistAsync(userId: LoggedUserId, productId: updatedProductModel.Id);
             if (doesProductCreatedByCreatorExist == false)
             {
                 ModelState.AddModelError(string.Empty, "The product you are trying to edit could not be found!");
-                return View(createdProductModel);
+                return View(updatedProductModel);
             }
+
+            string newProductName = updatedProductModel.ProductName.Trim();
+            string oldProductName = (await _crudDb.GetProductAsync(
+                   productFilter: new ProductFilter() { PorductId = updatedProductModel.Id },
+                   selector: p => p.Name)
+                   )!;
+
+            //the product name must change due to browser chaching (Browsers aggressively cache static files (especially images) when the URL does not change and as a result the browser will the old pictures) 
+            updatedProductModel.ProductName = (newProductName == oldProductName) ? newProductName + "_" : newProductName;
 
             //attempting to update the product folder and the 3D model file in it
             try
-            {
-                string oldProductName = (await _crudDb.GetProductAsync(
-                    productFilter: new ProductFilter() { PorductId = createdProductModel.Id },
-                    selector: p => p.Name)
-                    )!;
-                await _crudFile.UpdateProductInFolder(product: createdProductModel, creatorName: LoggedUserUsername, oldProductName: oldProductName);
+            {               
+                await _crudFile.UpdateProductInFolder(product: updatedProductModel, creatorName: LoggedUserUsername, oldProductName: oldProductName);
             }
             catch (Exception e)
             {
@@ -176,10 +181,10 @@ namespace TradingApp.Controllers
 
             Product product = new Product
             {
-                Id = createdProductModel.Id,
-                Name = createdProductModel.ProductName,
-                Description = createdProductModel.Description,
-                Price = createdProductModel.Price,
+                Id = updatedProductModel.Id,
+                Name = updatedProductModel.ProductName,
+                Description = updatedProductModel.Description,
+                Price = updatedProductModel.Price,
                 Status = _createdProductDefaultStatus,
                 CreatorId = LoggedUserId
             };
@@ -198,7 +203,7 @@ namespace TradingApp.Controllers
                 return RedirectToAction(nameof(Message));
             }
             TempData["title"] = "Success";
-            TempData["message"] = $"The 3D model {createdProductModel.ProductName} was updated succesfully.";
+            TempData["message"] = $"The 3D model {updatedProductModel.ProductName} was updated succesfully.";
             return RedirectToAction(nameof(Message));
 
 
