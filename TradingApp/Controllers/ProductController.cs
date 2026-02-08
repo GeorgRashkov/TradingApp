@@ -168,10 +168,12 @@ namespace TradingApp.Controllers
             MyProductViewModel? product = await _crudDb.GetProductAsync<MyProductViewModel>(productFilter: filter, selector:
                 p => new MyProductViewModel
                 {
+                    Id = p.Id.ToString(),
                     ProductName = p.Name,
                     Description = p.Description,
                     CreatorName = p.Creator.UserName,
                     Price = p.Price.ToString("f2"),
+                    ProductStatus = p.Status.ToString(),
                     HasActiveSellOrder = p.SellOrders.Any(so => so.Status == SellOrderStatus.active)
                 }
 
