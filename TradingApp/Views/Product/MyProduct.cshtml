@@ -1,19 +1,19 @@
-﻿
-@using TradingApp.ViewModels.Product;
+﻿@using TradingApp.ViewModels.Product;
 @using TradingApp.Data.Enums;
 
 @model MyProductViewModel
 @{
     ViewData["Title"] = Model.ProductName;
     List<string> imageNames = new List<string>() { "front", "back", "top", "bottom", "left", "right" };
-    bool maxSellOrdersCountReached = (bool)(ViewData["maxSellOrdersCountReached"] as bool?);
+    bool currentUserMaxSellOrdersCountReached = (bool)(ViewData["currentUserMaxSellOrdersCountReached"] as bool?);
+    bool currentProductMaxSellOrdersCountReached = (bool)(ViewData["currentProductMaxSellOrdersCountReached"] as bool?);
 }
 
 
 
 
-<h1>@Model.ProductName</h1>
-
+<h1>@(Model.ProductName)</h1>
+<h3>Active sale orders: @(Model.ActiveSellOrdersCount)</h3>
 
 <div class="container py-4">
 
@@ -27,12 +27,12 @@
 
                     <img class="card-img-top img-fluid product-img"
                          src="~/Creators/@(Model.CreatorName)/@(Model.ProductName)/@(imageNames[i]).jpg"
-                         alt="@Model.ProductName" />
+                         alt="@(Model.ProductName)" />
 
                     <div class="card-body text-center">
 
                         <h6 class="card-title fw-semibold">
-                            @imageNames[i]
+                            @(imageNames[i])
                         </h6>
 
                     </div>
@@ -49,7 +49,7 @@
 <br />
 
 <div>
-    <p>@Model.Description</p>
+    <p>@(Model.Description)</p>
 </div>
 
 <br />
@@ -65,19 +65,44 @@
 
 @if (Model.ProductStatus != ProductStatus.approved.ToString())
 {
-    <p><b>This product cannot be sold currently because it's status is @(Model.ProductStatus)!</b></p>
-}
-else if (Model.HasActiveSellOrder == true)
-{
-    <a class="btn btn-sm btn-primary" asp-controller="ProductOperations" asp-action="CancelSellOrder">Cancel sell order</a>
-}
-else if (maxSellOrdersCountReached == true)
-{
-    <p><b>Active sales maximum amount reached!</b></p>
+    <p><b>This product cannot be sold currently because it's status is "@(Model.ProductStatus)"!</b></p>
 }
 else
 {
-    <a class="btn btn-sm btn-primary" asp-controller="ProductOperations" asp-action="CreateSellOrder">Create sell order</a>
+    if (Model.ActiveSellOrdersCount > 0)
+    {
+        <form method="post" asp-controller="Order" asp-action="CancelSellOrder">
+            <label>Quantity</label>
+            <input type="text" />
+            <input type="submit" class="btn btn-sm btn-primary" value="Cancel sell order/s" />
+            
+        </form>
+       
+    }
+
+    <br />
+    <br />
+
+    if (currentUserMaxSellOrdersCountReached == true)
+    {
+        <p><b>You reached the maximum number of active sales orders!</b></p>
+        <p><b>In order to create a sell order of the product you will have to wait for someone to pruchase a sale order created by you.</b></p>
+        <p><b>Alternatively, you can cancel an active sell order of another product.</b></p>
+    }
+    else if (currentProductMaxSellOrdersCountReached == true)
+    {
+        <p><b>You reached the maximum number of active sales orders for the product @(Model.ProductName)!</b></p>
+        <p><b>In order to create another sell order of the product you will have to wait for someone to pruchase one of it's active sale orders.</b></p>
+    }
+    else
+    {      
+        <form method="post" asp-controller="Order" asp-action="CreateSellOrder">
+            <label>Quantity</label>
+            <input type="text" />
+            <input type="submit" class="btn btn-sm btn-primary" value="Create sell order/s" />
+            
+        </form>
+    }
 }
 
 

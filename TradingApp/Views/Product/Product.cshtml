@@ -1,9 +1,8 @@
-﻿
-@using TradingApp.ViewModels.Product;
+﻿@using TradingApp.ViewModels.Product;
 @model ProductViewModel
 @{
     ViewData["Title"] = Model.ProductName;
-    List<string> imageNames = new List<string>() { "front", "back", "top", "bottom", "left", "right" };    
+    List<string> imageNames = new List<string>() { "front", "back", "top", "bottom", "left", "right" };
 }
 
 
@@ -32,7 +31,7 @@
 
                         <h6 class="card-title fw-semibold">
                             @(imageNames[i])
-                        </h6>                                       
+                        </h6>
 
                     </div>
 
@@ -59,7 +58,7 @@
 
 
 
-    <a class="btn btn-sm btn-primary" asp-controller="Order" asp-action="Buy" asp-route-productId="@(Model.Id)">Buy</a>
+<a class="btn btn-sm btn-primary" asp-controller="Order" asp-action="Buy" asp-route-productId="@(Model.Id)">Buy</a>
 
 
 

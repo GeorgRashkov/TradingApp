@@ -5,6 +5,6 @@ namespace TradingApp.ViewModels.Product
     public class MyProductViewModel: MyProductsViewModel
     {        
         public string Description { get; set; } = string.Empty;    
-        public bool HasActiveSellOrder { get; set; }        
+        public int ActiveSellOrdersCount { get; set; }        
     }
 }

@@ -20,12 +20,13 @@ namespace TradingApp.Controllers
 {
     public class ProductController : Controller
     {
-        
+
         private int _productsPerPage = 4;
-        private int _maxActiveSellOrdersPerUser = 3;
+        private int _productsMaxActiveSellOrdersPerUser = 3;
+        private int _productMaxActiveSellOrdersPerUser = 2;
         private CrudDb _crudDb;
 
-        public  ProductController(ApplicationDbContext context)
+        public ProductController(ApplicationDbContext context)
         {
             _crudDb = new CrudDb(context);
         }
@@ -147,7 +148,7 @@ namespace TradingApp.Controllers
                 selector: (p) =>
                 new MyProductsViewModel
                 {
-                    Id = p.Id.ToString(),
+                    Id = p.Id,
                     Price = p.Price.ToString("f2"),
                     ProductName = p.Name,
                     ProductStatus = p.Status.ToString(),
@@ -171,30 +172,31 @@ namespace TradingApp.Controllers
             MyProductViewModel? product = await _crudDb.GetProductAsync<MyProductViewModel>(productFilter: filter, selector:
                 p => new MyProductViewModel
                 {
-                    Id = p.Id.ToString(),
+                    Id = p.Id,
                     ProductName = p.Name,
                     Description = p.Description,
                     CreatorName = p.Creator.UserName,
                     Price = p.Price.ToString("f2"),
                     ProductStatus = p.Status.ToString(),
-                    HasActiveSellOrder = p.SellOrders.Any(so => so.Status == SellOrderStatus.active)
+                    ActiveSellOrdersCount = p.SellOrders.Where(so => so.Status == SellOrderStatus.active).Count()
                 }
 
                 );
 
-            if(product == null)
+            if (product == null)
             {
                 return NotFound();
             }
             else if (LoggedUserUsername != product.CreatorName)
             {
                 return Forbid();
-            }         
+            }
 
-            int activeSellOrdersCount = await _crudDb.GetSellOrdersCountAsync(LoggedUserId);
-            ViewData["maxSellOrdersCountReached"] = activeSellOrdersCount >= _maxActiveSellOrdersPerUser ? true:false;
+            int loggedUserActiveSellOrdersCount = await _crudDb.GetSellOrdersCountAsync(LoggedUserId);
+            ViewData["currentUserMaxSellOrdersCountReached"] = loggedUserActiveSellOrdersCount >= _productsMaxActiveSellOrdersPerUser ? true : false;
+            ViewData["currentProductMaxSellOrdersCountReached"] = product.ActiveSellOrdersCount >= _productMaxActiveSellOrdersPerUser ? true : false;
 
             return View(model: product);
-        }       
+        }
     }
 }
