@@ -3,16 +3,16 @@
 @model ProductViewModel
 @{
     ViewData["Title"] = Model.ProductName;
-    List<string> imageNames = new List<string>() { "front", "back", "top", "bottom", "left", "right" };
-    bool isPrivate = ViewData["isPrivate"] as bool? ?? false;
+    List<string> imageNames = new List<string>() { "front", "back", "top", "bottom", "left", "right" };    
 }
 
 
 
 
-<h1>@Model.ProductName</h1>
-<h2>Created by @Model.CreatorName</h2>
-<h3>Sell order active from @Model.SellOrderCreationDate</h3>
+<h1>@(Model.ProductName)</h1>
+<h2>Created by @(Model.CreatorName)</h2>
+<h3>In stock @(Model.SellOrdersCount)</h3>
+<h4>Sell orders created from @(Model.FirstSellOrderCreationDate) to @(Model.LastSellOrderCreationDate)</h4>
 
 <div class="container py-4">
 
@@ -26,12 +26,12 @@
 
                     <img class="card-img-top img-fluid product-img"
                          src="~/Creators/@(Model.CreatorName)/@(Model.ProductName)/@(imageNames[i]).jpg"
-                         alt="@Model.ProductName" />
+                         alt="@(Model.ProductName)" />
 
                     <div class="card-body text-center">
 
                         <h6 class="card-title fw-semibold">
-                            @imageNames[i]
+                            @(imageNames[i])
                         </h6>                                       
 
                     </div>
@@ -48,7 +48,7 @@
 <br />
 
 <div>
-    <p>@Model.Description</p>
+    <p>@(Model.Description)</p>
 </div>
 
 <br />
@@ -57,14 +57,10 @@
 <p>Price: @(Model.Price)$</p>
 
 
-@if(isPrivate == true)
-{
-    <a class="btn btn-sm btn-primary" asp-controller="Product" asp-action="EditCreateProduct">Edit</a>
-}
-else
-{
-    <a class="btn btn-sm btn-primary" asp-controller="Product" asp-action="EditCreateProduct">Buy</a>
-}
+
+
+    <a class="btn btn-sm btn-primary" asp-controller="Order" asp-action="Buy" asp-route-productId="@(Model.Id)">Buy</a>
+
 
 
 <style>

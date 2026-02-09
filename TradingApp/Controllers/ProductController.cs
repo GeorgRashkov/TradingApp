@@ -77,7 +77,7 @@ namespace TradingApp.Controllers
             selector: (p) =>
                new ProductsViewModel
                {
-                   Id = p.Id.ToString(),
+                   Id = p.Id,
                    CreatorName = p.Creator.UserName,
                    Price = p.Price.ToString("f2"),
                    ProductName = p.Name
@@ -101,11 +101,14 @@ namespace TradingApp.Controllers
             ProductViewModel? product = await _crudDb.GetProductAsync<ProductViewModel>(productFilter: filter, selector:
                 p => new ProductViewModel
                 {
+                    Id = p.Id,
                     ProductName = p.Name,
-                    Description = p.Description,
                     Price = p.Price.ToString("f2"),
                     CreatorName = p.Creator.UserName,
-                    SellOrderCreationDate = p.SellOrders.SingleOrDefault().CreatedAt.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture)
+                    Description = p.Description,
+                    FirstSellOrderCreationDate = p.SellOrders.Where(so => so.Status == SellOrderStatus.active).Select(so => so.CreatedAt).OrderBy(createdAt => createdAt).SingleOrDefault().ToString("dd/MM/yyyy", CultureInfo.InvariantCulture),
+                    LastSellOrderCreationDate = p.SellOrders.Where(so => so.Status == SellOrderStatus.active).Select(so => so.CreatedAt).OrderByDescending(createdAt => createdAt).SingleOrDefault().ToString("dd/MM/yyyy", CultureInfo.InvariantCulture),
+                    SellOrdersCount = p.SellOrders.Where(so => so.Status == SellOrderStatus.active).Count()
                 }
 
                 );
@@ -192,102 +195,6 @@ namespace TradingApp.Controllers
             ViewData["maxSellOrdersCountReached"] = activeSellOrdersCount >= _maxActiveSellOrdersPerUser ? true:false;
 
             return View(model: product);
-        }
-
-        /*
-        //<DB calls
-
-        //this method filters the products based on the parameter values in the filter
-
-        private IQueryable<Product> FilterProducts(ProductFilter productFilter)
-        {
-            IQueryable<Product> query = _context.Products
-               .AsNoTracking();
-
-            if (productFilter.PorductId != null)
-            {
-                query = query.Where(p => p.Id == productFilter.PorductId);
-            }
-
-            if (productFilter.UserId != null)
-            {
-                query = query.Where(p => p.CreatorId == productFilter.UserId);
-            }
-
-            if (productFilter.ProductStatus != null)
-            {
-                query = query.Where(p => p.Status == productFilter.ProductStatus);
-            }
-
-            if (productFilter.SellOrderStatus != null)
-            {
-                query = query.Where(p => p.SellOrders.Any(so => so.Status == productFilter.SellOrderStatus));//must check if this line works correctly !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            }
-
-
-            if (productFilter.Username != null)
-            {
-                if (productFilter.UsernameContains == true)
-                { query = query.Where(p => p.Creator.UserName.Contains(productFilter.Username)); }
-                else
-                { query = query.Where(p => p.Creator.UserName == productFilter.Username); }
-            }
-
-            if (productFilter.ProductName != null)
-            {
-                if (productFilter.ProductNameContains == true)
-                { query = query.Where(p => p.Name.Contains(productFilter.ProductName)); }
-                else
-                { query = query.Where(p => p.Name == productFilter.ProductName); }
-            }
-
-            if (productFilter.Skip != null)
-            {
-                query = query.Skip((int)productFilter.Skip);
-            }
-
-            if (productFilter.Take != null)
-            {
-                query = query.Take((int)productFilter.Take);
-            }
-
-            return query;
-        }
-
-        private async Task<List<PVM>> GetProductsAsync<PVM>(ProductFilter productFilter, Expression<Func<Product, PVM>> selector)
-        {
-            List<PVM> productViewModels = await FilterProducts(productFilter)
-                .Select(selector)
-                .ToListAsync();
-
-            return productViewModels;
-        }
-
-        private async Task<PVM?> GetProductAsync<PVM>(ProductFilter productFilter, Expression<Func<Product, PVM>> selector)
-        {
-            PVM? productViewModel = await FilterProducts(productFilter)
-                .Select(selector)
-                .FirstOrDefaultAsync();
-
-            return productViewModel;
-        }
-                
-        private async Task<int> GetProductsCountAsync(ProductFilter productFilter)
-        {
-            int productsCount = await FilterProducts(productFilter).CountAsync();
-            return productsCount;
-        }
-
-
-        private async Task<int> GetSellOrdersCountAsync(string userId)
-        {
-            int sellOrdersCount = await _context.SellOrders
-                .AsNoTracking()
-                .Where(so => so.CreatorId == userId)
-                .CountAsync();
-            return sellOrdersCount;
-        }
-        //DB calls> 
-        */
+        }       
     }
 }
