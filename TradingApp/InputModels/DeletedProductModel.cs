@@ -2,7 +2,7 @@
 {
     public class DeletedProductModel
     {
-        public string ProductId { get; set; } = null!;
+        public Guid ProductId { get; set; }
         public string ProductName { get; set;} = null!;        
     }
 }

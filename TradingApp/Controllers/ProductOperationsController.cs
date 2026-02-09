@@ -239,7 +239,7 @@ namespace TradingApp.Controllers
           
             DeletedProductModel model = new DeletedProductModel() 
             { 
-                ProductId = productId.ToString(), 
+                ProductId = productId, 
                 ProductName = (await _crudDb.GetProductAsync(
                     productFilter: new ProductFilter() { PorductId =  productId },
                     selector: p => p.Name))!
@@ -254,41 +254,31 @@ namespace TradingApp.Controllers
 
         [HttpPost]
         [Authorize]
-        public async Task<IActionResult> DeleteProduct(Guid productId, string productName)
-        {
+        public async Task<IActionResult> DeleteProduct_execute(Guid productId)
+        {      
             //product existance validation
             bool doesProductCreatedByCreatorExist = await _crudDb.DoesProductCreatedByCreatorExistAsync(userId: LoggedUserId, productId: productId);
-
             if (doesProductCreatedByCreatorExist == false)
             {
                 TempData["title"] = "Not found";
                 TempData["message"] = "The product you are trying to delete could not be found!";
-                RedirectToAction(nameof(Message));
-            }
-
-
-            string creatorName = (await _crudDb.GetProductAsync(
-                   productFilter: new ProductFilter() { PorductId = productId },
-                   selector: p => p.Creator.UserName))!;
-
-            //attempting to delete the product folder and it's content (the 6 images and the 3D model file)
-            try
-            {
-                _crudFile.DeleteProductFolder(creatorName: creatorName, productName: productName);
-            }
-            catch (Exception e)
-            {
-                Console.Write(e.Message.ToString());
-
-                TempData["title"] = "Error";
-                TempData["message"] = $"An error occured while attempting to delete you product!";
                 return RedirectToAction(nameof(Message));
-            }
+            }            
 
+            var product = (await _crudDb.GetProductAsync(
+                   productFilter: new ProductFilter() { PorductId = productId },
+                   selector: p => new { Name = p.Name, CreatorName = p.Creator.UserName } ))!;
 
-            //attempting to delete the product in the database
+            string productName = product.Name;
+            string creatorName = product.CreatorName;
+            
+
             try
             {
+                //attempting to delete the product folder and it's content (the 6 images and the 3D model file)
+                _crudFile.DeleteProductFolder(creatorName: creatorName, productName: productName);
+
+                //attempting to delete the product in the database
                 await _crudDb.DeleteProductAsync(productId);
             }
             catch (Exception e)
