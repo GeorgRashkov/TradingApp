@@ -1,0 +1,29 @@
+﻿@using TradingApp.ViewModels.Invoice
+@model List<InvoicesViewModel>
+
+
+@if (Model.Count == 0)
+{
+    <h2>You have no invoices!</h2>
+}
+else
+{
+    <table>
+        <tr>
+            <th>Title</th>
+            <th>Completed At</th>
+            <th>Details</th>
+        </tr>
+
+        @foreach (InvoicesViewModel invoice in Model)
+        {
+            <tr>
+                <td>@(invoice.Title)</td>
+                <td>@(invoice.CompletedAt)</td>
+                <td><a class="btn btn-sm btn-primary" asp-controller="Invoice" asp-action="Invoice" asp-route-completedOrderId="@(invoice.Id)">Details</a></td>
+            </tr>
+        }
+
+
+    </table>
+}

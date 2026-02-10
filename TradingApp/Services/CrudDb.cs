@@ -327,6 +327,31 @@ namespace TradingApp.Services
             await _context.SaveChangesAsync();
 
         }
+
+
+
+
+        public async Task<List<COVM>> GetCompletedOrdersAsync<COVM>(string userId, Expression<Func<CompletedOrder, COVM>> buyerSelector, Expression<Func<CompletedOrder, COVM>> sellerSelector)
+        {
+            List<COVM> buyerCompletedOrders = await _context
+                .CompletedOrders
+                .AsNoTracking()
+                .Where(co => co.BuyerId == userId)
+                .Select(buyerSelector)
+                .ToListAsync();
+
+            List<COVM> sellerCompletedOrders = await _context
+                .CompletedOrders
+                .AsNoTracking()
+                .Where(co => co.SellerId == userId)
+                .Select(sellerSelector)
+                .ToListAsync();
+
+            List<COVM> userCompletedOrders = [.. buyerCompletedOrders, .. sellerCompletedOrders];
+
+            return userCompletedOrders;
+        }
+
                
     }
 }
