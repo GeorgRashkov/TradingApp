@@ -54,7 +54,7 @@ namespace TradingApp.Controllers
                });
 
             //execute this code if no approved product has the specified id
-            if(product is null)
+            if (product is null)
             {
                 return NotFound();
             }
@@ -174,7 +174,7 @@ namespace TradingApp.Controllers
             };
 
             //save the orders to the DB
-            await _crudDb.CreateSellOrders(sellOrder: sellOrder, ordersCount:ordersCount);
+            await _crudDb.CreateSellOrders(sellOrder: sellOrder, ordersCount: ordersCount);
 
             //return a success message page
             TempData["title"] = "Success";
@@ -303,16 +303,131 @@ namespace TradingApp.Controllers
 
 
 
+
+
+
         [HttpGet]
-        public IActionResult BuySellOrder(Guid productId)
+        public async Task<IActionResult> BuySellOrder(Guid productId)
         {
-            return View();
+            ProductFilter filter = new ProductFilter()
+            {
+                PorductId = productId,
+                ProductStatus = Data.Enums.ProductStatus.approved,
+            };
+
+            //get the approved product based on its Id
+            var product = await _crudDb.GetProductAsync(productFilter: filter,
+               selector: p => new
+               {
+                   Id = p.Id,
+                   Name = p.Name,
+                   CreatorId = p.CreatorId,
+                   Price = p.Price,
+                   activeSellOrdersCount = p.SellOrders.Where(so => so.Status == Data.Enums.SellOrderStatus.active).Count(),
+               });
+
+            //execute this code if no approved product has the specified id
+            if (product is null)
+            {
+                return NotFound();
+            }
+
+            //execute this code if the logged user is the creator
+            if (product.CreatorId == LoggedUserId)
+            {
+                TempData["title"] = "Not allowed";
+                TempData["message"] = $"You are not allowed to buy your own products!";
+                return RedirectToAction(nameof(Message));
+            }
+
+            //execute this code if the product has no active sell orders
+            if (product.activeSellOrdersCount < 1)
+            {
+                TempData["title"] = "Not allowed";
+                TempData["message"] = $"You cannot buy the product {product.Name} because it has no active sell orders!";
+                return RedirectToAction(nameof(Message));
+            }
+
+            decimal userBalance = await _crudDb.GetUserBalanceAsync(LoggedUserId);
+            //execute this code if the user balance is below the product price
+            if (userBalance < product.Price)
+            {
+                TempData["title"] = "Not allowed";
+                TempData["message"] = $"You do not have enough money in your balance to buy the product {product.Name}!";
+                return RedirectToAction(nameof(Message));
+            }
+
+            //create the order view model
+            OrderViewModel order = new OrderViewModel()
+            {
+                Message = $"You are about to purchase the product {product.Name}",
+                ProductId = product.Id
+            };
+
+            //return a confirmation view
+            TempData["ReturnUrl"] = Referer;
+            return View(order);
         }
 
         [HttpPost]
-        public IActionResult BuySellOrder_execute(Guid productId)
+        public async Task<IActionResult> BuySellOrder_execute(Guid productId)
         {
-            return View();
+            ProductFilter filter = new ProductFilter()
+            {
+                PorductId = productId,
+                ProductStatus = Data.Enums.ProductStatus.approved,
+            };
+
+            //get the approved product based on its Id
+            var product = await _crudDb.GetProductAsync(productFilter: filter,
+               selector: p => new
+               {
+                   Id = p.Id,
+                   Name = p.Name,
+                   CreatorId = p.CreatorId,
+                   Price = p.Price,
+                   activeSellOrdersCount = p.SellOrders.Where(so => so.Status == Data.Enums.SellOrderStatus.active).Count(),
+               });
+
+            //execute this code if no approved product has the specified id
+            if (product is null)
+            {
+                return NotFound();
+            }
+
+            //execute this code if the logged user is the creator
+            if (product.CreatorId == LoggedUserId)
+            {
+                TempData["title"] = "Not allowed";
+                TempData["message"] = $"You are not allowed to buy your own products!";
+                return RedirectToAction(nameof(Message));
+            }
+
+            //execute this code if the product has no active sell orders
+            if (product.activeSellOrdersCount < 1)
+            {
+                TempData["title"] = "Not allowed";
+                TempData["message"] = $"You cannot buy the product {product.Name} because it has no active sell orders!";
+                return RedirectToAction(nameof(Message));
+            }
+
+
+            decimal userBalance = await _crudDb.GetUserBalanceAsync(LoggedUserId);
+            //execute this code if the user balance is below the product price
+            if (userBalance < product.Price)
+            {
+                TempData["title"] = "Not allowed";
+                TempData["message"] = $"You do not have enough money in your balance to buy the product {product.Name}!";
+                return RedirectToAction(nameof(Message));
+            }
+
+            //the sell order is bough and the changes are applied to the DB (executes only when when the sell order can be bought)
+            await _crudDb.BuySellOrderAsync(productId: productId, buyerId: LoggedUserId);
+
+            //return a success message page
+            TempData["title"] = "Success";
+            TempData["message"] = $"You successfully purchased the product {product.Name}.";
+            return RedirectToAction(nameof(Message));
         }
 
 

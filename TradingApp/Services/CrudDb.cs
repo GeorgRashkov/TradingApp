@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
+using System.Threading.Tasks;
 using TradingApp.Common;
 using TradingApp.Data;
 using TradingApp.Data.Models;
@@ -237,6 +238,94 @@ namespace TradingApp.Services
             }
 
             await _context.SaveChangesAsync();
+        }
+
+
+        public async Task<decimal> GetUserBalanceAsync(string userId)
+        {
+            var balance = await _context
+                .Users
+                .AsNoTracking()
+                .Where( u => u.Id == userId)
+                .Select(u => new { Amount = u.Balance.Amount })
+                .FirstOrDefaultAsync();
+
+            if (balance == null) 
+            {
+                throw new Exception("Balance not found!");
+            }
+
+            return balance.Amount;
+        }
+
+        public async Task BuySellOrderAsync(Guid productId, string buyerId)
+        {
+            SellOrder? sellOrder = await _context
+                .SellOrders               
+                .Include(so => so.Product)
+                .Where(so => so.ProductId == productId && so.Status == Data.Enums.SellOrderStatus.active)
+                .OrderBy(so => so.CreatedAt)                
+                .FirstOrDefaultAsync();
+
+            if(sellOrder == null)
+            {
+                throw new InvalidOperationException("Cannot buy a non existing sell order!");
+            }
+
+
+            Balance? buyerBalance = await _context
+                .Balances
+                .Include(b => b.User)
+                .Where(b => b.User.Id == buyerId)
+                .FirstOrDefaultAsync();          
+
+            Balance? sellerBalance = await _context
+                .Balances
+                .Include(b => b.User)
+                .Where(b => b.User.Id == sellOrder.CreatorId)
+                .FirstOrDefaultAsync();
+
+
+            if (buyerBalance == null || sellerBalance == null)
+            {
+                throw new InvalidOperationException("A non existing user or user without a balance is not allowed to buy or sell orders!");
+            }
+
+            if (sellerBalance.User.Id == buyerBalance.User.Id) 
+            {
+                throw new InvalidOperationException("Users are not allowed to buy their own sell orders!");
+            }
+
+            decimal productPrice = sellOrder.Product.Price;
+            decimal platformFee = 0.1m * productPrice;
+
+            if (buyerBalance.Amount < productPrice)
+            {
+                throw new InvalidOperationException("Users are not allowed to buy sell orders when the sell order price is above the user balance!");
+            }
+                        
+
+            CompletedOrder completedOrder = new CompletedOrder()
+            {
+                TitleForBuyer = $"Product {sellOrder.Product.Name} purchased successfully",
+                TitleForSeller = $"Product {sellOrder.Product.Name}  sold successfully",
+                PricePaid = productPrice,
+                PlatformFee = platformFee,
+                SellerRevenue = productPrice - platformFee,
+                CompletedAt = DateTime.UtcNow,
+
+                ProductId = sellOrder.Product.Id,
+                BuyerId = buyerBalance.User.Id,
+                SellerId = sellerBalance.User.Id,
+            };
+
+            buyerBalance.Amount -= completedOrder.PricePaid;
+            sellerBalance.Amount += completedOrder.SellerRevenue;
+            sellOrder.Status = Data.Enums.SellOrderStatus.completed;
+            _context.CompletedOrders.Add(completedOrder);
+
+            await _context.SaveChangesAsync();
+
         }
                
     }

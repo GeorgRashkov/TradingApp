@@ -52,7 +52,7 @@ else
                             </a>
 
 
-                            <a class="btn btn-sm btn-primary" asp-controller="ProductOperations" asp-action="BuyProduct" asp-route-creatorName="@(product.CreatorName)" asp-route-productName="@(product.ProductName)">
+                            <a class="btn btn-sm btn-primary" asp-controller="Order" asp-action="BuySellOrder" asp-route-productId="@(product.Id)">
                                 Buy
                             </a>
 
