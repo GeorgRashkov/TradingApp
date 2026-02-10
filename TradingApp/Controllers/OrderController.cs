@@ -34,7 +34,8 @@ namespace TradingApp.Controllers
 
 
         [HttpPost]
-        public async Task<IActionResult> CreateSellOrder(Guid productId, int ordersCount)//this method will show the confirmation page when the user presses the button for creating an order
+        //this method will show the confirmation page when the user presses the button for creating an order
+        public async Task<IActionResult> CreateSellOrder(Guid productId, int ordersCount)
         {
             ProductFilter filter = new ProductFilter()
             {
@@ -42,7 +43,7 @@ namespace TradingApp.Controllers
                 ProductStatus = Data.Enums.ProductStatus.approved,
             };
 
-            //get the approved product based on it's Id
+            //get the approved product based on its Id
             var product = await _crudDb.GetProductAsync(productFilter: filter,
                selector: p => new
                {
@@ -82,7 +83,7 @@ namespace TradingApp.Controllers
             }
 
             //make sure the created orders are 1 or more and that their count is not above the max number of total sale orders per product nor above the max number of total sale orders per user
-            ordersCount = FitOrdersCountInBoundaries(ordersCount: ordersCount, productActiveSellOrdersCount: product.activeSellOrdersCount, userActiveSellOrdersCount: currentUserActiveSellOrdersCount);
+            ordersCount = FitOrdersCreationCountInBoundaries(ordersCount: ordersCount, productActiveSellOrdersCount: product.activeSellOrdersCount, userActiveSellOrdersCount: currentUserActiveSellOrdersCount);
 
             //create the order view model
             OrderViewModel order = new OrderViewModel()
@@ -97,7 +98,7 @@ namespace TradingApp.Controllers
             return View(order);
         }
 
-        private int FitOrdersCountInBoundaries(int ordersCount, int productActiveSellOrdersCount, int userActiveSellOrdersCount)
+        private int FitOrdersCreationCountInBoundaries(int ordersCount, int productActiveSellOrdersCount, int userActiveSellOrdersCount)
         {
             if (ordersCount < 1)
             { ordersCount = 1; }
@@ -112,7 +113,8 @@ namespace TradingApp.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateSellOrder_execute(Guid productId, int ordersCount)//this method will create the order when the user confirms the creation
+        //this method will create the order when the user confirms the creation
+        public async Task<IActionResult> CreateSellOrder_execute(Guid productId, int ordersCount)
         {
             ProductFilter filter = new ProductFilter()
             {
@@ -120,7 +122,7 @@ namespace TradingApp.Controllers
                 ProductStatus = Data.Enums.ProductStatus.approved,
             };
 
-            //get the approved product based on it's Id
+            //get the approved product based on its Id
             var product = await _crudDb.GetProductAsync(productFilter: filter,
                selector: p => new
                {
@@ -160,7 +162,7 @@ namespace TradingApp.Controllers
             }
 
             //make sure the created orders are 1 or more and that their count is not above the max number of total sale orders per product nor above the max number of total sale orders per user
-            ordersCount = FitOrdersCountInBoundaries(ordersCount: ordersCount, productActiveSellOrdersCount: product.activeSellOrdersCount, userActiveSellOrdersCount: currentUserActiveSellOrdersCount);
+            ordersCount = FitOrdersCreationCountInBoundaries(ordersCount: ordersCount, productActiveSellOrdersCount: product.activeSellOrdersCount, userActiveSellOrdersCount: currentUserActiveSellOrdersCount);
 
             //create the order
             SellOrder sellOrder = new SellOrder()
@@ -182,16 +184,120 @@ namespace TradingApp.Controllers
 
 
 
-        [HttpGet]
-        public IActionResult CancelSellOrder(Guid productId, int ordersCount)
+
+
+
+
+
+
+        [HttpPost]
+        //this method will show the confirmation page when the user presses the button for cancelling an order
+        public async Task<IActionResult> CancelSellOrder(Guid productId, int ordersCount)
         {
-            return View();
+            ProductFilter filter = new ProductFilter()
+            {
+                PorductId = productId,
+                ProductStatus = Data.Enums.ProductStatus.approved,
+            };
+
+            //get the approved product based on its Id
+            var product = await _crudDb.GetProductAsync(productFilter: filter,
+               selector: p => new
+               {
+                   Id = p.Id,
+                   Name = p.Name,
+                   CreatorId = p.CreatorId,
+                   activeSellOrdersCount = p.SellOrders.Where(so => so.Status == Data.Enums.SellOrderStatus.active).Count(),
+               });
+
+            //execute this code if no approved product has the specified id
+            if (product is null)
+            {
+                return NotFound();
+            }
+
+            //execute this code if the logged user is not creator
+            if (product.CreatorId != LoggedUserId)
+            {
+                return Forbid();
+            }
+
+            //execute this code if the product has no active sell orders
+            if (product.activeSellOrdersCount < 1)
+            {
+                TempData["title"] = "Not allowed";
+                TempData["message"] = $"The product {product.Name} has no active sell orders to cancel!";
+                return RedirectToAction(nameof(Message));
+            }
+
+            //make the count of the orders (which are about to be cancelled) to be positive and also equal or below the count of the active sell orders of the product
+            ordersCount = Math.Max(1, ordersCount);
+            ordersCount = Math.Min(ordersCount, product.activeSellOrdersCount);
+
+            //create the order view model
+            OrderViewModel order = new OrderViewModel()
+            {
+                Message = $"You are about to cancel {ordersCount} sell orders of the product {product.Name}",
+                ProductId = product.Id,
+                OrdersCount = ordersCount,
+            };
+
+            //return a confirmation view
+            TempData["ReturnUrl"] = Referer;
+            return View(order);
         }
 
         [HttpPost]
-        public IActionResult CancelSellOrder_execute(Guid productId, int ordersCount)
+        //this method will cancel the order when the user confirms the cancelation
+        public async Task<IActionResult> CancelSellOrder_execute(Guid productId, int ordersCount)
         {
-            return View();
+            ProductFilter filter = new ProductFilter()
+            {
+                PorductId = productId,
+                ProductStatus = Data.Enums.ProductStatus.approved,
+            };
+
+            //get the approved product based on its Id
+            var product = await _crudDb.GetProductAsync(productFilter: filter,
+               selector: p => new
+               {
+                   Id = p.Id,
+                   Name = p.Name,
+                   CreatorId = p.CreatorId,
+                   activeSellOrdersCount = p.SellOrders.Where(so => so.Status == Data.Enums.SellOrderStatus.active).Count(),
+               });
+
+            //execute this code if no approved product has the specified id
+            if (product is null)
+            {
+                return NotFound();
+            }
+
+            //execute this code if the logged user is not creator
+            if (product.CreatorId != LoggedUserId)
+            {
+                return Forbid();
+            }
+
+            //execute this code if the product has no active sell orders
+            if (product.activeSellOrdersCount < 1)
+            {
+                TempData["title"] = "Not allowed";
+                TempData["message"] = $"The product {product.Name} has no active sell orders to cancel!";
+                return RedirectToAction(nameof(Message));
+            }
+
+            //make the count of the orders (which are about to be cancelled) to be positive and also equal or below the count of the active sell orders of the product
+            ordersCount = Math.Max(1, ordersCount);
+            ordersCount = Math.Min(ordersCount, product.activeSellOrdersCount);
+
+            //set the status of the orders to cancelled
+            await _crudDb.CancelSellOrdersAsync(product.Id, ordersCount);
+
+            //return a success message page
+            TempData["title"] = "Success";
+            TempData["message"] = $"You successfully cancelled {ordersCount} sell order/s of the product {product.Name}.";
+            return RedirectToAction(nameof(Message));
         }
 
 

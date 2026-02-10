@@ -73,7 +73,8 @@ else
     {
         <form method="post" asp-controller="Order" asp-action="CancelSellOrder">
             <label>Quantity</label>
-            <input type="text" />
+            <input type="number" name="ordersCount" min="1" />
+            <input type="hidden" name="productId" value="@(Model.Id)" />
             <input type="submit" class="btn btn-sm btn-primary" value="Cancel sell order/s" />
             
         </form>

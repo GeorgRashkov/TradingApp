@@ -1,10 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
-using System.Threading.Tasks;
 using TradingApp.Common;
 using TradingApp.Data;
 using TradingApp.Data.Models;
-using TradingApp.InputModels;
 
 namespace TradingApp.Services
 {
@@ -218,5 +216,28 @@ namespace TradingApp.Services
 
             await _context.SaveChangesAsync();
         }
+
+        public async Task CancelSellOrdersAsync(Guid productId, int ordersCount)
+        {
+            List<SellOrder> sellOrders = await _context
+                .SellOrders
+                .Where(so => so.ProductId == productId && so.Status == Data.Enums.SellOrderStatus.active)
+                .ToListAsync();
+
+            if (sellOrders.Count == 0)
+            {
+                throw new InvalidOperationException("Product has no active sale orders to cancel!");
+            }
+
+            foreach (SellOrder sellOrder in sellOrders)
+            {
+                if (ordersCount < 1) { break; }
+                sellOrder.Status = Data.Enums.SellOrderStatus.cancelled;
+                ordersCount--;
+            }
+
+            await _context.SaveChangesAsync();
+        }
+               
     }
 }
