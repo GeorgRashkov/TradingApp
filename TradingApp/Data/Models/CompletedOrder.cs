@@ -12,7 +12,11 @@ namespace TradingApp.Data.Models
 
         [Required]
         [MaxLength(EntityValidation.Order.TitleMaxLength)]
-        public string Title { get; set; } = null!;
+        public string TitleForBuyer { get; set; } = null!;
+
+        [Required]
+        [MaxLength(EntityValidation.Order.TitleMaxLength)]
+        public string TitleForSeller { get; set; } = null!;      
 
         [Required]
         [Column(TypeName = EntityValidation.Order.PriceDbType)]

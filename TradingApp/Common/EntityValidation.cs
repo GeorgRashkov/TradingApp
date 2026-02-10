@@ -10,7 +10,7 @@
         public static class Product
         {
             public const int NameMinLength = 2;
-            public const int NameMaxLength = 100;
+            public const int NameMaxLength = 50;
             public const string NameRegex = @"^[a-zA-Z0-9 ]*$";
 
             public const int DescriptionMinLength = 10;
