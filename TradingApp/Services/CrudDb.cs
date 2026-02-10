@@ -205,5 +205,18 @@ namespace TradingApp.Services
             await _context.SaveChangesAsync();
         }
 
+
+
+
+        public async Task CreateSellOrders(SellOrder sellOrder, int ordersCount)
+        {
+            for (int i = 0; i < ordersCount; i++)
+            {
+                sellOrder.CreatedAt = DateTime.UtcNow;
+                await _context.SellOrders.AddAsync(sellOrder);
+            }
+
+            await _context.SaveChangesAsync();
+        }
     }
 }

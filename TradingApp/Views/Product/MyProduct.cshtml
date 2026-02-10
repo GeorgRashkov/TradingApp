@@ -95,10 +95,11 @@ else
         <p><b>In order to create another sell order of the product you will have to wait for someone to pruchase one of it's active sale orders.</b></p>
     }
     else
-    {      
+    {
         <form method="post" asp-controller="Order" asp-action="CreateSellOrder">
             <label>Quantity</label>
-            <input type="text" />
+            <input type="number" name="ordersCount" min="1"/>
+            <input type="hidden" name="productId" value="@(Model.Id)"/>
             <input type="submit" class="btn btn-sm btn-primary" value="Create sell order/s" />
             
         </form>
