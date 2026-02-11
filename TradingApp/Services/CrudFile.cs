@@ -85,13 +85,26 @@ namespace TradingApp.Services
 
         public void DeleteProductFolder(string creatorName, string productName)
         {
+            string productPath = GetProductPath(creatorName, productName);
+            Directory.Delete(productPath, true);
+        }
+
+
+        public byte[] Get3dModelFileBytes(string creatorName, string productName)
+        {
+            string productPath = Path.Combine(GetProductPath(creatorName, productName), productName + ".jpg");
+            byte[] bytes = File.ReadAllBytes(productPath);
+            return bytes;
+        }
+
+        private string GetProductPath(string creatorName, string productName)
+        {
             string productPath = Path.Combine("wwwroot", "Creators", creatorName, productName);
             if(Directory.Exists(productPath) == false)
             {
                 throw new DirectoryNotFoundException(productPath);
             }
-            
-            Directory.Delete(productPath, true);
+            return productPath;
         }
     }
 }

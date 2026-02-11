@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Identity.Client;
 using System.Globalization;
 using System.Security.Claims;
+using System.Threading.Tasks;
 using TradingApp.Data;
 using TradingApp.Data.Models;
 using TradingApp.Services;
@@ -12,10 +14,12 @@ namespace TradingApp.Controllers
     public class InvoiceController : Controller
     {
         private CrudDb _crudDb;
+        private CrudFile _crudFile;
 
         public InvoiceController(ApplicationDbContext context)
         {
             _crudDb = new CrudDb(context);
+            _crudFile = new CrudFile();
         }
 
         //this is the Id of the currently logged user; if the user is not logged the value will be null 
@@ -85,6 +89,41 @@ namespace TradingApp.Controllers
             };
 
             return View(model: invoiceViewModel);
+        }
+
+
+        [Authorize]
+        [HttpGet]
+        public async Task<IActionResult> Download3dModelFile(Guid completedOrderId)
+        {
+            CompletedOrder? completedOrder = await _crudDb.GetCompletedOrderAsync(completedOrderId);
+
+            if (completedOrder is null)
+            {
+                return NotFound();
+            }
+
+            if(LoggedUserId != completedOrder.BuyerId)
+            {
+                return Forbid();
+            }
+
+            string productCreatorName = (await _crudDb.GetUserAsync(completedOrder.Product.CreatorId)).UserName;
+            string productName = completedOrder.Product.Name;
+            byte[] bytes;
+            try
+            {
+                bytes = _crudFile.Get3dModelFileBytes(creatorName: productCreatorName, productName: productName);
+            }
+            catch (Exception e) 
+            {
+                Console.WriteLine(e.Message);
+                TempData["title"] = "Error";
+                TempData["message"] = "An error occured while attempting to dowload the file!";
+                return View(viewName: "Message");
+            }
+
+            return File(bytes, "image/jpg", productName+".jpg");
         }
     }
 }

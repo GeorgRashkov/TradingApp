@@ -29,5 +29,7 @@ else
 @if (Model.IsUserTheBuyer)
 {
     <br />
-    <input type="button" value="download" />
+    <a class="btn btn-primary" asp-controller="Invoice" asp-action="Download3dModelFile" asp-route-completedOrderId="@Model.Id">
+        Download
+    </a>
 }
