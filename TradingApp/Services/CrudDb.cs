@@ -352,6 +352,24 @@ namespace TradingApp.Services
             return userCompletedOrders;
         }
 
-               
+        public async Task<CompletedOrder?> GetCompletedOrderAsync(Guid orderId)
+        {
+            CompletedOrder? completedOrder = await _context
+                .CompletedOrders
+                .AsNoTracking()
+                .Include(co => co.Seller)
+                .Include(co => co.Buyer)
+                .Include(co => co.Product)                
+                .Where(co => co.Id == orderId)
+                .FirstOrDefaultAsync();
+
+            return completedOrder;
+        }
+
+        public async Task<User?> GetUserAsync(string userId)
+        {
+            User? user = await _context.Users.FindAsync(userId);
+            return user;
+        }
     }
 }

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Globalization;
 using System.Security.Claims;
 using TradingApp.Data;
+using TradingApp.Data.Models;
 using TradingApp.Services;
 using TradingApp.ViewModels.Invoice;
 
@@ -46,7 +47,44 @@ namespace TradingApp.Controllers
 
             loggedUserCompletedOrders.OrderBy(co => DateTime.Parse(co.CompletedAt));
 
-            return View(loggedUserCompletedOrders);
+            return View(model: loggedUserCompletedOrders);
+        }
+
+
+        [Authorize]
+        [HttpGet]
+        public async Task<IActionResult> Invoice(Guid completedOrderId)
+        {
+            CompletedOrder? completedOrder = await _crudDb.GetCompletedOrderAsync(completedOrderId);
+
+            //checks whether the completed order exists
+            if (completedOrder is null) 
+            { return NotFound(); }
+
+            string loggedUserId = LoggedUserId;
+
+            //checks whether the logged user is the buyer or the seller of the completed order
+            if (loggedUserId != completedOrder.BuyerId && loggedUserId != completedOrder.SellerId) 
+            { return Forbid(); }
+
+            bool isUserTheBuyer = loggedUserId == completedOrder.BuyerId;
+            decimal price = isUserTheBuyer ? completedOrder.PricePaid : completedOrder.SellerRevenue;
+            string title = isUserTheBuyer ? completedOrder.TitleForBuyer : completedOrder.TitleForSeller;
+            string productCreatorName = (await _crudDb.GetUserAsync(completedOrder.Product.CreatorId)).UserName;
+            
+            InvoiceViewModel invoiceViewModel = new InvoiceViewModel()
+            {
+                Id = completedOrder.Id,
+                Title = title,
+                CompletedAt = completedOrder.CompletedAt.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture),
+                ProductId = completedOrder.Product.Id,
+                ProductName = completedOrder.Product.Name,
+                ProductCreatorName = productCreatorName,
+                Price = price.ToString("f2"),
+                IsUserTheBuyer = isUserTheBuyer
+            };
+
+            return View(model: invoiceViewModel);
         }
     }
 }

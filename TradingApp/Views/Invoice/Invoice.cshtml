@@ -1,0 +1,33 @@
+﻿
+@using TradingApp.ViewModels.Invoice
+@model InvoiceViewModel
+
+<br />
+<h1>@(Model.Title)</h1>
+
+<br />
+<img src="~/Creators/@(Model.ProductCreatorName)/@(Model.ProductName)/front.jpg" alt="@(Model.ProductName)" style="max-width:90%"/>
+
+<br />
+<br />
+
+
+@if (Model.IsUserTheBuyer)
+{
+    <h3>Price:@(Model.Price)</h3>
+    <br />
+    <h3>Seller: @(Model.ProductCreatorName)</h3>
+}
+else
+{
+    <h3>Revenue:@(Model.Price)</h3>
+}
+
+<br />
+<h3>Completed at:@(Model.CompletedAt)</h3>
+
+@if (Model.IsUserTheBuyer)
+{
+    <br />
+    <input type="button" value="download" />
+}
