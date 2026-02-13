@@ -1,4 +1,4 @@
-﻿namespace TradingApp.Data.Enums
+﻿namespace TradingApp.GCommon.Enums
 {
     public enum ProductStatus
     {

@@ -1,4 +1,4 @@
-﻿namespace TradingApp.InputModels
+﻿namespace TradingApp.ViewModels.InputProduct
 {
     public class DeletedProductModel
     {

@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TradingApp.Data.Models;
+using TradingApp.GCommon.Enums;
 
 namespace TradingApp.Data.Seed
 {
@@ -33,7 +34,7 @@ namespace TradingApp.Data.Seed
             {              
                 SellOrder activeSellOrder = new SellOrder()
                 {
-                    Status = Enums.SellOrderStatus.active,
+                    Status = SellOrderStatus.active,
                     CreatedAt = DateTime.UtcNow,
                     CreatorId = productsAndCreatorsIds[i].CreatorId,
                     ProductId = productsAndCreatorsIds[i].Id,
@@ -45,7 +46,7 @@ namespace TradingApp.Data.Seed
 
             SellOrder cancelledOrder = new SellOrder()
             {
-                Status = Enums.SellOrderStatus.cancelled,
+                Status = SellOrderStatus.cancelled,
                 CreatedAt = DateTime.UtcNow,
                 CreatorId = productsAndCreatorsIds[productsAndCreatorsIds.Count - 1].CreatorId,
                 ProductId = productsAndCreatorsIds[productsAndCreatorsIds.Count - 1].Id,

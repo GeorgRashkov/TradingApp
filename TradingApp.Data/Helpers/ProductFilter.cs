@@ -1,4 +1,4 @@
-﻿using TradingApp.Data.Enums;
+﻿using TradingApp.GCommon.Enums;
 
 namespace TradingApp.Common
 {

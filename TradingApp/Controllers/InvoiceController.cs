@@ -1,9 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Identity.Client;
 using System.Globalization;
 using System.Security.Claims;
-using System.Threading.Tasks;
 using TradingApp.Data;
 using TradingApp.Data.Models;
 using TradingApp.Services;

@@ -1,5 +1,6 @@
-﻿
-namespace TradingApp.InputModels
+﻿using Microsoft.AspNetCore.Http;
+
+namespace TradingApp.ViewModels.InputProduct
 {
     public class UpdatedProductModel: CreatedUpdatedProductModel
     {

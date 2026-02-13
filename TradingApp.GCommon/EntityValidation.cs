@@ -1,4 +1,4 @@
-﻿namespace TradingApp.Common
+﻿namespace TradingApp.GCommon
 {
     public static class EntityValidation
     {

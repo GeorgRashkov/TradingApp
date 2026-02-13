@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using TradingApp.Data.Enums;
+using TradingApp.GCommon.Enums;
 using TradingApp.Data.Models;
 
 namespace TradingApp.Data.Seed

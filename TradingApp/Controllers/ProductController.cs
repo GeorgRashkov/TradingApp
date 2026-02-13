@@ -1,20 +1,12 @@
-﻿using AspNetCoreGeneratedDocument;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System.Globalization;
-using System.Linq.Expressions;
 using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
 using TradingApp.Common;
 using TradingApp.Data;
-using TradingApp.Data.Enums;
-using TradingApp.Data.Models;
-using TradingApp.InputModels;
-using TradingApp.ViewModels.Product;
 using TradingApp.Services;
+using TradingApp.ViewModels.Product;
+
 
 namespace TradingApp.Controllers
 {
@@ -59,8 +51,8 @@ namespace TradingApp.Controllers
 
             ProductFilter filter = new ProductFilter()
             {
-                ProductStatus = ProductStatus.approved,
-                SellOrderStatus = SellOrderStatus.active,
+                ProductStatus = GCommon.Enums.ProductStatus.approved,
+                SellOrderStatus = GCommon.Enums.SellOrderStatus.active,
             };
 
             int productsCount = await _crudDb.GetProductsCountAsync(filter);
@@ -94,8 +86,8 @@ namespace TradingApp.Controllers
             ProductFilter filter = new ProductFilter()
             {
                 PorductId = productId,
-                ProductStatus = ProductStatus.approved,
-                SellOrderStatus = SellOrderStatus.active,
+                ProductStatus = GCommon.Enums.ProductStatus.approved,
+                SellOrderStatus = GCommon.Enums.SellOrderStatus.active,
             };
 
 
@@ -107,9 +99,9 @@ namespace TradingApp.Controllers
                     Price = p.Price.ToString("f2"),
                     CreatorName = p.Creator.UserName,
                     Description = p.Description,
-                    FirstSellOrderCreationDate = p.SellOrders.Where(so => so.Status == SellOrderStatus.active).Select(so => so.CreatedAt).OrderBy(createdAt => createdAt).SingleOrDefault().ToString("dd/MM/yyyy", CultureInfo.InvariantCulture),
-                    LastSellOrderCreationDate = p.SellOrders.Where(so => so.Status == SellOrderStatus.active).Select(so => so.CreatedAt).OrderByDescending(createdAt => createdAt).SingleOrDefault().ToString("dd/MM/yyyy", CultureInfo.InvariantCulture),
-                    SellOrdersCount = p.SellOrders.Where(so => so.Status == SellOrderStatus.active).Count()
+                    FirstSellOrderCreationDate = p.SellOrders.Where(so => so.Status == GCommon.Enums.SellOrderStatus.active).Select(so => so.CreatedAt).OrderBy(createdAt => createdAt).SingleOrDefault().ToString("dd/MM/yyyy", CultureInfo.InvariantCulture),
+                    LastSellOrderCreationDate = p.SellOrders.Where(so => so.Status == GCommon.Enums.SellOrderStatus.active).Select(so => so.CreatedAt).OrderByDescending(createdAt => createdAt).SingleOrDefault().ToString("dd/MM/yyyy", CultureInfo.InvariantCulture),
+                    SellOrdersCount = p.SellOrders.Where(so => so.Status == GCommon.Enums.SellOrderStatus.active).Count()
                 }
 
                 );
@@ -178,7 +170,7 @@ namespace TradingApp.Controllers
                     CreatorName = p.Creator.UserName,
                     Price = p.Price.ToString("f2"),
                     ProductStatus = p.Status.ToString(),
-                    ActiveSellOrdersCount = p.SellOrders.Where(so => so.Status == SellOrderStatus.active).Count()
+                    ActiveSellOrdersCount = p.SellOrders.Where(so => so.Status == GCommon.Enums.SellOrderStatus.active).Count()
                 }
 
                 );

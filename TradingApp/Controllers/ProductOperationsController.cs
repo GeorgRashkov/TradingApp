@@ -1,19 +1,17 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-using System.Threading.Tasks;
 using TradingApp.Common;
 using TradingApp.Data;
-using TradingApp.Data.Enums;
 using TradingApp.Data.Models;
-using TradingApp.InputModels;
+using TradingApp.ViewModels.InputProduct;
 using TradingApp.Services;
 
 namespace TradingApp.Controllers
 {
     public class ProductOperationsController : Controller
     {
-        private ProductStatus _createdProductDefaultStatus = ProductStatus.approved;
+        private GCommon.Enums.ProductStatus _createdProductDefaultStatus = GCommon.Enums.ProductStatus.approved;
         private const int MaxSellOrdersPerProduct = 2;
 
 

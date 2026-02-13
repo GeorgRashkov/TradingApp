@@ -1,6 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
-using TradingApp.Common;
-namespace TradingApp.InputModels
+﻿using Microsoft.AspNetCore.Http;
+using System.ComponentModel.DataAnnotations;
+using TradingApp.GCommon;
+namespace TradingApp.ViewModels.InputProduct
 {
     public abstract class CreatedUpdatedProductModel
     {

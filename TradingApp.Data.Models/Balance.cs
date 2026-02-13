@@ -1,8 +1,7 @@
-﻿using Microsoft.AspNetCore.Identity;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-using TradingApp.Common;
+using TradingApp.GCommon;
 namespace TradingApp.Data.Models
 {
     public class Balance

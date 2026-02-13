@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
-using System.Threading.Tasks;
 using TradingApp.Common;
 using TradingApp.Data;
 using TradingApp.Data.Models;
@@ -222,7 +221,7 @@ namespace TradingApp.Services
         {
             List<SellOrder> sellOrders = await _context
                 .SellOrders
-                .Where(so => so.ProductId == productId && so.Status == Data.Enums.SellOrderStatus.active)
+                .Where(so => so.ProductId == productId && so.Status == GCommon.Enums.SellOrderStatus.active)
                 .ToListAsync();
 
             if (sellOrders.Count == 0)
@@ -233,7 +232,7 @@ namespace TradingApp.Services
             foreach (SellOrder sellOrder in sellOrders)
             {
                 if (ordersCount < 1) { break; }
-                sellOrder.Status = Data.Enums.SellOrderStatus.cancelled;
+                sellOrder.Status = GCommon.Enums.SellOrderStatus.cancelled;
                 ordersCount--;
             }
 
@@ -263,7 +262,7 @@ namespace TradingApp.Services
             SellOrder? sellOrder = await _context
                 .SellOrders               
                 .Include(so => so.Product)
-                .Where(so => so.ProductId == productId && so.Status == Data.Enums.SellOrderStatus.active)
+                .Where(so => so.ProductId == productId && so.Status == GCommon.Enums.SellOrderStatus.active)
                 .OrderBy(so => so.CreatedAt)                
                 .FirstOrDefaultAsync();
 
@@ -321,7 +320,7 @@ namespace TradingApp.Services
 
             buyerBalance.Amount -= completedOrder.PricePaid;
             sellerBalance.Amount += completedOrder.SellerRevenue;
-            sellOrder.Status = Data.Enums.SellOrderStatus.completed;
+            sellOrder.Status = GCommon.Enums.SellOrderStatus.completed;
             _context.CompletedOrders.Add(completedOrder);
 
             await _context.SaveChangesAsync();

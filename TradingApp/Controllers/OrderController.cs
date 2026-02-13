@@ -5,7 +5,6 @@ using TradingApp.Data;
 using TradingApp.Data.Models;
 using TradingApp.Services;
 using TradingApp.ViewModels.Order;
-using static TradingApp.Common.EntityValidation;
 
 namespace TradingApp.Controllers
 {
@@ -40,7 +39,7 @@ namespace TradingApp.Controllers
             ProductFilter filter = new ProductFilter()
             {
                 PorductId = productId,
-                ProductStatus = Data.Enums.ProductStatus.approved,
+                ProductStatus = GCommon.Enums.ProductStatus.approved,
             };
 
             //get the approved product based on its Id
@@ -50,7 +49,7 @@ namespace TradingApp.Controllers
                    Id = p.Id,
                    Name = p.Name,
                    CreatorId = p.CreatorId,
-                   activeSellOrdersCount = p.SellOrders.Where(so => so.Status == Data.Enums.SellOrderStatus.active).Count(),
+                   activeSellOrdersCount = p.SellOrders.Where(so => so.Status == GCommon.Enums.SellOrderStatus.active).Count(),
                });
 
             //execute this code if no approved product has the specified id
@@ -119,7 +118,7 @@ namespace TradingApp.Controllers
             ProductFilter filter = new ProductFilter()
             {
                 PorductId = productId,
-                ProductStatus = Data.Enums.ProductStatus.approved,
+                ProductStatus = GCommon.Enums.ProductStatus.approved,
             };
 
             //get the approved product based on its Id
@@ -129,7 +128,7 @@ namespace TradingApp.Controllers
                    Id = p.Id,
                    Name = p.Name,
                    CreatorId = p.CreatorId,
-                   activeSellOrdersCount = p.SellOrders.Where(so => so.Status == Data.Enums.SellOrderStatus.active).Count(),
+                   activeSellOrdersCount = p.SellOrders.Where(so => so.Status == GCommon.Enums.SellOrderStatus.active).Count(),
                });
 
             //execute this code if no approved product has the specified id
@@ -167,7 +166,7 @@ namespace TradingApp.Controllers
             //create the order
             SellOrder sellOrder = new SellOrder()
             {
-                Status = Data.Enums.SellOrderStatus.active,
+                Status = GCommon.Enums.SellOrderStatus.active,
                 CreatedAt = DateTime.UtcNow,
                 CreatorId = product.CreatorId,
                 ProductId = product.Id,
@@ -197,7 +196,7 @@ namespace TradingApp.Controllers
             ProductFilter filter = new ProductFilter()
             {
                 PorductId = productId,
-                ProductStatus = Data.Enums.ProductStatus.approved,
+                ProductStatus = GCommon.Enums.ProductStatus.approved,
             };
 
             //get the approved product based on its Id
@@ -207,7 +206,7 @@ namespace TradingApp.Controllers
                    Id = p.Id,
                    Name = p.Name,
                    CreatorId = p.CreatorId,
-                   activeSellOrdersCount = p.SellOrders.Where(so => so.Status == Data.Enums.SellOrderStatus.active).Count(),
+                   activeSellOrdersCount = p.SellOrders.Where(so => so.Status == GCommon.Enums.SellOrderStatus.active).Count(),
                });
 
             //execute this code if no approved product has the specified id
@@ -254,7 +253,7 @@ namespace TradingApp.Controllers
             ProductFilter filter = new ProductFilter()
             {
                 PorductId = productId,
-                ProductStatus = Data.Enums.ProductStatus.approved,
+                ProductStatus = GCommon.Enums.ProductStatus.approved,
             };
 
             //get the approved product based on its Id
@@ -264,7 +263,7 @@ namespace TradingApp.Controllers
                    Id = p.Id,
                    Name = p.Name,
                    CreatorId = p.CreatorId,
-                   activeSellOrdersCount = p.SellOrders.Where(so => so.Status == Data.Enums.SellOrderStatus.active).Count(),
+                   activeSellOrdersCount = p.SellOrders.Where(so => so.Status == GCommon.Enums.SellOrderStatus.active).Count(),
                });
 
             //execute this code if no approved product has the specified id
@@ -312,7 +311,7 @@ namespace TradingApp.Controllers
             ProductFilter filter = new ProductFilter()
             {
                 PorductId = productId,
-                ProductStatus = Data.Enums.ProductStatus.approved,
+                ProductStatus = GCommon.Enums.ProductStatus.approved,
             };
 
             //get the approved product based on its Id
@@ -323,7 +322,7 @@ namespace TradingApp.Controllers
                    Name = p.Name,
                    CreatorId = p.CreatorId,
                    Price = p.Price,
-                   activeSellOrdersCount = p.SellOrders.Where(so => so.Status == Data.Enums.SellOrderStatus.active).Count(),
+                   activeSellOrdersCount = p.SellOrders.Where(so => so.Status == GCommon.Enums.SellOrderStatus.active).Count(),
                });
 
             //execute this code if no approved product has the specified id
@@ -375,7 +374,7 @@ namespace TradingApp.Controllers
             ProductFilter filter = new ProductFilter()
             {
                 PorductId = productId,
-                ProductStatus = Data.Enums.ProductStatus.approved,
+                ProductStatus = GCommon.Enums.ProductStatus.approved,
             };
 
             //get the approved product based on its Id
@@ -386,7 +385,7 @@ namespace TradingApp.Controllers
                    Name = p.Name,
                    CreatorId = p.CreatorId,
                    Price = p.Price,
-                   activeSellOrdersCount = p.SellOrders.Where(so => so.Status == Data.Enums.SellOrderStatus.active).Count(),
+                   activeSellOrdersCount = p.SellOrders.Where(so => so.Status == GCommon.Enums.SellOrderStatus.active).Count(),
                });
 
             //execute this code if no approved product has the specified id

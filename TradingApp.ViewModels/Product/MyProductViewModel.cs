@@ -1,6 +1,4 @@
-﻿using TradingApp.Data.Enums;
-
-namespace TradingApp.ViewModels.Product
+﻿namespace TradingApp.ViewModels.Product
 {
     public class MyProductViewModel: MyProductsViewModel
     {        
