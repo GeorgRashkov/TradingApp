@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
-using TradingApp.Common;
+using TradingApp.Data.Helpers;
 using TradingApp.Data;
 using TradingApp.Data.Models;
 

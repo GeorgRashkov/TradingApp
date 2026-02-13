@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Globalization;
 using System.Security.Claims;
-using TradingApp.Common;
+using TradingApp.Data.Helpers;
 using TradingApp.Data;
 using TradingApp.Services;
 using TradingApp.ViewModels.Product;

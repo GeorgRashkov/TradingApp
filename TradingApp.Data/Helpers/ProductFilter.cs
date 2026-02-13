@@ -1,6 +1,6 @@
 ﻿using TradingApp.GCommon.Enums;
 
-namespace TradingApp.Common
+namespace TradingApp.Data.Helpers
 {
     //this class will be used for filtering products when searching for them in the database;
     public class ProductFilter
