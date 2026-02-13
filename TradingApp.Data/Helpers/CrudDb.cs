@@ -4,7 +4,7 @@ using TradingApp.Data.Helpers;
 using TradingApp.Data;
 using TradingApp.Data.Models;
 
-namespace TradingApp.Services
+namespace TradingApp.Data.Helpers
 {
     public class CrudDb
     {

@@ -2,34 +2,25 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Globalization;
 using System.Security.Claims;
-using TradingApp.Data.Helpers;
 using TradingApp.Data;
-using TradingApp.Services;
+using TradingApp.Data.Helpers;
+using TradingApp.GCommon;
+using TradingApp.Services.Core;
+using TradingApp.Services.Core.Interfaces;
 using TradingApp.ViewModels.Product;
 
 
 namespace TradingApp.Controllers
 {
     public class ProductController : Controller
-    {
+    {                    
+        private IProductService _productService;
 
-        private int _productsPerPage = 4;
-        private int _productsMaxActiveSellOrdersPerUser = 3;
-        private int _productMaxActiveSellOrdersPerUser = 2;
-        private CrudDb _crudDb;
-
-        public ProductController(ApplicationDbContext context)
-        {
-            _crudDb = new CrudDb(context);
+        public ProductController(ApplicationDbContext context, IProductService productService)
+        {          
+            _productService = productService;
         }
-        /*
-        private ApplicationDbContext _context;
-        public ProductController(ApplicationDbContext context)
-        {
-            _context = context;
-        }
-        */
-
+       
         //this is the Id of the currently logged user; if the user is not logged the value will be null 
         private string LoggedUserId
         {
@@ -42,40 +33,14 @@ namespace TradingApp.Controllers
             get { return User.Identity?.Name; }
         }
 
-
-
         [HttpGet]
         public async Task<IActionResult> Products(int pageIndex)
         {
-            pageIndex = pageIndex < 0 ? 0 : pageIndex;
-
-            ProductFilter filter = new ProductFilter()
-            {
-                ProductStatus = GCommon.Enums.ProductStatus.approved,
-                SellOrderStatus = GCommon.Enums.SellOrderStatus.active,
-            };
-
-            int productsCount = await _crudDb.GetProductsCountAsync(filter);
-            if (productsCount == 0)
+            IEnumerable<ProductsViewModel> products = await _productService.GetApprovedProductsWithActiveSellOrdersAsync(pageIndex: pageIndex);
+            if (products.Count() == 0)
             { return View(model: null); }
-            pageIndex = pageIndex * _productsPerPage >= productsCount ? (int)Math.Ceiling((decimal)productsCount / (decimal)_productsPerPage) - 1 : pageIndex; ;//pageIndex-1 : pageIndex;
 
-
-            filter.Skip = pageIndex * _productsPerPage;
-            filter.Take = _productsPerPage;
-            ViewData["page"] = pageIndex;
-
-
-            List<ProductsViewModel> products = await _crudDb.GetProductsAsync<ProductsViewModel>(productFilter: filter,
-            selector: (p) =>
-               new ProductsViewModel
-               {
-                   Id = p.Id,
-                   CreatorName = p.Creator.UserName,
-                   Price = p.Price.ToString("f2"),
-                   ProductName = p.Name
-               }
-            );
+            ViewData["page"] = _productService.ProductPageIndex;
 
             return View(model: products);
         }
@@ -83,28 +48,7 @@ namespace TradingApp.Controllers
         [HttpGet]
         public async Task<IActionResult> Product(Guid productId)
         {
-            ProductFilter filter = new ProductFilter()
-            {
-                PorductId = productId,
-                ProductStatus = GCommon.Enums.ProductStatus.approved,
-                SellOrderStatus = GCommon.Enums.SellOrderStatus.active,
-            };
-
-
-            ProductViewModel? product = await _crudDb.GetProductAsync<ProductViewModel>(productFilter: filter, selector:
-                p => new ProductViewModel
-                {
-                    Id = p.Id,
-                    ProductName = p.Name,
-                    Price = p.Price.ToString("f2"),
-                    CreatorName = p.Creator.UserName,
-                    Description = p.Description,
-                    FirstSellOrderCreationDate = p.SellOrders.Where(so => so.Status == GCommon.Enums.SellOrderStatus.active).Select(so => so.CreatedAt).OrderBy(createdAt => createdAt).SingleOrDefault().ToString("dd/MM/yyyy", CultureInfo.InvariantCulture),
-                    LastSellOrderCreationDate = p.SellOrders.Where(so => so.Status == GCommon.Enums.SellOrderStatus.active).Select(so => so.CreatedAt).OrderByDescending(createdAt => createdAt).SingleOrDefault().ToString("dd/MM/yyyy", CultureInfo.InvariantCulture),
-                    SellOrdersCount = p.SellOrders.Where(so => so.Status == GCommon.Enums.SellOrderStatus.active).Count()
-                }
-
-                );
+            ProductViewModel? product = await _productService.GetDetailsForApprovedProductWithActiveSellOrdersAsync(productId: productId);
 
             if (product == null)
             { return NotFound(); }
@@ -114,39 +58,16 @@ namespace TradingApp.Controllers
         }
 
 
+
         [HttpGet]
         [Authorize]
         public async Task<IActionResult> MyProducts(int pageIndex)
         {
-            pageIndex = pageIndex < 0 ? 0 : pageIndex;
-
-            ProductFilter filter = new ProductFilter()
-            {
-                Username = LoggedUserUsername,
-            };
-
-            int productsCount = await _crudDb.GetProductsCountAsync(filter);
-            if (productsCount == 0)
+            IEnumerable<MyProductsViewModel> products = await _productService.GetProductsCreatedByUserAsync(pageIndex: pageIndex, userId: LoggedUserId);
+            if (products.Count() == 0)
             { return View(model: null); }
 
-            pageIndex = pageIndex * _productsPerPage >= productsCount ? (int)Math.Ceiling((decimal)productsCount / (decimal)_productsPerPage) - 1 : pageIndex; ;//pageIndex-1 : pageIndex;
-
-
-            filter.Skip = pageIndex * _productsPerPage;
-            filter.Take = _productsPerPage;
-            ViewData["page"] = pageIndex;
-
-            List<MyProductsViewModel> products = await _crudDb.GetProductsAsync(productFilter: filter,
-                selector: (p) =>
-                new MyProductsViewModel
-                {
-                    Id = p.Id,
-                    Price = p.Price.ToString("f2"),
-                    ProductName = p.Name,
-                    ProductStatus = p.Status.ToString(),
-                    CreatorName = p.Creator.UserName
-                }
-                );
+            ViewData["page"] = _productService.ProductPageIndex;
 
             return View(model: products);
         }
@@ -156,39 +77,22 @@ namespace TradingApp.Controllers
         [Authorize]
         public async Task<IActionResult> MyProduct(Guid productId)
         {
-            ProductFilter filter = new ProductFilter()
-            {
-                PorductId = productId
-            };
-
-            MyProductViewModel? product = await _crudDb.GetProductAsync<MyProductViewModel>(productFilter: filter, selector:
-                p => new MyProductViewModel
-                {
-                    Id = p.Id,
-                    ProductName = p.Name,
-                    Description = p.Description,
-                    CreatorName = p.Creator.UserName,
-                    Price = p.Price.ToString("f2"),
-                    ProductStatus = p.Status.ToString(),
-                    ActiveSellOrdersCount = p.SellOrders.Where(so => so.Status == GCommon.Enums.SellOrderStatus.active).Count()
-                }
-
-                );
+            MyProductViewModel? product = await _productService.GetDetailsForProductAsync(productId: productId);
 
             if (product == null)
-            {
-                return NotFound();
-            }
-            else if (LoggedUserUsername != product.CreatorName)
-            {
-                return Forbid();
-            }
+            { return NotFound(); }
 
-            int loggedUserActiveSellOrdersCount = await _crudDb.GetSellOrdersCountAsync(LoggedUserId);
-            ViewData["currentUserMaxSellOrdersCountReached"] = loggedUserActiveSellOrdersCount >= _productsMaxActiveSellOrdersPerUser ? true : false;
-            ViewData["currentProductMaxSellOrdersCountReached"] = product.ActiveSellOrdersCount >= _productMaxActiveSellOrdersPerUser ? true : false;
+            if (LoggedUserUsername != product.CreatorName)
+            { return Unauthorized(); }
+
+            int loggedUserActiveSellOrdersCount = await _productService.GetUserActiveSellOrdersCountAsync(userId: LoggedUserId);
+
+            ViewData["currentUserMaxSellOrdersCountReached"] = loggedUserActiveSellOrdersCount >= ApplicationConstants.ProductsMaxActiveSellOrdersPerUser ? true : false;
+            ViewData["currentProductMaxSellOrdersCountReached"] = product.ActiveSellOrdersCount >= ApplicationConstants.ProductMaxActiveSellOrdersPerUser ? true : false;
 
             return View(model: product);
         }
+
+
     }
 }

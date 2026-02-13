@@ -6,6 +6,7 @@ using TradingApp.Data;
 using TradingApp.Data.Models;
 using TradingApp.Services;
 using TradingApp.ViewModels.Invoice;
+using TradingApp.Data.Helpers;
 
 namespace TradingApp.Controllers
 {

@@ -4,6 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using TradingApp.Data;
 using TradingApp.Data.Models;
 using TradingApp.Data.Seed;
+using TradingApp.Services.Core;
+using TradingApp.Services.Core.Interfaces;
 
 namespace TradingApp
 {
@@ -23,6 +25,8 @@ namespace TradingApp
                 .AddEntityFrameworkStores<ApplicationDbContext>();
             builder.Services.AddControllersWithViews();
 
+            //adding custom services to the container
+            builder.Services.AddScoped<IProductService, ProductService>();
 
 
             //<in testing state
