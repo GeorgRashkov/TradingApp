@@ -4,6 +4,7 @@ using TradingApp.Data;
 using TradingApp.GCommon;
 using TradingApp.GCommon.Enums;
 using TradingApp.Services.Core.Interfaces;
+using TradingApp.ViewModels.InputProduct;
 using TradingApp.ViewModels.Product;
 
 namespace TradingApp.Services.Core
@@ -128,7 +129,7 @@ namespace TradingApp.Services.Core
                 }).SingleOrDefaultAsync();
 
             return product;           
-        }
+        }             
 
 
         public async Task<int> GetUserActiveSellOrdersCountAsync(string userId)
@@ -146,6 +147,96 @@ namespace TradingApp.Services.Core
             pageIndex = pageIndex < 0 ? 0 : pageIndex;
             pageIndex = pageIndex * _productsPerPage >= productsCount ? (int)Math.Ceiling((decimal)productsCount / (decimal)_productsPerPage) - 1 : pageIndex;
             ProductPageIndex = pageIndex;
+        }
+
+
+
+        public async Task<int> GetProductActiveSellOrdersCountAsync(Guid productId)
+        {
+            int sellOrdersCount = await _context.SellOrders
+                .AsNoTracking()
+                .Where(so => so.ProductId == productId && so.Status == SellOrderStatus.active)
+                .CountAsync();
+            return sellOrdersCount;
+        }
+
+
+        public async Task<UpdatedProductModel> GetUpdatedProductModelAsync(Guid productId)
+        {
+             UpdatedProductModel? product = await _context
+                .Products
+                .AsNoTracking()
+                .Where(p => p.Id == productId)
+                .Select(p => new UpdatedProductModel()
+                {
+                    Id = productId,
+                    ProductName = p.Name,
+                    Description = p.Description,
+                    Price = p.Price
+                }).SingleOrDefaultAsync();
+
+            if(product == null)
+            {
+                throw new Exception("Cannot create an `updated product model` because the product Id was not found");
+            }
+
+            return product;
+        }
+
+        public async Task<DeletedProductModel> GetDeletedProductModelAsync(Guid productId)
+        {
+            DeletedProductModel? product = await _context
+               .Products
+               .AsNoTracking()
+               .Where(p => p.Id == productId)
+               .Select(p => new DeletedProductModel()
+               {
+                   ProductId = productId,
+                   ProductName = p.Name,                   
+               }).SingleOrDefaultAsync();
+
+            if (product == null)
+            {
+                throw new Exception("Cannot create a `deleted product model` because the product Id was not found");
+            }
+
+
+            return product;
+        }
+
+
+        public async Task<string> GetProductNameAsync(Guid productId)
+        {
+            string? productName = await _context
+                .Products
+                .AsNoTracking()
+                .Where(p => p.Id == productId)
+                .Select(p => p.Name).SingleOrDefaultAsync();
+
+            if(productName == null)
+            {
+                throw new InvalidOperationException("Cannot get the name of the product because it's id was not found!");
+            }
+
+            return productName;
+        }
+
+        public async Task<string> GetCreatorNameOfProductAsync(Guid productId)
+        {
+            string? creatorName = await _context
+                .Products
+                .Include(p => p.Creator)
+                .AsNoTracking()
+                .Where(p => p.Id == productId)
+                .Select(p => p.Creator.UserName)
+                .SingleOrDefaultAsync();
+
+            if (creatorName == null)
+            {
+                throw new InvalidOperationException("Cannot get the name of the product because it's id was not found!");
+            }
+
+            return creatorName;
         }
     }
 }

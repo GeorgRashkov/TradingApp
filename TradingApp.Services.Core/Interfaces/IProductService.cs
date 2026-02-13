@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TradingApp.ViewModels.InputProduct;
 using TradingApp.ViewModels.Product;
 
 namespace TradingApp.Services.Core.Interfaces
@@ -14,6 +15,14 @@ namespace TradingApp.Services.Core.Interfaces
         Task<IEnumerable<MyProductsViewModel>> GetProductsCreatedByUserAsync(int pageIndex, string userId);
         Task<MyProductViewModel?> GetDetailsForProductAsync(Guid productId);
         Task<int> GetUserActiveSellOrdersCountAsync(string userId);
+
+        Task<int> GetProductActiveSellOrdersCountAsync(Guid productId);
+
+        Task<UpdatedProductModel> GetUpdatedProductModelAsync(Guid productId);
+        Task<DeletedProductModel> GetDeletedProductModelAsync(Guid productId);
+
+        Task<string> GetProductNameAsync(Guid productId);
+        Task<string> GetCreatorNameOfProductAsync(Guid productId);
 
         int ProductPageIndex { get; }
     }

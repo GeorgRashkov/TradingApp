@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using TradingApp.GCommon.Enums;
 
 namespace TradingApp.GCommon
 {
@@ -11,6 +7,8 @@ namespace TradingApp.GCommon
         public const int ProductsPerPage = 4;
         public const int ProductsMaxActiveSellOrdersPerUser = 3;
         public const int ProductMaxActiveSellOrdersPerUser = 2;
+
         public const string DateFormat = "dd/MM/yyyy";
+        public const ProductStatus CreatedProductDefaultStatus = ProductStatus.approved;
     }
 }

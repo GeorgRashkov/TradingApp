@@ -27,6 +27,9 @@ namespace TradingApp
 
             //adding custom services to the container
             builder.Services.AddScoped<IProductService, ProductService>();
+            builder.Services.AddScoped<IProductOperationsService, ProductOperationsService>();
+            builder.Services.AddScoped<IProductBoolsService, ProductBoolsService>();
+            builder.Services.AddScoped<IProductFileService, ProductFileService>();
 
 
             //<in testing state
