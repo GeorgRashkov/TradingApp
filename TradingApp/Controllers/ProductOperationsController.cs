@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
+﻿using Microsoft.AspNetCore.Mvc;
 using TradingApp.Data;
 using TradingApp.Services.Core.Interfaces;
 using TradingApp.ViewModels.InputProduct;
@@ -8,7 +6,7 @@ using TradingApp.ViewModels.InputProduct;
 
 namespace TradingApp.Controllers
 {
-    public class ProductOperationsController : Controller
+    public class ProductOperationsController : ControllerBase
     {
         private IProductBoolsService _productBoolsService; 
         private IProductOperationsService _productOperationsService;
@@ -24,32 +22,17 @@ namespace TradingApp.Controllers
             _productFileService = productFileService;
             _productService = productService;
 
-        }
-        private string LoggedUserId
-        {
-            get { return User.FindFirst(ClaimTypes.NameIdentifier)?.Value; }
-        }
+        }       
 
-        private string LoggedUserUsername
-        {
-            get { return User.Identity?.Name; }
-        }
-
-        private string Referer
-        {
-            get { return Request.Headers["Referer"].ToString(); }
-        }
-
+       
 
         [HttpGet]
-        [Authorize]
         public IActionResult CreateProduct()
         {
             return View();
         }
 
         [HttpPost]
-        [Authorize]
         public async Task<IActionResult> CreateProduct([FromForm] CreatedProductModel createdProductModel)
         {
 
@@ -94,7 +77,6 @@ namespace TradingApp.Controllers
 
 
         [HttpGet]
-        [Authorize]
         public async Task<IActionResult> UpdateProduct(Guid productId)
         {
             bool doesProductCreatedByCreatorExist = await _productBoolsService.DoesProductCreatedByUserExistAsync(userId: LoggedUserId, productId: productId);
@@ -118,7 +100,6 @@ namespace TradingApp.Controllers
         }
 
         [HttpPost]
-        [Authorize]
         public async Task<IActionResult> UpdateProduct([FromForm] UpdatedProductModel updatedProductModel)
         {
             //model state validation
@@ -166,7 +147,6 @@ namespace TradingApp.Controllers
                
 
         [HttpGet]
-        [Authorize]
         public async Task<IActionResult> DeleteProduct(Guid productId)
         {
             //product existance validation
@@ -187,7 +167,6 @@ namespace TradingApp.Controllers
         }
         
         [HttpPost]
-        [Authorize]
         public async Task<IActionResult> DeleteProduct_execute(Guid productId)
         {
             //product existance validation
@@ -223,16 +202,6 @@ namespace TradingApp.Controllers
             TempData["title"] = "Success";
             TempData["message"] = $"The 3D model {productName} was deleted successfully.";
             return RedirectToAction(nameof(Message));
-        }
-
-
-
-
-
-        [HttpGet]
-        public IActionResult Message()
-        {
-            return View();
         }
 
 

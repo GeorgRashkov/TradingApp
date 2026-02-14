@@ -1,12 +1,9 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
-using System.Threading.Tasks;
+﻿using Microsoft.AspNetCore.Mvc;
 using TradingApp.Services.Core.Interfaces;
 
 namespace TradingApp.Controllers
 {
-    public class BalanceController : Controller
+    public class BalanceController : ControllerBase
     {
         private readonly IBalanceService _balanceService;
         public BalanceController(IBalanceService balanceService) 
@@ -14,14 +11,9 @@ namespace TradingApp.Controllers
             _balanceService = balanceService;
         }
 
-        //this is the Id of the currently logged user; if the user is not logged the value will be null 
-        private string LoggedUserId
-        {
-            get { return User.FindFirst(ClaimTypes.NameIdentifier)?.Value; }
-        }
+        
 
         [HttpGet]
-        [Authorize]
         public async Task<IActionResult> Balance()
         {
             decimal balance = await _balanceService.GetUserBalanceAsync(LoggedUserId);
@@ -30,7 +22,6 @@ namespace TradingApp.Controllers
 
 
         [HttpPost]
-        [Authorize]
         public async Task<IActionResult> IncreaseBalance(decimal increasement)
         {
             try
@@ -53,7 +44,6 @@ namespace TradingApp.Controllers
         }
 
         [HttpPost]
-        [Authorize]
         public async Task<IActionResult> DecreaseBalance(decimal decreasement)
         {
             try
@@ -73,12 +63,6 @@ namespace TradingApp.Controllers
             TempData["title"] = "Success";
             TempData["message"] = $"Money from your balance were transfered successfully to your bank account! Your current balance is {balance.ToString("f2")}";
             return RedirectToAction(nameof(Message));
-        }
-
-
-        public IActionResult Message()
-        {
-            return View();
         }
     }
 }

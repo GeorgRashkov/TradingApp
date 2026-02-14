@@ -1,16 +1,14 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 using TradingApp.Services.Core.Interfaces;
 using TradingApp.ViewModels.Order;
 
 namespace TradingApp.Controllers
 {
-    public class OrderController : Controller
+    public class OrderController : ControllerBase
     {
 
         private IProductService _productService;
         private IOrderService _orderService;
-
 
         public OrderController(IProductService productService, IOrderService orderService)
         {
@@ -19,21 +17,7 @@ namespace TradingApp.Controllers
 
         }
 
-        private string LoggedUserId
-        {
-            get { return User.FindFirst(ClaimTypes.NameIdentifier)?.Value; }
-        }
-
-        private string Referer
-        {
-            get { return Request.Headers["Referer"].ToString(); }
-        }
-
-
-
-
-
-
+     
         [HttpPost]
         //this method will show the confirmation page when the user presses the button for creating an order
         public async Task<IActionResult> CreateSellOrder(Guid productId, int ordersCount)
@@ -245,10 +229,5 @@ namespace TradingApp.Controllers
             return RedirectToAction(nameof(Message));
         }
 
-
-        public IActionResult Message()
-        {
-            return View();
-        }
     }
 }

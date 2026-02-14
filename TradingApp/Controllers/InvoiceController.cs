@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
+﻿using Microsoft.AspNetCore.Mvc;
 using TradingApp.Data;
 using TradingApp.ViewModels.Invoice;
 using TradingApp.Services.Core.Interfaces;
@@ -8,7 +6,7 @@ using TradingApp.Services.Core.Interfaces;
 
 namespace TradingApp.Controllers
 {
-    public class InvoiceController : Controller
+    public class InvoiceController : ControllerBase
     {        
         private IInvoiceService _invoiceService;
         private IProductFileService _productFileService;
@@ -19,16 +17,8 @@ namespace TradingApp.Controllers
             _productFileService = productFileService;
         }
 
-        //this is the Id of the currently logged user; if the user is not logged the value will be null 
-        private string LoggedUserId
-        {
-            get { return User.FindFirst(ClaimTypes.NameIdentifier)?.Value; }
-        }
 
-
-
-
-        [Authorize]
+        
         [HttpGet]
         public async Task<IActionResult> Invoices(int pageIndex)
         {
@@ -37,7 +27,7 @@ namespace TradingApp.Controllers
             return View(model: loggedUserCompletedOrders);
         }
 
-        [Authorize]
+        
         [HttpGet]
         public async Task<IActionResult> Invoice(Guid completedOrderId)
         {
@@ -52,7 +42,7 @@ namespace TradingApp.Controllers
         }
         
 
-        [Authorize]
+        
         [HttpGet]
         public async Task<IActionResult> Download3dModelFile(Guid completedOrderId)
         {
