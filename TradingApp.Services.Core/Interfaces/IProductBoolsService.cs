@@ -1,6 +1,4 @@
 ﻿
-using TradingApp.Data.Models;
-
 namespace TradingApp.Services.Core.Interfaces
 {
     public interface IProductBoolsService

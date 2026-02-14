@@ -1,16 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Linq.Expressions;
 using TradingApp.Data;
-using TradingApp.Data.Helpers;
 using TradingApp.Data.Models;
 using TradingApp.GCommon;
 using TradingApp.Services.Core.Interfaces;
 using TradingApp.ViewModels.Invoice;
-using static TradingApp.GCommon.EntityValidation;
 
 namespace TradingApp.Services.Core
 {

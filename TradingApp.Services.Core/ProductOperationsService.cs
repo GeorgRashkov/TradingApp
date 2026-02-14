@@ -1,10 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
-
+﻿
 using TradingApp.Data;
-using TradingApp.Data.Helpers;
 using TradingApp.Data.Models;
 using TradingApp.GCommon;
-using TradingApp.GCommon.Enums;
 using TradingApp.Services.Core.Interfaces;
 
 namespace TradingApp.Services.Core

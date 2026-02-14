@@ -1,13 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-using TradingApp.Data;
-using TradingApp.Data.Helpers;
-using TradingApp.Data.Models;
-using TradingApp.GCommon;
-using TradingApp.Services.Core;
 using TradingApp.Services.Core.Interfaces;
 using TradingApp.ViewModels.Order;
-using static TradingApp.GCommon.EntityValidation;
 
 namespace TradingApp.Controllers
 {

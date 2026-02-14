@@ -1,14 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TradingApp.Data;
-using TradingApp.Data.Models;
-using TradingApp.ViewModels.Order;
-using static TradingApp.GCommon.EntityValidation;
-
+﻿
 namespace TradingApp.Services.Core.Interfaces
 {
     public interface IOrderService

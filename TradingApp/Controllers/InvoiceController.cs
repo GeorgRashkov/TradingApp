@@ -1,27 +1,19 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Globalization;
 using System.Security.Claims;
 using TradingApp.Data;
-using TradingApp.Data.Models;
-using TradingApp.Services;
 using TradingApp.ViewModels.Invoice;
-using TradingApp.Data.Helpers;
 using TradingApp.Services.Core.Interfaces;
 
 namespace TradingApp.Controllers
 {
     public class InvoiceController : Controller
-    {
-        private CrudDb _crudDb;
-        private CrudFile _crudFile;
+    {        
         private IInvoiceService _invoiceService;
         private IProductFileService _productFileService;
 
         public InvoiceController(ApplicationDbContext context, IInvoiceService invoiceService, IProductFileService productFileService)
-        {
-            _crudDb = new CrudDb(context);
-            _crudFile = new CrudFile();
+        {           
             _invoiceService = invoiceService;
             _productFileService = productFileService;
         }

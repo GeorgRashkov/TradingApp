@@ -1,11 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Globalization;
 using System.Security.Claims;
 using TradingApp.Data;
-using TradingApp.Data.Helpers;
 using TradingApp.GCommon;
-using TradingApp.Services.Core;
 using TradingApp.Services.Core.Interfaces;
 using TradingApp.ViewModels.Product;
 

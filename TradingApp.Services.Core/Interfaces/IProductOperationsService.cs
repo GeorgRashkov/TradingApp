@@ -1,6 +1,4 @@
-﻿using TradingApp.Data.Models;
-using TradingApp.GCommon.Enums;
-
+﻿
 namespace TradingApp.Services.Core.Interfaces
 {
     public interface IProductOperationsService
