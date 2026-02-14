@@ -1,0 +1,16 @@
+﻿@model string
+
+<br />
+<h4>Current balance: @(Model)</h4>
+
+<br />
+<form method="post" asp-controller="Balance" asp-action="IncreaseBalance">
+    <input type="number" name="increasement" />
+    <input type="submit" value="Increase balance" />
+</form>
+
+<br />
+<form method="post" asp-controller="Balance" asp-action="DecreaseBalance">
+    <input type="number" name="decreasement" />
+    <input type="submit" value="Decrease balance" />
+</form>
