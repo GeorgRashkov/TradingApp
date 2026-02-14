@@ -1,29 +1,75 @@
 ﻿@using TradingApp.ViewModels.Invoice
 @model List<InvoicesViewModel>
 
-
-@if (Model.Count == 0)
-{
-    <h2>You have no invoices!</h2>
+@{
+    ViewData["Title"] = "Invoices";
+    int pageIndex = (int)(ViewData["page"] ?? 0);
 }
-else
-{
-    <table>
-        <tr>
-            <th>Title</th>
-            <th>Completed At</th>
-            <th>Details</th>
-        </tr>
 
-        @foreach (InvoicesViewModel invoice in Model)
-        {
-            <tr>
-                <td>@(invoice.Title)</td>
-                <td>@(invoice.CompletedAt)</td>
-                <td><a class="btn btn-sm btn-primary" asp-controller="Invoice" asp-action="Invoice" asp-route-completedOrderId="@(invoice.Id)">Details</a></td>
-            </tr>
-        }
+<div class="container mt-4">
 
+    @if (Model.Count == 0)
+    {
+        <div class="alert alert-info text-center">
+            <h2>You have no invoices!</h2>
+        </div>
+    }
+    else
+    {
+        <h2 class="mb-3">Your Invoices</h2>
 
-    </table>
-}
+        <table class="table table-striped table-bordered table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>Title</th>
+                    <th>Completed At</th>
+                    <th class="text-center">Details</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (InvoicesViewModel invoice in Model)
+                {
+                    <tr>
+                        <td>@(invoice.Title)</td>
+                        <td>@(invoice.CompletedAt)</td>
+                        <td class="text-center">
+                            <a class="btn btn-sm btn-primary"
+                               asp-controller="Invoice"
+                               asp-action="Invoice"
+                               asp-route-completedOrderId="@(invoice.Id)">
+                                Details
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <br />
+
+        <!-- <Pagination -->
+        <div class="d-flex justify-content-between align-items-center mt-4">
+
+            <!-- Previous -->
+            <a class="btn btn-outline-secondary @(pageIndex <= 0 ? "disabled" : "")"
+               asp-controller="Invoice"
+               asp-action="Invoices"
+               asp-route-pageIndex="@(pageIndex - 1)">
+                ← Previous
+            </a>
+
+            <!-- Page indicator -->
+            <span class="fw-bold">Page @(pageIndex + 1)</span>
+
+            <!-- Next -->
+            <a class="btn btn-outline-secondary"
+               asp-controller="Invoice"
+               asp-action="Invoices"
+               asp-route-pageIndex="@(pageIndex + 1)">
+                Next →
+            </a>
+
+        </div>
+        <!-- Pagination> -->
+    }
+</div>

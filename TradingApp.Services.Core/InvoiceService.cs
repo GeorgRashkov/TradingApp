@@ -5,44 +5,53 @@ using TradingApp.Data.Models;
 using TradingApp.GCommon;
 using TradingApp.Services.Core.Interfaces;
 using TradingApp.ViewModels.Invoice;
+using TradingApp.ViewModels.Product;
 
 namespace TradingApp.Services.Core
 {
     public class InvoiceService: IInvoiceService
     {
         private ApplicationDbContext _context;
+        private const int _invoicesPerPage = ApplicationConstants.InvoicesPerPage;
+
         public InvoiceService(ApplicationDbContext context) 
         {
             _context = context;
         }
 
-        public async Task<IEnumerable<InvoicesViewModel>> GetCompletedOrdersAsync(string userId)
+        public int InvoicePageIndex { get; private set; }
+
+        private void SetInvoicePage(int pageIndex, int userInvoicesCount)
         {
-            List<InvoicesViewModel> buyerCompletedOrders = await _context
+            pageIndex = pageIndex < 0 ? 0 : pageIndex;
+            pageIndex = pageIndex * _invoicesPerPage >= userInvoicesCount ? (int)Math.Ceiling((decimal)userInvoicesCount / (decimal)_invoicesPerPage) - 1 : pageIndex;
+            InvoicePageIndex = pageIndex;
+        }
+
+        public async Task<IEnumerable<InvoicesViewModel>> GetCompletedOrdersAsync(string userId, int pageIndex)
+        {
+            int userInvoicesCount = await _context
+                .CompletedOrders
+                .Where(co => co.SellerId == userId || co.BuyerId == userId)
+                .CountAsync();
+
+            if (userInvoicesCount == 0)
+            { return new List<InvoicesViewModel>(); }
+
+            SetInvoicePage(pageIndex, userInvoicesCount);
+
+            List<InvoicesViewModel> userCompletedOrders = await _context
                 .CompletedOrders
                 .AsNoTracking()
-                .Where(co => co.BuyerId == userId)
+                .Where(co => userId == co.BuyerId || userId == co.SellerId)
+                .OrderBy(co => co.CompletedAt)
+                .Skip(InvoicePageIndex * _invoicesPerPage).Take(_invoicesPerPage)
                 .Select(co => new InvoicesViewModel
                 {
                     Id = co.Id,
-                    Title = co.TitleForBuyer,
+                    Title = co.BuyerId == userId ? co.TitleForBuyer:co.TitleForSeller,
                     CompletedAt = co.CompletedAt.ToString(ApplicationConstants.DateFormat, CultureInfo.InvariantCulture)
                 }).ToListAsync();
-
-
-            List<InvoicesViewModel> sellerCompletedOrders = await _context
-                .CompletedOrders
-                .AsNoTracking()
-                .Where(co => co.SellerId == userId)
-                .Select(co => new InvoicesViewModel
-                {
-                    Id = co.Id,
-                    Title = co.TitleForSeller,
-                    CompletedAt = co.CompletedAt.ToString(ApplicationConstants.DateFormat, CultureInfo.InvariantCulture)
-                }).ToListAsync();
-
-
-            List<InvoicesViewModel> userCompletedOrders = [.. buyerCompletedOrders, .. sellerCompletedOrders];
 
             return userCompletedOrders;
         }
@@ -78,7 +87,7 @@ namespace TradingApp.Services.Core
             {
                 Id = completedOrder.Id,
                 Title = title,
-                CompletedAt = completedOrder.CompletedAt.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture),
+                CompletedAt = completedOrder.CompletedAt.ToString(ApplicationConstants.DateFormat, CultureInfo.InvariantCulture),
                 ProductId = completedOrder.Product.Id,
                 ProductName = completedOrder.Product.Name,
                 ProductCreatorName = completedOrder.Seller.UserName,

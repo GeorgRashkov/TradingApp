@@ -5,6 +5,7 @@ using TradingApp.Data;
 using TradingApp.ViewModels.Invoice;
 using TradingApp.Services.Core.Interfaces;
 
+
 namespace TradingApp.Controllers
 {
     public class InvoiceController : Controller
@@ -29,9 +30,10 @@ namespace TradingApp.Controllers
 
         [Authorize]
         [HttpGet]
-        public async Task<IActionResult> Invoices()
+        public async Task<IActionResult> Invoices(int pageIndex)
         {
-            IEnumerable<InvoicesViewModel> loggedUserCompletedOrders = await _invoiceService.GetCompletedOrdersAsync(userId: LoggedUserId);
+            IEnumerable<InvoicesViewModel> loggedUserCompletedOrders = await _invoiceService.GetCompletedOrdersAsync(userId: LoggedUserId, pageIndex: pageIndex);
+            ViewData["page"] = _invoiceService.InvoicePageIndex;
             return View(model: loggedUserCompletedOrders);
         }
 
