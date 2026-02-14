@@ -30,9 +30,11 @@ namespace TradingApp
             builder.Services.AddScoped<IProductOperationsService, ProductOperationsService>();
             builder.Services.AddScoped<IProductBoolsService, ProductBoolsService>();
             builder.Services.AddScoped<IProductFileService, ProductFileService>();
+            builder.Services.AddScoped<IOrderService, OrderService>();
+            
 
 
-            //<in testing state
+            
             //add the seeder classes to the services
             builder.Services.AddTransient<UserSeeder>();
             builder.Services.AddTransient<BalanceSeeder>();
@@ -40,7 +42,7 @@ namespace TradingApp
             builder.Services.AddTransient<PurchaseOrderSeeder>();
             builder.Services.AddTransient<SellOrderSeeder>();
             builder.Services.AddTransient<SellOrderSuggestionSeeder>();
-            //in testing state>
+            
 
 
 

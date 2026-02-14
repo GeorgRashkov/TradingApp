@@ -87,8 +87,8 @@ namespace TradingApp.Controllers
 
             int loggedUserActiveSellOrdersCount = await _productService.GetUserActiveSellOrdersCountAsync(userId: LoggedUserId);
 
-            ViewData["currentUserMaxSellOrdersCountReached"] = loggedUserActiveSellOrdersCount >= ApplicationConstants.ProductsMaxActiveSellOrdersPerUser ? true : false;
-            ViewData["currentProductMaxSellOrdersCountReached"] = product.ActiveSellOrdersCount >= ApplicationConstants.ProductMaxActiveSellOrdersPerUser ? true : false;
+            ViewData["currentUserMaxSellOrdersCountReached"] = loggedUserActiveSellOrdersCount >= ApplicationConstants.UserMaxActiveSellOrders ? true : false;
+            ViewData["currentProductMaxSellOrdersCountReached"] = product.ActiveSellOrdersCount >= ApplicationConstants.ProductMaxActiveSellOrders ? true : false;
 
             return View(model: product);
         }
