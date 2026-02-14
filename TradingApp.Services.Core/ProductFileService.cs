@@ -93,9 +93,9 @@ namespace TradingApp.Services.Core
         }
 
 
-        public byte[] Get3dModelFileBytes(string creatorName, string productName)
+        public byte[] Get3dModelFileBytes(string productCreatorName, string productName)
         {
-            string productPath = Path.Combine(GetProductPath(creatorName, productName), productName + ".jpg");
+            string productPath = Path.Combine(GetProductPath(productCreatorName, productName), productName + ".jpg");
             byte[] bytes = File.ReadAllBytes(productPath);
             return bytes;
         }

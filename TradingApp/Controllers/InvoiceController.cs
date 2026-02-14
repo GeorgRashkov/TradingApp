@@ -7,6 +7,7 @@ using TradingApp.Data.Models;
 using TradingApp.Services;
 using TradingApp.ViewModels.Invoice;
 using TradingApp.Data.Helpers;
+using TradingApp.Services.Core.Interfaces;
 
 namespace TradingApp.Controllers
 {
@@ -14,11 +15,15 @@ namespace TradingApp.Controllers
     {
         private CrudDb _crudDb;
         private CrudFile _crudFile;
+        private IInvoiceService _invoiceService;
+        private IProductFileService _productFileService;
 
-        public InvoiceController(ApplicationDbContext context)
+        public InvoiceController(ApplicationDbContext context, IInvoiceService invoiceService, IProductFileService productFileService)
         {
             _crudDb = new CrudDb(context);
             _crudFile = new CrudFile();
+            _invoiceService = invoiceService;
+            _productFileService = productFileService;
         }
 
         //this is the Id of the currently logged user; if the user is not logged the value will be null 
@@ -28,93 +33,48 @@ namespace TradingApp.Controllers
         }
 
 
+
+
         [Authorize]
         [HttpGet]
         public async Task<IActionResult> Invoices()
         {
-            List<InvoicesViewModel> loggedUserCompletedOrders = await _crudDb.
-            GetCompletedOrdersAsync<InvoicesViewModel>(userId: LoggedUserId,
-            buyerSelector: co => new InvoicesViewModel
-            {
-                Id = co.Id,
-                Title = co.TitleForBuyer,
-                CompletedAt = co.CompletedAt.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture)
-            },
-            sellerSelector: co => new InvoicesViewModel
-            {
-                Id = co.Id,
-                Title = co.TitleForSeller,
-                CompletedAt = co.CompletedAt.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture)
-            }
-            );            
-
-            loggedUserCompletedOrders.OrderBy(co => DateTime.Parse(co.CompletedAt));
-
+            IEnumerable<InvoicesViewModel> loggedUserCompletedOrders = await _invoiceService.GetCompletedOrdersAsync(userId: LoggedUserId);
             return View(model: loggedUserCompletedOrders);
         }
-
 
         [Authorize]
         [HttpGet]
         public async Task<IActionResult> Invoice(Guid completedOrderId)
         {
-            CompletedOrder? completedOrder = await _crudDb.GetCompletedOrderAsync(completedOrderId);
+            InvoiceViewModel? invoiceViewModel = await _invoiceService.GetCompletedOrderAsync(userId: LoggedUserId, completedOrderId: completedOrderId);
 
-            //checks whether the completed order exists
-            if (completedOrder is null) 
-            { return NotFound(); }
-
-            string loggedUserId = LoggedUserId;
-
-            //checks whether the logged user is the buyer or the seller of the completed order
-            if (loggedUserId != completedOrder.BuyerId && loggedUserId != completedOrder.SellerId) 
-            { return Forbid(); }
-
-            bool isUserTheBuyer = loggedUserId == completedOrder.BuyerId;
-            decimal price = isUserTheBuyer ? completedOrder.PricePaid : completedOrder.SellerRevenue;
-            string title = isUserTheBuyer ? completedOrder.TitleForBuyer : completedOrder.TitleForSeller;
-            string productCreatorName = (await _crudDb.GetUserAsync(completedOrder.Product.CreatorId)).UserName;
-            
-            InvoiceViewModel invoiceViewModel = new InvoiceViewModel()
+            if(invoiceViewModel == null)
             {
-                Id = completedOrder.Id,
-                Title = title,
-                CompletedAt = completedOrder.CompletedAt.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture),
-                ProductId = completedOrder.Product.Id,
-                ProductName = completedOrder.Product.Name,
-                ProductCreatorName = productCreatorName,
-                Price = price.ToString("f2"),
-                IsUserTheBuyer = isUserTheBuyer
-            };
+                return NotFound();
+            }
 
             return View(model: invoiceViewModel);
         }
-
+        
 
         [Authorize]
         [HttpGet]
         public async Task<IActionResult> Download3dModelFile(Guid completedOrderId)
         {
-            CompletedOrder? completedOrder = await _crudDb.GetCompletedOrderAsync(completedOrderId);
+            InvoiceViewModel? invoiceViewModel = await _invoiceService.GetCompletedOrderAsync(userId:LoggedUserId,completedOrderId: completedOrderId);
 
-            if (completedOrder is null)
+            if (invoiceViewModel == null)
             {
                 return NotFound();
             }
-
-            if(LoggedUserId != completedOrder.BuyerId)
-            {
-                return Forbid();
-            }
-
-            string productCreatorName = (await _crudDb.GetUserAsync(completedOrder.Product.CreatorId)).UserName;
-            string productName = completedOrder.Product.Name;
+                           
             byte[] bytes;
             try
             {
-                bytes = _crudFile.Get3dModelFileBytes(creatorName: productCreatorName, productName: productName);
+                bytes = _productFileService.Get3dModelFileBytes(productCreatorName: invoiceViewModel.ProductCreatorName, productName: invoiceViewModel.ProductName);
             }
-            catch (Exception e) 
+            catch (Exception e)
             {
                 Console.WriteLine(e.Message);
                 TempData["title"] = "Error";
@@ -122,7 +82,8 @@ namespace TradingApp.Controllers
                 return View(viewName: "Message");
             }
 
-            return File(bytes, "image/jpg", productName+".jpg");
+            return File(bytes, "image/jpg", invoiceViewModel.ProductName + ".jpg");
         }
+        
     }
 }

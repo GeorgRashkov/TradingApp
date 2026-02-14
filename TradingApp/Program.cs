@@ -31,6 +31,7 @@ namespace TradingApp
             builder.Services.AddScoped<IProductBoolsService, ProductBoolsService>();
             builder.Services.AddScoped<IProductFileService, ProductFileService>();
             builder.Services.AddScoped<IOrderService, OrderService>();
+            builder.Services.AddScoped<IInvoiceService, InvoiceService>();
             
 
 

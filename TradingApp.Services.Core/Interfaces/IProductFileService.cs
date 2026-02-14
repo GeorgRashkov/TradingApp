@@ -8,6 +8,6 @@ namespace TradingApp.Services.Core.Interfaces
         Task SaveProductInFolderAsync(CreatedProductModel product, string creatorName);
         Task UpdateProductInFolderAsync(UpdatedProductModel product, string creatorName, string oldProductName);
         void DeleteProductFolder(string creatorName, string productName);
-        public byte[] Get3dModelFileBytes(string creatorName, string productName);        
+        public byte[] Get3dModelFileBytes(string productCreatorName, string productName);        
     }
 }
