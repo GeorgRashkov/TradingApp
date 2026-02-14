@@ -9,6 +9,7 @@
   <ItemGroup>
     <ProjectReference Include="..\TradingApp.Data.Models\TradingApp.Data.Models.csproj" />
     <ProjectReference Include="..\TradingApp.Data\TradingApp.Data.csproj" />
+    <ProjectReference Include="..\TradingApp.GCommon\TradingApp.GCommon.csproj" />
     <ProjectReference Include="..\TradingApp.ViewModels\TradingApp.ViewModels.csproj" />
   </ItemGroup>
 
