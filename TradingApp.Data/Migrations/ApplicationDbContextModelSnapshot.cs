@@ -169,7 +169,7 @@ namespace TradingApp.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Balances");
+                    b.ToTable("Balances", (string)null);
                 });
 
             modelBuilder.Entity("TradingApp.Data.Models.CompletedOrder", b =>
@@ -217,7 +217,7 @@ namespace TradingApp.Data.Migrations
 
                     b.HasIndex("SellerId");
 
-                    b.ToTable("CompletedOrders");
+                    b.ToTable("CompletedOrders", (string)null);
                 });
 
             modelBuilder.Entity("TradingApp.Data.Models.Product", b =>
@@ -250,7 +250,7 @@ namespace TradingApp.Data.Migrations
 
                     b.HasIndex("CreatorId");
 
-                    b.ToTable("Products");
+                    b.ToTable("Products", (string)null);
                 });
 
             modelBuilder.Entity("TradingApp.Data.Models.PurchaseOrder", b =>
@@ -286,7 +286,7 @@ namespace TradingApp.Data.Migrations
 
                     b.HasIndex("CreatorId");
 
-                    b.ToTable("PurchaseOrders");
+                    b.ToTable("PurchaseOrders", (string)null);
                 });
 
             modelBuilder.Entity("TradingApp.Data.Models.SellOrder", b =>
@@ -314,7 +314,7 @@ namespace TradingApp.Data.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("SellOrders");
+                    b.ToTable("SellOrders", (string)null);
                 });
 
             modelBuilder.Entity("TradingApp.Data.Models.SellOrderSuggestion", b =>
@@ -329,7 +329,7 @@ namespace TradingApp.Data.Migrations
 
                     b.HasIndex("PurchaseOrderId");
 
-                    b.ToTable("SellOrderSuggestions");
+                    b.ToTable("SellOrderSuggestions", (string)null);
                 });
 
             modelBuilder.Entity("TradingApp.Data.Models.User", b =>

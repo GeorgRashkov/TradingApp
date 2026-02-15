@@ -1,4 +1,5 @@
 ﻿
+using Microsoft.EntityFrameworkCore;
 using TradingApp.Data;
 using TradingApp.Data.Models;
 using TradingApp.GCommon;
@@ -80,9 +81,37 @@ namespace TradingApp.Services.Core
                 throw new InvalidOperationException("Product could not be deleted from the DB because it's ID was not in the DB!");
             }
 
+            await DeleteSellOrdersOfProductAsync(productId);
+            await SetFkToNullForCompletedOrdersOfProductAsync(productId);
+
             _context.Products.Attach(product);
             _context.Products.Remove(product);
             await _context.SaveChangesAsync();
+        }
+
+        private async Task DeleteSellOrdersOfProductAsync(Guid productId)
+        {
+            IEnumerable<SellOrder> sellOrders = await _context
+                .SellOrders
+                .Include(so => so.Product)
+                .Where(so => so.Product.Id == productId)
+                .ToListAsync();
+
+            _context.SellOrders.RemoveRange(sellOrders);            
+        }
+
+        private async Task SetFkToNullForCompletedOrdersOfProductAsync(Guid productId)
+        {
+            IEnumerable<CompletedOrder> completedOrders = await _context
+                .CompletedOrders
+                .Include(so => so.Product)
+                .Where(so => so.Product.Id == productId)
+                .ToListAsync();
+
+            foreach (CompletedOrder completedOrder in completedOrders)
+            {
+                completedOrder.Product = null;
+            }
         }
     }
 }

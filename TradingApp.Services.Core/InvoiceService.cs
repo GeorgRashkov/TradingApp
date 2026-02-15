@@ -88,9 +88,9 @@ namespace TradingApp.Services.Core
                 Id = completedOrder.Id,
                 Title = title,
                 CompletedAt = completedOrder.CompletedAt.ToString(ApplicationConstants.DateFormat, CultureInfo.InvariantCulture),
-                ProductId = completedOrder.Product.Id,
-                ProductName = completedOrder.Product.Name,
-                ProductCreatorName = completedOrder.Seller.UserName,
+                ProductId = completedOrder.Product?.Id,
+                ProductName = completedOrder.Product?.Name,
+                ProductCreatorName = completedOrder.Seller?.UserName,
                 Price = price.ToString("f2"),
                 IsUserTheBuyer = isUserTheBuyer
             };
