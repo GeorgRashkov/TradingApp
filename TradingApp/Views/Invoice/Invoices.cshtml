@@ -3,7 +3,13 @@
 
 @{
     ViewData["Title"] = "Invoices";
-    int pageIndex = (int)(ViewData["page"] ?? 0);
+    
+    PaginationHelper paginationHelper = new PaginationHelper()
+    {
+        Controller = "Invoice",
+        Action = "Invoices",
+        PageIndex = (int)(ViewData["page"] ?? 0)
+    };   
 }
 
 <div class="container mt-4">
@@ -46,30 +52,6 @@
         </table>
 
         <br />
-
-        <!-- <Pagination -->
-        <div class="d-flex justify-content-between align-items-center mt-4">
-
-            <!-- Previous -->
-            <a class="btn btn-outline-secondary @(pageIndex <= 0 ? "disabled" : "")"
-               asp-controller="Invoice"
-               asp-action="Invoices"
-               asp-route-pageIndex="@(pageIndex - 1)">
-                ← Previous
-            </a>
-
-            <!-- Page indicator -->
-            <span class="fw-bold">Page @(pageIndex + 1)</span>
-
-            <!-- Next -->
-            <a class="btn btn-outline-secondary"
-               asp-controller="Invoice"
-               asp-action="Invoices"
-               asp-route-pageIndex="@(pageIndex + 1)">
-                Next →
-            </a>
-
-        </div>
-        <!-- Pagination> -->
+        <partial name="_Pagination" model="@(paginationHelper)"></partial>
     }
 </div>

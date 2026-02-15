@@ -2,7 +2,13 @@
 @model List<MyProductsViewModel>
 @{
     ViewData["Title"] = "My products";
-    int pageIndex = (int)(ViewData["page"] ?? 0);
+    
+    PaginationHelper paginationHelper = new PaginationHelper()
+    {
+        Controller = "Product",
+        Action = "MyProducts",
+        PageIndex = (int)(ViewData["page"] ?? 0)
+    };    
 }
 
 <div class="row row-cols-1 row-cols-sm-2 g-2">
@@ -77,23 +83,8 @@ else
 
     </div>
 
-
-    <div>
-        <div style="text-align:left">
-            <a asp-controller="Product" asp-action="MyProducts" asp-route-pageIndex="@(pageIndex - 1)">
-                <img src="~/Common/PreviousElementsButton.jpg" style="width:30px; height:30px" />
-            </a>
-
-        </div>
-        <div style="text-align:right">
-            <a asp-controller="Product" asp-action="MyProducts" asp-route-pageIndex="@(pageIndex + 1)">
-                <img src="~/Common/NextElementsButton.jpg" style="width:30px; height:30px" />
-            </a>
-
-        </div>
-    </div>
-
-
+    <partial name="_Pagination" model="@(paginationHelper)"></partial>
+    
     <style>
         .product-img {
             height: 300px;
