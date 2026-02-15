@@ -10,6 +10,7 @@ namespace TradingApp.GCommon
         public const int ProductMaxActiveSellOrders = 3;
 
         public const string DateFormat = "dd/MM/yyyy";
+        public const string DateTimeFormat = "dd/MM/yyyy HH:mm:ss";
         public const ProductStatus CreatedProductDefaultStatus = ProductStatus.approved;
         public const SellOrderStatus CreatedSellOrderDefaultStatus = SellOrderStatus.active;
     }

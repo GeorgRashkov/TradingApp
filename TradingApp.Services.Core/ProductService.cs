@@ -172,7 +172,7 @@ namespace TradingApp.Services.Core
                     Id = productId,
                     ProductName = p.Name,
                     Description = p.Description,
-                    Price = p.Price
+                    Price = decimal.Parse(p.Price.ToString("f2"))
                 }).SingleOrDefaultAsync();
 
             if(product == null)

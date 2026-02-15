@@ -44,13 +44,13 @@ namespace TradingApp.Services.Core
                 .CompletedOrders
                 .AsNoTracking()
                 .Where(co => userId == co.BuyerId || userId == co.SellerId)
-                .OrderBy(co => co.CompletedAt)
+                .OrderByDescending(co => co.CompletedAt)
                 .Skip(InvoicePageIndex * _invoicesPerPage).Take(_invoicesPerPage)
                 .Select(co => new InvoicesViewModel
                 {
                     Id = co.Id,
                     Title = co.BuyerId == userId ? co.TitleForBuyer:co.TitleForSeller,
-                    CompletedAt = co.CompletedAt.ToString(ApplicationConstants.DateFormat, CultureInfo.InvariantCulture)
+                    CompletedAt = co.CompletedAt.ToString(ApplicationConstants.DateTimeFormat, CultureInfo.InvariantCulture)
                 }).ToListAsync();
 
             return userCompletedOrders;
@@ -87,7 +87,7 @@ namespace TradingApp.Services.Core
             {
                 Id = completedOrder.Id,
                 Title = title,
-                CompletedAt = completedOrder.CompletedAt.ToString(ApplicationConstants.DateFormat, CultureInfo.InvariantCulture),
+                CompletedAt = completedOrder.CompletedAt.ToString(ApplicationConstants.DateTimeFormat, CultureInfo.InvariantCulture),
                 ProductId = completedOrder.Product?.Id,
                 ProductName = completedOrder.Product?.Name,
                 ProductCreatorName = completedOrder.Seller?.UserName,
