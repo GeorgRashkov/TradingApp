@@ -26,4 +26,9 @@
     <ProjectReference Include="..\TradingApp.ViewModels\TradingApp.ViewModels.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\Creators\frank\" />
+    <Folder Include="wwwroot\Creators\grace\" />
+  </ItemGroup>
+
 </Project>
