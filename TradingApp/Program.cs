@@ -105,10 +105,7 @@ namespace TradingApp
                 await purchaseOrderSeeder.SeedAsync();
 
                 SellOrderSeeder sellOrderSeeder = services.GetRequiredService<SellOrderSeeder>();
-                await sellOrderSeeder.SeedAsync();
-
-                SellOrderSuggestionSeeder sellOrderSuggestionSeeder = services.GetRequiredService<SellOrderSuggestionSeeder>();
-                await sellOrderSuggestionSeeder.SeedAsync();
+                await sellOrderSeeder.SeedAsync();                
             }
         }
         //in testing state>

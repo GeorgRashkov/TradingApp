@@ -5,9 +5,11 @@
 <br />
 <h1>@(Model.Title)</h1>
 
-<br />
-<img src="~/Creators/@(Model.ProductCreatorName)/@(Model.ProductName)/front.jpg" alt="@(Model.ProductName)" style="max-width:90%"/>
-
+@if (Model.ProductId is not null)
+{
+    <br />
+    <img src="~/Creators/@(Model.ProductCreatorName)/@(Model.ProductName)/front.jpg" alt="@(Model.ProductName)" style="max-width:90%"/>
+}
 <br />
 <br />
 
@@ -29,7 +31,15 @@ else
 @if (Model.IsUserTheBuyer)
 {
     <br />
-    <a class="btn btn-primary" asp-controller="Invoice" asp-action="Download3dModelFile" asp-route-completedOrderId="@Model.Id">
-        Download
-    </a>
+    @if (Model.ProductId is null)
+    {
+        <h3>The product cannot be downloaded because it was deleted by it's creator!</h3>
+    }
+    else
+    {        
+        <a class="btn btn-primary" asp-controller="Invoice" asp-action="Download3dModelFile" asp-route-completedOrderId="@Model.Id">
+            Download
+        </a>
+    }
+    
 }
