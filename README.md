@@ -90,7 +90,7 @@ dotnet ef database update
 dotnet run
 ```
 
-Once the application starts, it will be available at a local URL address (e.g. `https://localhost:5074`). Check the terminal output for the exact address.
+Once the application starts, it will be available at a local URL address (e.g. `http://localhost:5074`). Check the terminal output for the exact address.
 
 ---
 <br>
