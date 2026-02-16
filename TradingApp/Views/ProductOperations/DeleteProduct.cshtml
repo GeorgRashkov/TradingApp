@@ -2,31 +2,13 @@
 @model DeletedProductModel
 
 @{
-    ViewData["Title"] = "Confirmation";
+    ConfirmationHelper confirmationHelper = new ConfirmationHelper()
+    {
+        Message = $"Are you sure you want to delete product {Model.ProductName}?",
+        Controller = "ProductOperations",
+        Action = "DeleteProduct_execute",
+        ProductId = Model.ProductId
+    };
 }
 
-<div style="text-align:center">
-    <h2><b>Are you sure you want to delete product @(Model.ProductName)?</b></h2>
-</div>
-
-<br />
-
-<div style="text-align:center">
-    <form method="post" asp-controller="ProductOperations" asp-action="DeleteProduct_execute" asp-route-productId="@(Model.ProductId)">
-        <input class="btn btn-sm btn-primary" type="submit" value="Confirm" />
-       
-        @if(TempData["ReturnUrl"] is not null )
-        {
-            <a class="btn btn-sm btn-primary" href="@(TempData["ReturnUrl"])">
-                Cancel
-            </a>
-        }
-        else
-        {
-            <a class="btn btn-sm btn-primary" asp-controller="Product" asp-action="Products">
-                Cancel
-            </a>
-        }
-
-    </form>
-</div>
+<partial name="_Confirmation" model="confirmationHelper"></partial>
