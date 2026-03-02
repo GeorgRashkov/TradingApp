@@ -24,34 +24,10 @@
     {
         <h2 class="mb-3">Your Invoices</h2>
 
-        <table class="table table-striped table-bordered table-hover">
-            <thead class="table-dark">
-                <tr>
-                    <th>Title</th>
-                    <th>Completed At</th>
-                    <th class="text-center">Details</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (InvoicesViewModel invoice in Model)
-                {
-                    <tr>
-                        <td>@(invoice.Title)</td>
-                        <td>@(invoice.CompletedAt)</td>
-                        <td class="text-center">
-                            <a class="btn btn-sm btn-primary"
-                               asp-controller="Invoice"
-                               asp-action="Invoice"
-                               asp-route-completedOrderId="@(invoice.Id)">
-                                Details
-                            </a>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+        <partial name="_Invoices_Table" model="@(Model)"></partial>
 
         <br />
+
         <partial name="_Pagination" model="@(paginationHelper)"></partial>
     }
 </div>

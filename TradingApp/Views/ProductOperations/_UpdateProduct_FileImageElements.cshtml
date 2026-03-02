@@ -1,0 +1,123 @@
+﻿@model TradingApp.ViewModels.InputProduct.UpdatedProductModel
+
+@{
+    List<string> imageNames = new List<string>() { "front", "back", "top", "bottom", "left", "right" };
+    string frontImageName = imageNames[0];
+}
+
+
+<div class="container py-4">
+
+    <div class="row row-cols-1 row-cols-sm-2 g-2">
+
+
+        <div class="col">
+            <div class="card h-100 shadow-sm">
+                <input type="file"
+                       accept=".jpg,.jpeg"
+                       asp-for="FrontImageFile" />
+                <span asp-validation-for="FrontImageFile" class="text-danger"></span>
+                <div class="card-body text-center">
+
+                    <h6 class="card-title fw-semibold">
+                        @imageNames[0]
+                    </h6>
+
+                </div>
+            </div>
+        </div>
+
+
+
+        <div class="col">
+            <div class="card h-100 shadow-sm">
+                <input type="file"
+                       accept=".jpg,.jpeg"
+                       asp-for="BackImageFile" />
+                <span asp-validation-for="BackImageFile" class="text-danger"></span>
+                <div class="card-body text-center">
+
+                    <h6 class="card-title fw-semibold">
+                        @imageNames[1]
+                    </h6>
+
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col">
+            <div class="card h-100 shadow-sm">
+                <input type="file"
+                       accept=".jpg,.jpeg"
+                       asp-for="TopImageFile" />
+                <span asp-validation-for="TopImageFile" class="text-danger"></span>
+                <div class="card-body text-center">
+
+                    <h6 class="card-title fw-semibold">
+                        @imageNames[2]
+                    </h6>
+
+                </div>
+            </div>
+        </div>
+
+
+
+
+        <div class="col">
+            <div class="card h-100 shadow-sm">
+                <input type="file"
+                       accept=".jpg,.jpeg"
+                       asp-for="BottomImageFile" />
+                <span asp-validation-for="BottomImageFile" class="text-danger"></span>
+                <div class="card-body text-center">
+
+                    <h6 class="card-title fw-semibold">
+                        @imageNames[3]
+                    </h6>
+
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col">
+            <div class="card h-100 shadow-sm">
+                <input type="file"
+                       accept=".jpg,.jpeg"
+                       asp-for="LeftImageFile" />
+                <span asp-validation-for="LeftImageFile" class="text-danger"></span>
+                <div class="card-body text-center">
+
+                    <h6 class="card-title fw-semibold">
+                        @imageNames[4]
+                    </h6>
+
+                </div>
+            </div>
+        </div>
+
+
+
+        <div class="col">
+            <div class="card h-100 shadow-sm">
+                <input type="file"
+                       accept=".jpg,.jpeg"
+                       asp-for="RightImageFile" />
+                <span asp-validation-for="RightImageFile" class="text-danger"></span>
+                <div class="card-body text-center">
+
+                    <h6 class="card-title fw-semibold">
+                        @imageNames[5]
+                    </h6>
+
+                </div>
+            </div>
+        </div>
+
+
+
+    </div>
+
+</div>

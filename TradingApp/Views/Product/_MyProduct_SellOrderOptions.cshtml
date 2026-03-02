@@ -1,0 +1,46 @@
+﻿@using TradingApp.ViewModels.Product;
+@using TradingApp.GCommon.Enums;
+
+@model MyProductViewModel
+@{
+    bool currentUserMaxSellOrdersCountReached = (bool)(ViewData["currentUserMaxSellOrdersCountReached"] as bool?);
+    bool currentProductMaxSellOrdersCountReached = (bool)(ViewData["currentProductMaxSellOrdersCountReached"] as bool?);
+}
+
+
+@if (Model.ActiveSellOrdersCount > 0)
+{
+    <form method="post" asp-controller="Order" asp-action="CancelSellOrder">
+        <label>Quantity</label>
+        <input type="number" name="ordersCount" min="1" />
+        <input type="hidden" name="productId" value="@(Model.Id)" />
+        <input type="submit" class="btn btn-sm btn-primary" value="Cancel sell order/s" />
+
+    </form>
+
+}
+
+<br />
+<br />
+
+@if (currentUserMaxSellOrdersCountReached == true)
+{
+    <p><b>You reached the maximum number of active sales orders!</b></p>
+    <p><b>In order to create a sell order of the product you will have to wait for someone to pruchase a sale order created by you.</b></p>
+    <p><b>Alternatively, you can cancel an active sell order of another product.</b></p>
+}
+else if (currentProductMaxSellOrdersCountReached == true)
+{
+    <p><b>You reached the maximum number of active sales orders for the product @(Model.ProductName)!</b></p>
+    <p><b>In order to create another sell order of the product you will have to wait for someone to pruchase one of it's active sale orders.</b></p>
+}
+else
+{
+    <form method="post" asp-controller="Order" asp-action="CreateSellOrder">
+        <label>Quantity</label>
+        <input type="number" name="ordersCount" min="1" />
+        <input type="hidden" name="productId" value="@(Model.Id)" />
+        <input type="submit" class="btn btn-sm btn-primary" value="Create sell order/s" />
+
+    </form>
+}

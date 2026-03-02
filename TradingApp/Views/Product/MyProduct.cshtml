@@ -5,46 +5,13 @@
 @{
     ViewData["Title"] = Model.ProductName;
     List<string> imageNames = new List<string>() { "front", "back", "top", "bottom", "left", "right" };
-    bool currentUserMaxSellOrdersCountReached = (bool)(ViewData["currentUserMaxSellOrdersCountReached"] as bool?);
-    bool currentProductMaxSellOrdersCountReached = (bool)(ViewData["currentProductMaxSellOrdersCountReached"] as bool?);
 }
-
-
 
 
 <h1>@(Model.ProductName)</h1>
 <h3>Active sale orders: @(Model.ActiveSellOrdersCount)</h3>
 
-<div class="container py-4">
-
-    <div class="row row-cols-1 row-cols-sm-2 g-2">
-
-        @for (int i = 0; i < 6; i++)
-        {
-            <div class="col">
-
-                <div class="card h-100 shadow-sm">
-
-                    <img class="card-img-top img-fluid product-img"
-                         src="~/Creators/@(Model.CreatorName)/@(Model.ProductName)/@(imageNames[i]).jpg"
-                         alt="@(Model.ProductName)" />
-
-                    <div class="card-body text-center">
-
-                        <h6 class="card-title fw-semibold">
-                            @(imageNames[i])
-                        </h6>
-
-                    </div>
-
-                </div>
-
-            </div>
-        }
-
-    </div>
-
-</div>
+<partial name="_MyProduct_Images" model="@Model"></partial>
 
 <br />
 
@@ -54,9 +21,7 @@
 
 <br />
 
-
 <p>Price: @(Model.Price)$</p>
-
 
 <a class="btn btn-sm btn-primary" asp-controller="ProductOperations" asp-action="UpdateProduct" asp-route-productId="@(Model.Id)">Edit</a>
 <a class="btn btn-sm btn-primary" asp-controller="ProductOperations" asp-action="DeleteProduct" asp-route-productId="@(Model.Id)">Delete</a>
@@ -69,50 +34,10 @@
 }
 else
 {
-    if (Model.ActiveSellOrdersCount > 0)
-    {
-        <form method="post" asp-controller="Order" asp-action="CancelSellOrder">
-            <label>Quantity</label>
-            <input type="number" name="ordersCount" min="1" />
-            <input type="hidden" name="productId" value="@(Model.Id)" />
-            <input type="submit" class="btn btn-sm btn-primary" value="Cancel sell order/s" />
-            
-        </form>
-       
-    }
-
-    <br />
-    <br />
-
-    if (currentUserMaxSellOrdersCountReached == true)
-    {
-        <p><b>You reached the maximum number of active sales orders!</b></p>
-        <p><b>In order to create a sell order of the product you will have to wait for someone to pruchase a sale order created by you.</b></p>
-        <p><b>Alternatively, you can cancel an active sell order of another product.</b></p>
-    }
-    else if (currentProductMaxSellOrdersCountReached == true)
-    {
-        <p><b>You reached the maximum number of active sales orders for the product @(Model.ProductName)!</b></p>
-        <p><b>In order to create another sell order of the product you will have to wait for someone to pruchase one of it's active sale orders.</b></p>
-    }
-    else
-    {
-        <form method="post" asp-controller="Order" asp-action="CreateSellOrder">
-            <label>Quantity</label>
-            <input type="number" name="ordersCount" min="1"/>
-            <input type="hidden" name="productId" value="@(Model.Id)"/>
-            <input type="submit" class="btn btn-sm btn-primary" value="Create sell order/s" />
-            
-        </form>
-    }
+    <partial name="_MyProduct_SellOrderOptions"></partial>
 }
 
 
-
-<style>
-    .product-img {
-        height: 500px;
-        object-fit: contain;
-        padding: 15px;
-    }
-</style>
+@section Styles {
+    <partial name="_ProductStyle"></partial>
+}
