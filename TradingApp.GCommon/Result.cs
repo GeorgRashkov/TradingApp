@@ -1,5 +1,5 @@
 ﻿
-namespace TradingApp.Services.Result
+namespace TradingApp.GCommon
 {
     public class Result
     {
