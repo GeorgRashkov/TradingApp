@@ -14,11 +14,11 @@ namespace TradingApp.Services.Core.Interfaces
 
         Task<int> GetProductActiveSellOrdersCountAsync(Guid productId);
 
-        Task<UpdatedProductModel> GetUpdatedProductModelAsync(Guid productId);
-        Task<DeletedProductModel> GetDeletedProductModelAsync(Guid productId);
+        Task<UpdatedProductModel?> GetUpdatedProductModelAsync(Guid productId);
+        Task<DeletedProductModel?> GetDeletedProductModelAsync(Guid productId);
 
-        Task<string> GetProductNameAsync(Guid productId);
-        Task<string> GetCreatorNameOfProductAsync(Guid productId);
+        Task<string?> GetProductNameAsync(Guid productId);
+        Task<string?> GetCreatorNameOfProductAsync(Guid productId);
 
         int ProductPageIndex { get; }
     }

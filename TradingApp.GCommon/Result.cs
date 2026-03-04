@@ -3,15 +3,15 @@ namespace TradingApp.GCommon
 {
     public class Result
     {
-        public Result(string? ErrorCode = null) 
+        public Result(string? errorCode = null) 
         {            
-            if (ErrorCode is not null)
+            if (errorCode is not null)
             {
                 Success = false;
-                this.ErrorCode = ErrorCode;
+                ErrorCode = errorCode;
             }
         }
         public bool Success { get; private set; } = true;
-        public string? ErrorCode { get; private set; } = null;
+        public string ErrorCode { get; private set; } = "";
     }
 }

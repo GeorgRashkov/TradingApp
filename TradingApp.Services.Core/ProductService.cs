@@ -161,7 +161,7 @@ namespace TradingApp.Services.Core
         }
 
 
-        public async Task<UpdatedProductModel> GetUpdatedProductModelAsync(Guid productId)
+        public async Task<UpdatedProductModel?> GetUpdatedProductModelAsync(Guid productId)
         {
              UpdatedProductModel? product = await _context
                 .Products
@@ -173,17 +173,12 @@ namespace TradingApp.Services.Core
                     ProductName = p.Name,
                     Description = p.Description,
                     Price = decimal.Parse(p.Price.ToString("f2"))
-                }).SingleOrDefaultAsync();
-
-            if(product == null)
-            {
-                throw new Exception("Cannot create an `updated product model` because the product Id was not found");
-            }
+                }).SingleOrDefaultAsync();          
 
             return product;
         }
 
-        public async Task<DeletedProductModel> GetDeletedProductModelAsync(Guid productId)
+        public async Task<DeletedProductModel?> GetDeletedProductModelAsync(Guid productId)
         {
             DeletedProductModel? product = await _context
                .Products
@@ -195,17 +190,11 @@ namespace TradingApp.Services.Core
                    ProductName = p.Name,                   
                }).SingleOrDefaultAsync();
 
-            if (product == null)
-            {
-                throw new Exception("Cannot create a `deleted product model` because the product Id was not found");
-            }
-
-
             return product;
         }
 
 
-        public async Task<string> GetProductNameAsync(Guid productId)
+        public async Task<string?> GetProductNameAsync(Guid productId)
         {
             string? productName = await _context
                 .Products
@@ -213,15 +202,10 @@ namespace TradingApp.Services.Core
                 .Where(p => p.Id == productId)
                 .Select(p => p.Name).SingleOrDefaultAsync();
 
-            if(productName == null)
-            {
-                throw new InvalidOperationException("Cannot get the name of the product because it's id was not found!");
-            }
-
             return productName;
         }
 
-        public async Task<string> GetCreatorNameOfProductAsync(Guid productId)
+        public async Task<string?> GetCreatorNameOfProductAsync(Guid productId)
         {
             string? creatorName = await _context
                 .Products
@@ -230,11 +214,6 @@ namespace TradingApp.Services.Core
                 .Where(p => p.Id == productId)
                 .Select(p => p.Creator.UserName)
                 .SingleOrDefaultAsync();
-
-            if (creatorName == null)
-            {
-                throw new InvalidOperationException("Cannot get the name of the product because it's id was not found!");
-            }
 
             return creatorName;
         }

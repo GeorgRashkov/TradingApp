@@ -5,7 +5,7 @@ namespace TradingApp.GCommon.ErrorCodes
     {
         public const string ProductNotFound = "Product.NotFound";
         public const string ProductWithSameNameAlreadyExists = "Product.NameAlreadyExists";
-        public const string ProductHasNoActiveSaleOrders = "Product.NoActiveSaleOrders";
-
+        public const string ProductHasActiveSaleOrders = "Product.NoActiveSaleOrders";
+        public const string ProductInvalidCreator = "Product.InvalidCreator";
     }
 }

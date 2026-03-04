@@ -3,36 +3,39 @@ using Microsoft.EntityFrameworkCore;
 using TradingApp.Data;
 using TradingApp.Data.Models;
 using TradingApp.GCommon;
+using TradingApp.GCommon.ErrorCodes;
 using TradingApp.Services.Core.Interfaces;
 
 namespace TradingApp.Services.Core
 {
-    public class ProductOperationsService: IProductOperationsService
+    public class ProductOperationsService : IProductOperationsService
     {
         private ApplicationDbContext _context;
         private IProductBoolsService _productBoolsService;
-        public ProductOperationsService(ApplicationDbContext context, IProductBoolsService productBoolsService) 
+        private IProductService _productService;
+        public ProductOperationsService(ApplicationDbContext context, IProductBoolsService productBoolsService, IProductService productService)
         {
             _context = context;
             _productBoolsService = productBoolsService;
+            _productService = productService;
         }
-        
+
         //saves the product in the database
-        public async Task AddProductAsync(string name, string description, decimal price, string creatorId)
+        public async Task<Result> AddProductAsync(string name, string description, decimal price, string creatorId)
         {
-            bool doesCreatorExist = await _productBoolsService.DoesUserExistAsync(userId: creatorId);
-            if (doesCreatorExist == false)
+            bool doesUserExist = await _productBoolsService.DoesUserExistAsync(userId: creatorId);
+            if (doesUserExist == false)
             {
-                throw new InvalidOperationException(message: "I product cannot be created because the creator ID was not found in the DB!");
+                return new Result(errorCode: UserErrorCodes.UserNotFound);
             }
 
-            bool doesProductCreatedByCreatorExist = await _productBoolsService.DoesProductCreatedByUserExistAsync(userId: creatorId, productName: name);
-            if (doesProductCreatedByCreatorExist == true)
+            bool doesProductCreatedByUserExist = await _productBoolsService.DoesProductCreatedByUserExistAsync(userId: creatorId, productName: name);
+            if (doesProductCreatedByUserExist == true)
             {
-                throw new InvalidOperationException(message:"Creators are not allowed to create 2 or more products with the same name!");
+                return new Result(errorCode: ProductErrorCodes.ProductWithSameNameAlreadyExists);
             }
 
-           
+
             Product product = new Product()
             {
                 Name = name,
@@ -41,24 +44,35 @@ namespace TradingApp.Services.Core
                 CreatorId = creatorId,
                 Status = ApplicationConstants.CreatedProductDefaultStatus
             };
-            
+
             await _context.Products.AddAsync(product);
             await _context.SaveChangesAsync();
+
+            return new Result();
         }
 
-        public async Task UpdateProductAsync(Guid id, string name, string description, decimal price, string creatorId)
+        //updates an existing product in the database
+        public async Task<Result> UpdateProductAsync(Guid id, string name, string description, decimal price, string creatorId)
         {
-            Product? product = await _context.Products
-               .FindAsync(id);
+            Product? product = await _context
+                .Products                            
+                .Where(p => p.Id == id)
+                .SingleOrDefaultAsync();
 
             if (product == null)
             {
-                throw new InvalidOperationException("Product could not be updated in the DB because it's ID was not in the DB!");
+                return new Result(errorCode: ProductErrorCodes.ProductNotFound);
+            }
+            else if (product.CreatorId != creatorId)
+            {
+                return new Result(errorCode: ProductErrorCodes.ProductInvalidCreator);
             }
 
-            if (product.CreatorId != creatorId)
+            int productActiveSellOrdersCount = await _productService.GetProductActiveSellOrdersCountAsync(productId: id);
+
+            if (productActiveSellOrdersCount > 0)
             {
-                throw new UnauthorizedAccessException("The product cannot be updated by anyone except it's creator.");
+                return new Result(errorCode: ProductErrorCodes.ProductHasActiveSaleOrders);
             }
 
             //update the product
@@ -69,24 +83,31 @@ namespace TradingApp.Services.Core
 
             //apply change to DB
             await _context.SaveChangesAsync();
+            return new Result();
         }
 
-
-        public async Task DeleteProductAsync(Guid productId)
+        //deletes an existing product in the database
+        public async Task<Result> DeleteProductAsync(Guid id, string creatorId)
         {
-            Product product = (await _context.Products.FindAsync(productId))!;
+            Product product = (await _context.Products.FindAsync(id))!;
 
             if (product == null)
             {
-                throw new InvalidOperationException("Product could not be deleted from the DB because it's ID was not in the DB!");
+                return new Result(errorCode: ProductErrorCodes.ProductNotFound);
+            }
+            else if (product.CreatorId != creatorId)
+            {
+                return new Result(errorCode: ProductErrorCodes.ProductInvalidCreator);
             }
 
-            await DeleteSellOrdersOfProductAsync(productId);
-            await SetFkToNullForCompletedOrdersOfProductAsync(productId);
+            await DeleteSellOrdersOfProductAsync(id);
+            await SetFkToNullForCompletedOrdersOfProductAsync(id);
 
             _context.Products.Attach(product);
             _context.Products.Remove(product);
             await _context.SaveChangesAsync();
+
+            return new Result();
         }
 
         private async Task DeleteSellOrdersOfProductAsync(Guid productId)
@@ -97,7 +118,7 @@ namespace TradingApp.Services.Core
                 .Where(so => so.Product.Id == productId)
                 .ToListAsync();
 
-            _context.SellOrders.RemoveRange(sellOrders);            
+            _context.SellOrders.RemoveRange(sellOrders);
         }
 
         private async Task SetFkToNullForCompletedOrdersOfProductAsync(Guid productId)

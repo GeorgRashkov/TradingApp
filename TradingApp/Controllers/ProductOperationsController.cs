@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using TradingApp.Data;
+using TradingApp.GCommon;
+using TradingApp.GCommon.ErrorCodes;
 using TradingApp.Services.Core.Interfaces;
 using TradingApp.ViewModels.InputProduct;
 
@@ -42,17 +44,16 @@ namespace TradingApp.Controllers
             }
             createdProductModel.ProductName = createdProductModel.ProductName.Trim();
             
-            //check whether the user has a product with the same name
-            bool doesProductCreatedByCreatorExist = await _productBoolsService.DoesProductCreatedByUserExistAsync(userId: LoggedUserId, productName: createdProductModel.ProductName);
-            if (doesProductCreatedByCreatorExist == true)
-            {
-                ModelState.AddModelError(string.Empty, "A product with the same name already exists!\n Consider using unique name before creating your 3D model file.");
-                return View(createdProductModel);
-            }
-            
             try
             {                
-                await _productOperationsService.AddProductAsync(name:createdProductModel.ProductName,description:createdProductModel.Description, price:createdProductModel.Price, creatorId: LoggedUserId);
+                Result result = await _productOperationsService.AddProductAsync(name:createdProductModel.ProductName,description:createdProductModel.Description, price:createdProductModel.Price, creatorId: LoggedUserId);
+                if (result.Success == false)
+                {
+                    string errorMessage = GetCreateProductErrorMessage(result.ErrorCode);
+                    ModelState.AddModelError(key:string.Empty, errorMessage: errorMessage);
+                    return View(createdProductModel);
+                }
+                
                 await _productFileService.SaveProductInFolderAsync(product: createdProductModel, creatorName: LoggedUserUsername);
             }
             catch (Exception e)
@@ -60,7 +61,7 @@ namespace TradingApp.Controllers
                 Console.Write(e.Message.ToString());
 
                 TempData["title"] = "Error";
-                TempData["message"] = $"An error occured while attempting to save you product!";
+                TempData["message"] = $"An error occured while attempting to save you product! Please try again later.";
                 return RedirectToAction(nameof(Message));
             }
 
@@ -70,6 +71,24 @@ namespace TradingApp.Controllers
 
         }
 
+        //this method is formed based on the logic of the service method for creating a product 
+        //it's purpose is to provide a proper error message which will be shown to the user based on the error code
+        private string GetCreateProductErrorMessage(string errorCode)
+        {
+            
+            string errorMessage = errorCode switch
+            {
+                string code when code == UserErrorCodes.UserNotFound =>
+                    "You have to login in order to create a product.",
+
+                string code when code == ProductErrorCodes.ProductWithSameNameAlreadyExists =>
+                    "A product with the same name already exists!\n Consider using unique name before creating the product.",
+
+                _ => "Something went wrong."
+            };
+
+            return errorMessage;
+        }
 
 
 
@@ -91,7 +110,7 @@ namespace TradingApp.Controllers
             if (productActiveSellOrdersCount > 0)
             {
                 TempData["title"] = "Not allowed";
-                TempData["message"] = $"The product you are trying to update has at least one sell order! Make sure you cancel all sell orders of the product before editing it!";
+                TempData["message"] = "The product you are trying to update has at least one sell order! Make sure you cancel all sell orders of the product before editing it!";
                 return RedirectToAction(nameof(Message));
             }
             UpdatedProductModel product = await _productService.GetUpdatedProductModelAsync(productId);
@@ -108,23 +127,22 @@ namespace TradingApp.Controllers
                 return View(updatedProductModel);
             }
 
-            //product existance validation
-            bool doesProductCreatedByCreatorExist = await _productBoolsService.DoesProductCreatedByUserExistAsync(userId: LoggedUserId, productId: updatedProductModel.Id);
-            if (doesProductCreatedByCreatorExist == false)
-            {
-                ModelState.AddModelError(string.Empty, "The product you are trying to edit could not be found!");
-                return View(updatedProductModel);
-            }
-
+            
             string newProductName = updatedProductModel.ProductName.Trim();
             string oldProductName = await _productService.GetProductNameAsync(productId: updatedProductModel.Id);
               
-            //the product name must change due to browser chaching (Browsers aggressively cache static files (especially images) when the URL does not change and as a result the browser will the old pictures) 
+            //the product name must change due to browser chaching (Browsers aggressively cache static files (especially images) when the URL does not change and as a result the browser will get the old pictures) 
             updatedProductModel.ProductName = (newProductName == oldProductName) ? newProductName + "_" : newProductName;
 
             try
             {
-                await _productOperationsService.UpdateProductAsync(id: updatedProductModel.Id, name: updatedProductModel.ProductName, description: updatedProductModel.Description, price: updatedProductModel.Price, creatorId: LoggedUserId);
+                Result result = await _productOperationsService.UpdateProductAsync(id: updatedProductModel.Id, name: updatedProductModel.ProductName, description: updatedProductModel.Description, price: updatedProductModel.Price, creatorId: LoggedUserId);
+                if(result.Success == false)
+                {
+                    string errorMessage = GetUpdateProductErrorMessage(result.ErrorCode);
+                    ModelState.AddModelError(key:string.Empty, errorMessage: errorMessage);
+                    return View(updatedProductModel);
+                }
                 await _productFileService.UpdateProductInFolderAsync(product: updatedProductModel, creatorName: LoggedUserUsername, oldProductName: oldProductName);               
             }
             catch (Exception e)
@@ -132,7 +150,7 @@ namespace TradingApp.Controllers
                 Console.Write(e.Message.ToString());
 
                 TempData["title"] = "Error";
-                TempData["message"] = $"An error occured while attempting to apply the product changes!";
+                TempData["message"] = "An error occured while attempting to apply the product changes! Please try again later.";
                 return RedirectToAction(nameof(Message));
             }
 
@@ -141,18 +159,39 @@ namespace TradingApp.Controllers
             return RedirectToAction(nameof(Message));
         }
 
-       
+        //this method is formed based on the logic of the service method for updating a product 
+        //it's purpose is to provide a proper error message which will be shown to the user based on the error code
+        private string GetUpdateProductErrorMessage(string errorCode)
+        {
 
-        
-               
+            string errorMessage = errorCode switch
+            {
+                string code when code == ProductErrorCodes.ProductNotFound =>
+                    "The product you are trying to edit could not be found!",
+
+                string code when code == ProductErrorCodes.ProductInvalidCreator =>
+                "You are not allowed to edit products created by other users!",
+
+                string code when code == ProductErrorCodes.ProductHasActiveSaleOrders =>
+                "The product you are trying to update has at least one sell order! Make sure you cancel all sell orders of the product before editing it!",
+
+                _ => "Something went wrong."
+            };
+
+            return errorMessage;
+        }
+
+
+
+
 
         [HttpGet]
         public async Task<IActionResult> DeleteProduct(Guid productId)
         {
             //product existance validation
-            bool doesProductCreatedByCreatorExist = await _productBoolsService.DoesProductCreatedByUserExistAsync(userId: LoggedUserId, productId: productId);
+            bool doesProductCreatedByUserExist = await _productBoolsService.DoesProductCreatedByUserExistAsync(userId: LoggedUserId, productId: productId);
 
-            if (doesProductCreatedByCreatorExist == false)
+            if (doesProductCreatedByUserExist == false)
             {
                 return NotFound();
             }
@@ -169,23 +208,20 @@ namespace TradingApp.Controllers
         [HttpPost]
         public async Task<IActionResult> DeleteProduct_execute(Guid productId)
         {
-            //product existance validation
-            bool doesProductCreatedByCreatorExist = await _productBoolsService.DoesProductCreatedByUserExistAsync(userId: LoggedUserId, productId: productId);
-            if (doesProductCreatedByCreatorExist == false)
-            {
-                TempData["title"] = "Not found";
-                TempData["message"] = "The product you are trying to delete could not be found!";
-                return RedirectToAction(nameof(Message));
-            }
-
+            
             string productName = await _productService.GetProductNameAsync(productId: productId);
-            string creatorName = await _productService.GetCreatorNameOfProductAsync(productId: productId);      
-
+            string creatorName = await _productService.GetCreatorNameOfProductAsync(productId: productId);
             try
             {
                 //attempting to delete the product in the database
-                await _productOperationsService.DeleteProductAsync(productId);
+                Result result = await _productOperationsService.DeleteProductAsync(id:productId, creatorId:LoggedUserId);
 
+                if (result.Success == false)
+                {                                       
+                    TempData["title"] = "Error";
+                    TempData["message"] = GetDeleteProductErrorMessage(result.ErrorCode);
+                    return View(viewName: nameof(Message));
+                }    
                 //attempting to delete the product folder and it's content (the 6 images and the 3D model file)
                 _productFileService.DeleteProductFolder(creatorName: creatorName, productName: productName);
                                 
@@ -195,7 +231,7 @@ namespace TradingApp.Controllers
                 Console.Write(e.Message.ToString());
 
                 TempData["title"] = "Error";
-                TempData["message"] = $"An error occured while attempting to delete you product!";
+                TempData["message"] = $"An error occured while attempting to delete you product! Please try again later.";
                 return RedirectToAction(nameof(Message));
             }
 
@@ -204,6 +240,23 @@ namespace TradingApp.Controllers
             return RedirectToAction(nameof(Message));
         }
 
+        //this method is formed based on the logic of the service method for deleting a product 
+        //it's purpose is to provide a proper error message which will be shown to the user based on the error code
+        private string GetDeleteProductErrorMessage(string errorCode)
+        {
 
+            string errorMessage = errorCode switch
+            {
+                string code when code == ProductErrorCodes.ProductNotFound =>
+                    "The product you are trying to delete could not be found!",
+
+                string code when code == ProductErrorCodes.ProductInvalidCreator =>
+                "You are not allowed to delete products created by other users!",
+
+                _ => "Something went wrong."
+            };
+
+            return errorMessage;
+        }
     }
 }
