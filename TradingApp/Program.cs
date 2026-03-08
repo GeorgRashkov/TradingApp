@@ -40,7 +40,7 @@ namespace TradingApp
             builder.Services.AddTransient<UserSeeder>();
             builder.Services.AddTransient<BalanceSeeder>();
             builder.Services.AddTransient<ProductSeeder>();
-            builder.Services.AddTransient<PurchaseOrderSeeder>();
+            builder.Services.AddTransient<OrderRequestSeeder>();
             builder.Services.AddTransient<SellOrderSeeder>();
             builder.Services.AddTransient<SellOrderSuggestionSeeder>();
             
@@ -101,11 +101,14 @@ namespace TradingApp
                 ProductSeeder productSeeder = services.GetRequiredService<ProductSeeder>();
                 await productSeeder.SeedAsync();
 
-                PurchaseOrderSeeder purchaseOrderSeeder = services.GetRequiredService<PurchaseOrderSeeder>();
+                OrderRequestSeeder purchaseOrderSeeder = services.GetRequiredService<OrderRequestSeeder>();
                 await purchaseOrderSeeder.SeedAsync();
 
                 SellOrderSeeder sellOrderSeeder = services.GetRequiredService<SellOrderSeeder>();
-                await sellOrderSeeder.SeedAsync();                
+                await sellOrderSeeder.SeedAsync();
+
+                SellOrderSuggestionSeeder sellOrderSuggestionSeeder = services.GetRequiredService<SellOrderSuggestionSeeder>();
+                await sellOrderSuggestionSeeder.SeedAsync();
             }
         }
         //in testing state>

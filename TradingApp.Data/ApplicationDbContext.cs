@@ -15,7 +15,7 @@ namespace TradingApp.Data
         public virtual DbSet<Product> Products { get; set; } = null!;
 
         public virtual DbSet<SellOrder> SellOrders { get; set; } = null!;
-        public virtual DbSet<PurchaseOrder> PurchaseOrders { get; set; } = null!;
+        public virtual DbSet<OrderRequest> OrderRequests { get; set; } = null!;
 
         public virtual DbSet<SellOrderSuggestion> SellOrderSuggestions { get; set; } = null!;
         public virtual DbSet<CompletedOrder> CompletedOrders { get; set; } = null!;
@@ -52,9 +52,9 @@ namespace TradingApp.Data
 
             builder.Entity<SellOrderSuggestion>(e =>
             {
-                e.HasOne(so => so.PurchaseOrder)
+                e.HasOne(so => so.OrderRequest)
                 .WithMany(p => p.SellOrderSuggestions)
-                .HasForeignKey(so => so.PurchaseOrderId)
+                .HasForeignKey(so => so.OrderRequestId)
                 .OnDelete(DeleteBehavior.Restrict);
             });
         }

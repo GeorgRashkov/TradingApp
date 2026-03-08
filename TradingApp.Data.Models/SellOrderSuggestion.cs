@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace TradingApp.Data.Models
 {
-    [PrimaryKey(nameof(SellOrderId), nameof(PurchaseOrderId))]
+    [PrimaryKey(nameof(SellOrderId), nameof(OrderRequestId))]
     public class SellOrderSuggestion
     {
         //[ForeignKey(nameof(SellOrder))]
@@ -12,11 +12,11 @@ namespace TradingApp.Data.Models
 
         //[ForeignKey(nameof(PurchaseOrder))]
         [Required]
-        public Guid PurchaseOrderId { get; set; }
+        public Guid OrderRequestId { get; set; }
 
 
 
         public virtual SellOrder SellOrder { get; set; } = null!;
-        public virtual PurchaseOrder PurchaseOrder { get; set; } = null!;
+        public virtual OrderRequest OrderRequest { get; set; } = null!;
     }
 }

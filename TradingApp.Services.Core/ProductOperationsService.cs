@@ -118,7 +118,19 @@ namespace TradingApp.Services.Core
                 .Where(so => so.Product.Id == productId)
                 .ToListAsync();
 
+            await DeleteSellOrderSuggestionsAsync(sellOrderIds: sellOrders.Select(so => so.Id));
+
             _context.SellOrders.RemoveRange(sellOrders);
+        }
+
+        private async Task DeleteSellOrderSuggestionsAsync(IEnumerable<Guid>sellOrderIds)
+        {
+            IEnumerable<SellOrderSuggestion> sellOrderSuggestions = await _context.
+                SellOrderSuggestions
+                .Where(sos => sellOrderIds.Contains(sos.SellOrderId))
+                .ToListAsync();
+
+            _context.SellOrderSuggestions.RemoveRange(sellOrderSuggestions);
         }
 
         private async Task SetFkToNullForCompletedOrdersOfProductAsync(Guid productId)

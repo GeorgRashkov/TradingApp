@@ -24,8 +24,8 @@ namespace TradingApp.Data.Seed
                 .Take(5)
                 .ToListAsync();
 
-            List<Guid> purchaseOrdersIds = await _context
-                .PurchaseOrders
+            List<Guid> orderRequestsIds = await _context
+                .OrderRequests
                 .AsNoTracking()
                 .OrderBy(so => so.Id)
                 .Select(so => so.Id)
@@ -40,7 +40,7 @@ namespace TradingApp.Data.Seed
                 SellOrderSuggestion sellOrderSuggestion = new SellOrderSuggestion()
                 {
                     SellOrderId = sellOrdersIds[i],
-                    PurchaseOrderId = purchaseOrdersIds[i],
+                    OrderRequestId = orderRequestsIds[i],
                 };
                 sellOrderSuggestions.Add(sellOrderSuggestion);
             }

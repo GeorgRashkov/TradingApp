@@ -1,6 +1,6 @@
 ﻿namespace TradingApp.GCommon.Enums
 {
-    public enum PurchaseOrderStatus
+    public enum OrderRequestStatus
     {
         active = 0,
         cancelled = 1,

@@ -5,7 +5,7 @@ using TradingApp.GCommon.Enums;
 
 namespace TradingApp.Data.Models
 {
-    public class PurchaseOrder
+    public class OrderRequest
     {
         [Key]
         public Guid Id { get; set; }
@@ -27,7 +27,7 @@ namespace TradingApp.Data.Models
         public DateTime CreatedAt { get; set; }
 
         [Required]
-        public PurchaseOrderStatus Status { get; set; }
+        public OrderRequestStatus Status { get; set; }
 
         [Required]
         [ForeignKey(nameof(Creator))]
