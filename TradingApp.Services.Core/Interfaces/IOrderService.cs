@@ -1,20 +1,17 @@
 ﻿
+using TradingApp.GCommon;
+
 namespace TradingApp.Services.Core.Interfaces
 {
     public interface IOrderService
     {
-        Task CreateSellOrders(string creatorId, Guid productId, int ordersCount);
-        Task CancelSellOrdersAsync(Guid productId, int ordersCount);
-        Task<bool> DidUserBoughtProductAsync(Guid productId, string userId);
+        Task<Result> CreateSellOrdersAsync(string creatorId, Guid productId, int ordersCount);
+        Task<Result> CancelSellOrdersAsync(string creatorId, Guid productId, int ordersCount);
+        Task<Result> BuySellOrderAsync(Guid productId, string buyerId);
 
-
-
-
-        Task<int> FitOrdersCreationCountInBoundariesAsync(int ordersCount, Guid productId, string userId);
-        Task<int> FitOrdersCancelationCountInBoundariesAsync(int ordersCount, Guid productId);        
-        Task<string> CanUserCreateSellOrderOfSpecificProductAsync(Guid productId, string userId);
-        Task<string> CanUserCancelSellOrderOfSpecificProductAsync(Guid productId, string userId);
-        Task<string> CanUserBuySellOrderOfSpecificProductAsync(Guid productId, string userId);
-        Task BuySellOrderAsync(Guid productId, string buyerId);
+        Task<Result> CanUserCreateSellOrdersOfSpecificProductAsync(Guid productId, string userId, int ordersCount);
+        Task<Result> CanUserCancelSellOrdersOfSpecificProductAsync(Guid productId, string userId, int ordersCount);
+        Task<Result> CanUserBuySellOrderOfSpecificProductAsync(Guid productId, string userId);
+        
     }
 }
