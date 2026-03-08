@@ -6,6 +6,9 @@ namespace TradingApp.GCommon
     {
         public const int InvoicesPerPage = 3;
         public const int ProductsPerPage = 4;
+        public const int RequestsPerPage = 5;
+
+
         public const int UserMaxActiveSellOrders = 5;
         public const int ProductMaxActiveSellOrders = 3;
 
