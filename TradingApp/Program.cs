@@ -32,10 +32,11 @@ namespace TradingApp
             builder.Services.AddScoped<IOrderService, OrderService>();
             builder.Services.AddScoped<IInvoiceService, InvoiceService>();
             builder.Services.AddScoped<IBalanceService, BalanceService>();
-            
+            builder.Services.AddScoped<IOrderRequestService, OrderRequestService>();
 
 
-            
+
+
             //add the seeder classes to the services
             builder.Services.AddTransient<UserSeeder>();
             builder.Services.AddTransient<BalanceSeeder>();

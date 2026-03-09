@@ -1,0 +1,25 @@
+﻿@using TradingApp.ViewModels.OrderRequest;
+@model MyOrderRequestViewModel
+@{
+    ViewData["Title"] = Model.Title;
+}
+
+
+
+
+<h1>@(Model.Title)</h1>
+<h3>Created on @(Model.CreationDate)</h3>
+<h3>Max Price: @(Model.MaxPrice)$</h3>
+
+<br />
+
+<div>
+    <p>@(Model.Description)</p>
+</div>
+
+<div>
+    <a class="btn btn-sm btn-primary" asp-controller="OrderRequestOperations" asp-action="UpdateOrderRequest" asp-route-orderRequestId="@(Model.Id)">Edit</a>
+    <a class="btn btn-sm btn-primary" asp-controller="OrderRequestOperations" asp-action="DeleteOrderRequest" asp-route-orderRequestId="@(Model.Id)">Delete</a>
+</div>
+
+<br />

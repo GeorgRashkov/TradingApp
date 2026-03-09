@@ -1,0 +1,47 @@
+﻿@using TradingApp.ViewModels.OrderRequest;
+@model List<OrderRequestsViewModel>
+
+@{
+    ViewData["Title"] = "Requests";
+
+    PaginationHelper paginationHelper = new PaginationHelper()
+    {
+        Controller = "OrderRequest",
+        Action = "OrderRequests",
+        PageIndex = (int)(ViewData["page"] ?? 0)
+    };
+}
+
+@if (Model is null)
+{
+    <h2>No requests found!</h2>
+}
+else
+{
+    <div class="container py-4">
+
+        <div class="row row-cols-1 row-cols-sm-2 g-2">
+
+            @foreach (OrderRequestsViewModel orderRequestsViewModel in Model)
+            {
+                <div class="col">
+
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body text-center">
+
+                            <h5>@(orderRequestsViewModel.Title)</h5>
+                            <h6>@(orderRequestsViewModel.MaxPrice)$</h6>
+                            <a class="btn btn-sm btn-primary" asp-controller="OrderRequest" asp-action="OrderRequest" asp-route-orderRequestId="@(orderRequestsViewModel.Id)">View</a>
+                        </div>
+                    </div>
+
+                </div>
+            }
+
+        </div>
+
+    </div>
+
+
+    <partial name="_Pagination" model="@(paginationHelper)"></partial>
+}

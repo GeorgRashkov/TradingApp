@@ -1,0 +1,21 @@
+﻿@using TradingApp.ViewModels.OrderRequest;
+@model OrderRequestViewModel
+@{
+    ViewData["Title"] = Model.Title;
+}
+
+
+
+
+<h1>@(Model.Title)</h1>
+<h3>Created on @(Model.CreationDate)</h3>
+<h3>Created by @(Model.CreatorName)</h3>
+<h3>Max Price: @(Model.MaxPrice)$</h3>
+
+<br />
+
+<div>
+    <p>@(Model.Description)</p>
+</div>
+
+<br />

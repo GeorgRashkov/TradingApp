@@ -50,8 +50,9 @@ namespace TradingApp.Services.Core
                 .Skip(RequestPageIndex * _requestsPerPage).Take(_requestsPerPage)
                 .Select(or => new OrderRequestsViewModel
                 {
+                    Id = or.Id,
                     Title = or.Title,
-                    MaxPrice = or.MaxPrice
+                    MaxPrice = or.MaxPrice.ToString("f2")
                 })
                 .ToListAsync();
 
@@ -67,9 +68,10 @@ namespace TradingApp.Services.Core
                 .Where(or => or.Id == requestId && or.Status == OrderRequestStatus.active)
                 .Select(or => new OrderRequestViewModel
                 {
+                    Id = or.Id,
                     Title = or.Title,
                     Description = or.Description,
-                    MaxPrice = or.MaxPrice,
+                    MaxPrice = or.MaxPrice.ToString("f2"),
                     CreationDate = or.CreatedAt.ToString(ApplicationConstants.DateFormat),
                     CreatorName = or.Creator.UserName!
                 }).SingleOrDefaultAsync();
@@ -82,11 +84,7 @@ namespace TradingApp.Services.Core
 
         public async Task<IEnumerable<MyOrderRequestsViewModel>> GetActiveRequestsCreatedByUserAsync(int pageIndex, string userId)
         {
-            int requestsCount = await _context
-               .OrderRequests
-               .AsNoTracking()
-               .Where(or => or.Status == OrderRequestStatus.active && or.CreatorId == userId)
-               .CountAsync();
+            int requestsCount = await GetUserActiveRequestsCountAsync(userId);
 
             if (requestsCount == 0)
             { return new List<MyOrderRequestsViewModel>(); }
@@ -100,8 +98,9 @@ namespace TradingApp.Services.Core
                 .Skip(RequestPageIndex * _requestsPerPage).Take(_requestsPerPage)
                 .Select(or => new MyOrderRequestsViewModel
                 {
+                    Id = or.Id,
                     Title = or.Title,
-                    MaxPrice = or.MaxPrice
+                    MaxPrice = or.MaxPrice.ToString("f2")
                 }).ToListAsync();
             
             return orderRequests;
@@ -116,13 +115,26 @@ namespace TradingApp.Services.Core
                 .Where(or => or.Id == requestId && or.Status == OrderRequestStatus.active && or.CreatorId == userId)
                 .Select(or => new MyOrderRequestViewModel
                 {
+                    Id = or.Id,
                     Title = or.Title,
                     Description = or.Description,
-                    MaxPrice = or.MaxPrice,
+                    MaxPrice = or.MaxPrice.ToString("f2"),
                     CreationDate = or.CreatedAt.ToString(ApplicationConstants.DateFormat)                   
                 }).SingleOrDefaultAsync();
 
             return request;
+        }
+
+
+        public async Task<int> GetUserActiveRequestsCountAsync(string userId)
+        {
+            int requestsCount = await _context
+                .OrderRequests
+                .AsNoTracking()
+                .Where(or => or.Status == OrderRequestStatus.active && or.CreatorId == userId)
+                .CountAsync();
+
+            return requestsCount;
         }
     }
 }
