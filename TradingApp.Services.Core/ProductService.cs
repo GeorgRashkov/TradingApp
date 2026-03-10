@@ -51,7 +51,18 @@ namespace TradingApp.Services.Core
             return products;
         }
 
+        public async Task<Dictionary<string, string>> GetIdsAndNamesOfApprovedProductsWithActiveSaleOrdersCreatedByUserAsync(string userId)
+        {
+            Dictionary<string,string> productIdsAndNamesDict = await _context
+                .Products
+                .Include(p => p.SellOrders)
+                .AsNoTracking()
+                .Where(p => p.Status == ProductStatus.approved && p.SellOrders.Any(so => so.Status == SellOrderStatus.active) && p.CreatorId == userId)
+                .Select(p => new { Id = p.Id.ToString(), Name = p.Name })
+                .ToDictionaryAsync(p => p.Id, p => p.Name);
 
+            return productIdsAndNamesDict;
+        }
 
         public async Task<ProductViewModel?> GetDetailsForApprovedProductWithActiveSellOrdersAsync(Guid productId)
         {

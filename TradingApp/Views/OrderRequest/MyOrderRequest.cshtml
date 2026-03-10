@@ -20,6 +20,7 @@
 <div>
     <a class="btn btn-sm btn-primary" asp-controller="OrderRequestOperations" asp-action="UpdateOrderRequest" asp-route-orderRequestId="@(Model.Id)">Edit</a>
     <a class="btn btn-sm btn-primary" asp-controller="OrderRequestOperations" asp-action="DeleteOrderRequest" asp-route-orderRequestId="@(Model.Id)">Delete</a>
+    <a class="btn btn-sm btn-primary" asp-controller="Product" asp-action="SuggestedProducts" asp-route-orderRequestId="@(Model.Id)">View suggestions</a>
 </div>
 
 <br />

@@ -12,9 +12,25 @@
     };
 }
 
+<div class="row row-cols-1 row-cols-sm-2 g-2">
+    <div style="text-align:left">
+        <h1>@(ViewData["Title"])</h1>
+    </div>
+
+    <div style="text-align:right">
+        <a class="btn btn-sm btn-primary" asp-controller="OrderRequestOperations" asp-action="CreateOrderRequest">
+            Create request
+        </a>
+    </div>
+
+
+</div>
+<br />
+
+
 @if (Model is null)
 {
-    <h2>No requests found!</h2>
+    <h2>You have not created any requests!</h2>
 }
 else
 {

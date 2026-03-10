@@ -40,6 +40,7 @@ namespace TradingApp.Data.Seed
                     Title = $"Request ({i})",
                     Description = $"Some request description describing the desired 3D model ({i}).",
                     MaxPrice = i + 50,
+                    CreatedAt = DateTime.UtcNow,
                     Status = OrderRequestStatus.active,
                     CreatorId = userIds[userIdIndex]
                 };
@@ -53,6 +54,7 @@ namespace TradingApp.Data.Seed
                 Title = $"Cancelled Request (-1)",
                 Description = $"Some request description describing the desired 3D model (-1).",
                 MaxPrice = 5,
+                CreatedAt = DateTime.UtcNow,
                 Status = OrderRequestStatus.cancelled,
                 CreatorId = userIds[0]
             };

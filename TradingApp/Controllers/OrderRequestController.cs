@@ -9,9 +9,11 @@ namespace TradingApp.Controllers
     public class OrderRequestController : ControllerBase
     {
         private IOrderRequestService _orderRequestService;
-        public OrderRequestController(IOrderRequestService orderRequestService)
+        private IProductService _productService;
+        public OrderRequestController(IOrderRequestService orderRequestService, IProductService productService)
         {
             _orderRequestService = orderRequestService;
+            _productService = productService;
         }
 
         [HttpGet]
@@ -34,7 +36,9 @@ namespace TradingApp.Controllers
             if (orderRequest == null)
             { return NotFound(); }
 
-            return View(model: orderRequest);
+            Dictionary<string, string> idsAndNamesOfProducts = await _productService.GetIdsAndNamesOfApprovedProductsWithActiveSaleOrdersCreatedByUserAsync(LoggedUserId);
+
+            return View(model: (orderRequest, idsAndNamesOfProducts));
         }
 
         [HttpGet]

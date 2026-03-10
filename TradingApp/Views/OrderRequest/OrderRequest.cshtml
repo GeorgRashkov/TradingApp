@@ -1,21 +1,41 @@
 ﻿@using TradingApp.ViewModels.OrderRequest;
-@model OrderRequestViewModel
+@model (OrderRequestViewModel request, Dictionary<string, string> idsAndNamesOfProducts)
 @{
-    ViewData["Title"] = Model.Title;
+    ViewData["Title"] = Model.request.Title;
 }
 
 
 
 
-<h1>@(Model.Title)</h1>
-<h3>Created on @(Model.CreationDate)</h3>
-<h3>Created by @(Model.CreatorName)</h3>
-<h3>Max Price: @(Model.MaxPrice)$</h3>
+<h1>@(Model.request.Title)</h1>
+<h3>Created on @(Model.request.CreationDate)</h3>
+<h3>Created by @(Model.request.CreatorName)</h3>
+<h3>Max Price: @(Model.request.MaxPrice)$</h3>
 
 <br />
 
 <div>
-    <p>@(Model.Description)</p>
+    <p>@(Model.request.Description)</p>
 </div>
 
 <br />
+
+@if (Model.idsAndNamesOfProducts.Count() > 0)
+{
+    <form asp-controller="OrderRequestOperations" asp-action="CreateSellOrderSuggestion">
+
+        <label for="products">Suggest a product:</label>
+        <select name="products">
+            @foreach ((string id, string name) in Model.idsAndNamesOfProducts)
+            {
+                <option value="@id">@name</option>
+            }
+        </select>
+        <br />
+        <input class="btn btn-sm btn-primary" type="submit" value="Suggest" />
+    </form>
+}
+else
+{
+    <p><b>Currently you can't suggest products because you don't have approved products with active sale orders!</b></p>
+}
