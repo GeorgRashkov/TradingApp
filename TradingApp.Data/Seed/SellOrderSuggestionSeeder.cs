@@ -16,30 +16,30 @@ namespace TradingApp.Data.Seed
             if (await _context.SellOrderSuggestions.AnyAsync()) 
             { return; }
 
-            List<Guid> sellOrdersIds = await _context
-                .SellOrders
+            List<Guid> productsIds = await _context
+                .Products
                 .AsNoTracking()
-                .OrderBy(so => so.Id)
-                .Select(so => so.Id)
+                .OrderBy(p => p.Id)
+                .Select(p => p.Id)
                 .Take(5)
                 .ToListAsync();
 
             List<Guid> orderRequestsIds = await _context
                 .OrderRequests
                 .AsNoTracking()
-                .OrderBy(so => so.Id)
-                .Select(so => so.Id)
+                .OrderBy(or => or.Id)
+                .Select(or => or.Id)
                 .Take(5)
                 .ToListAsync();
 
             List<SellOrderSuggestion> sellOrderSuggestions = new List<SellOrderSuggestion>();
-            int sellOrderSuggestionsCount = sellOrdersIds.Count;
+            int sellOrderSuggestionsCount = productsIds.Count;
 
             for (int i = 0; i < sellOrderSuggestionsCount; i++)
             {
                 SellOrderSuggestion sellOrderSuggestion = new SellOrderSuggestion()
                 {
-                    SellOrderId = sellOrdersIds[i],
+                    ProductId = productsIds[i],
                     OrderRequestId = orderRequestsIds[i],
                 };
                 sellOrderSuggestions.Add(sellOrderSuggestion);

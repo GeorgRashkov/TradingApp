@@ -44,17 +44,17 @@ namespace TradingApp.Data
         {
             builder.Entity<SellOrderSuggestion>(e =>
             {
-                e.HasOne(so => so.SellOrder)
+                e.HasOne(sos => sos.Product)
                 .WithMany(p => p.SellOrderSuggestions)
-                .HasForeignKey(so => so.SellOrderId)
+                .HasForeignKey(sos => sos.ProductId)
                 .OnDelete(DeleteBehavior.Restrict);
             });
 
             builder.Entity<SellOrderSuggestion>(e =>
             {
-                e.HasOne(so => so.OrderRequest)
+                e.HasOne(sos => sos.OrderRequest)
                 .WithMany(p => p.SellOrderSuggestions)
-                .HasForeignKey(so => so.OrderRequestId)
+                .HasForeignKey(sos => sos.OrderRequestId)
                 .OnDelete(DeleteBehavior.Restrict);
             });
         }

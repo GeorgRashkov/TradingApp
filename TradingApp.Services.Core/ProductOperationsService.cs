@@ -101,6 +101,7 @@ namespace TradingApp.Services.Core
             }
 
             await DeleteSellOrdersOfProductAsync(id);
+            await DeleteSellOrderSuggestionsOfProductAsync(id);
             await SetFkToNullForCompletedOrdersOfProductAsync(id);
 
             _context.Products.Attach(product);
@@ -118,16 +119,14 @@ namespace TradingApp.Services.Core
                 .Where(so => so.Product.Id == productId)
                 .ToListAsync();
 
-            await DeleteSellOrderSuggestionsAsync(sellOrderIds: sellOrders.Select(so => so.Id));
-
             _context.SellOrders.RemoveRange(sellOrders);
         }
 
-        private async Task DeleteSellOrderSuggestionsAsync(IEnumerable<Guid>sellOrderIds)
+        private async Task DeleteSellOrderSuggestionsOfProductAsync(Guid productId)
         {
             IEnumerable<SellOrderSuggestion> sellOrderSuggestions = await _context.
                 SellOrderSuggestions
-                .Where(sos => sellOrderIds.Contains(sos.SellOrderId))
+                .Where(sos => sos.ProductId == productId)
                 .ToListAsync();
 
             _context.SellOrderSuggestions.RemoveRange(sellOrderSuggestions);

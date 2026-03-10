@@ -97,6 +97,13 @@ namespace TradingApp.Services.Core
                 .Where(so => so.ProductId == productId && so.Status == SellOrderStatus.active)
                 .OrderBy(so => so.CreatedAt)
                 .FirstOrDefaultAsync())!;
+
+            OrderRequest? orderRequest = await _context
+                .OrderRequests
+                .Include(or => or.SellOrderSuggestions)
+                .Where(or => or.CreatorId == buyerId && or.SellOrderSuggestions.Any(sos => sos.ProductId == productId))
+                .OrderBy(or => or.CreatedAt)
+                .FirstOrDefaultAsync();
            
             User buyer = (await _context
                 .Users
@@ -132,6 +139,8 @@ namespace TradingApp.Services.Core
             buyer.Balance.Amount -= completedOrder.PricePaid;
             seller.Balance.Amount += completedOrder.SellerRevenue;
             sellOrder.Status = SellOrderStatus.completed;
+            if (orderRequest != null) 
+            { orderRequest.Status = OrderRequestStatus.completed; }
             _context.CompletedOrders.Add(completedOrder);
 
             await _context.SaveChangesAsync();

@@ -31,8 +31,6 @@ namespace TradingApp.Data.Models
         public virtual User Creator { get; set; } = null!;
 
         public virtual Product Product { get; set; } = null!;
-
-        public virtual ICollection<SellOrderSuggestion> SellOrderSuggestions { get; set; } = new HashSet<SellOrderSuggestion>();
        
     }
 }

@@ -27,7 +27,7 @@ namespace TradingApp.Data.Seed
                .ToListAsync();
 
             int orderRequestsCount = userIds.Count*3;
-            int orderRequestsPerUser = 3;//determines both the user count and purchase orders per user
+            int orderRequestsPerUser = 3;//determines both the user count and the Requests per user
             List<OrderRequest> orderRequests = new List<OrderRequest>();
 
 
@@ -37,7 +37,7 @@ namespace TradingApp.Data.Seed
 
                 OrderRequest orderRequest = new OrderRequest()
                 {
-                    Title = $"Purchase ({i})",
+                    Title = $"Request ({i})",
                     Description = $"Some request description describing the desired 3D model ({i}).",
                     MaxPrice = i + 50,
                     Status = OrderRequestStatus.active,
@@ -50,7 +50,7 @@ namespace TradingApp.Data.Seed
 
             OrderRequest cancelledOrderRequest = new OrderRequest()
             {
-                Title = $"Cancelled Purchase (-1)",
+                Title = $"Cancelled Request (-1)",
                 Description = $"Some request description describing the desired 3D model (-1).",
                 MaxPrice = 5,
                 Status = OrderRequestStatus.cancelled,
