@@ -110,7 +110,10 @@ namespace TradingApp.Services.Core
         public async Task<MyOrderRequestViewModel?> GetDetailsForActiveRequestCreatedByUserAsync(Guid requestId, string userId)
         {
             MyOrderRequestViewModel? request = await _context
-                .OrderRequests                
+                .OrderRequests 
+                .Include(or => or.SellOrderSuggestions)
+                .ThenInclude(sos => sos.Product)
+                .ThenInclude(p => p.SellOrders)
                 .AsNoTracking()
                 .Where(or => or.Id == requestId && or.Status == OrderRequestStatus.active && or.CreatorId == userId)
                 .Select(or => new MyOrderRequestViewModel
@@ -119,7 +122,8 @@ namespace TradingApp.Services.Core
                     Title = or.Title,
                     Description = or.Description,
                     MaxPrice = or.MaxPrice.ToString("f2"),
-                    CreationDate = or.CreatedAt.ToString(ApplicationConstants.DateFormat)                   
+                    CreationDate = or.CreatedAt.ToString(ApplicationConstants.DateFormat),
+                    HasSuggestions = or.SellOrderSuggestions.Any(sos => sos.Product.Status == ProductStatus.approved && sos.Product.SellOrders.Any(so => so.Status == SellOrderStatus.active))
                 }).SingleOrDefaultAsync();
 
             return request;

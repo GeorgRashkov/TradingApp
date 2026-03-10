@@ -6,7 +6,7 @@
     PaginationHelper paginationHelper = new PaginationHelper()
     {
         Controller = "Product",
-        Action = "Products",
+        Action = (string)(ViewData["action"] ?? "Products"),
         PageIndex = (int)(ViewData["page"] ?? 0)
     };    
 }
