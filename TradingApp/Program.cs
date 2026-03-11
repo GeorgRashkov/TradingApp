@@ -25,6 +25,7 @@ namespace TradingApp
             builder.Services.AddControllersWithViews();
 
             //adding custom services to the container
+            builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IProductService, ProductService>();
             builder.Services.AddScoped<IProductOperationsService, ProductOperationsService>();
             builder.Services.AddScoped<IProductBoolsService, ProductBoolsService>();

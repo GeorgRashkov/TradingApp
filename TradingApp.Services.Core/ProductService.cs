@@ -173,25 +173,12 @@ namespace TradingApp.Services.Core
             return product;           
         }             
 
-
-        public async Task<int> GetUserActiveSellOrdersCountAsync(string userId)
-        {
-            int sellOrdersCount = await _context
-                .SellOrders
-                 .AsNoTracking()
-                 .Where(so => so.CreatorId == userId && so.Status == SellOrderStatus.active)
-                 .CountAsync();
-            return sellOrdersCount;
-        }
-
         private void SetProductPage(int pageIndex, int productsCount)
         {
             pageIndex = pageIndex < 0 ? 0 : pageIndex;
             pageIndex = pageIndex * _productsPerPage >= productsCount ? (int)Math.Ceiling((decimal)productsCount / (decimal)_productsPerPage) - 1 : pageIndex;
             ProductPageIndex = pageIndex;
         }
-
-
 
         public async Task<int> GetProductActiveSellOrdersCountAsync(Guid productId)
         {
@@ -201,7 +188,6 @@ namespace TradingApp.Services.Core
                 .CountAsync();
             return sellOrdersCount;
         }
-
 
         public async Task<UpdatedProductModel?> GetUpdatedProductModelAsync(Guid productId)
         {
@@ -245,19 +231,6 @@ namespace TradingApp.Services.Core
                 .Select(p => p.Name).SingleOrDefaultAsync();
 
             return productName;
-        }
-
-        public async Task<string?> GetCreatorNameOfProductAsync(Guid productId)
-        {
-            string? creatorName = await _context
-                .Products
-                .Include(p => p.Creator)
-                .AsNoTracking()
-                .Where(p => p.Id == productId)
-                .Select(p => p.Creator.UserName)
-                .SingleOrDefaultAsync();
-
-            return creatorName;
         }
     }
 }

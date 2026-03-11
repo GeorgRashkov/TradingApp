@@ -12,11 +12,13 @@ namespace TradingApp.Controllers
 {
     public class ProductController : ControllerBase
     {                    
-        private IProductService _productService;        
+        private IProductService _productService;   
+        private IUserService _userService;
 
-        public ProductController(ApplicationDbContext context, IProductService productService)
+        public ProductController(ApplicationDbContext context, IProductService productService, IUserService userService)
         {          
             _productService = productService;
+            _userService = userService;
         }
        
        
@@ -73,7 +75,7 @@ namespace TradingApp.Controllers
             if (LoggedUserUsername != product.CreatorName)
             { return Unauthorized(); }
 
-            int loggedUserActiveSellOrdersCount = await _productService.GetUserActiveSellOrdersCountAsync(userId: LoggedUserId);
+            int loggedUserActiveSellOrdersCount = await _userService.GetUserActiveSellOrdersCountAsync(userId: LoggedUserId);
 
             ViewData["currentUserMaxSellOrdersCountReached"] = loggedUserActiveSellOrdersCount >= ApplicationConstants.UserMaxActiveSellOrders ? true : false;
             ViewData["currentProductMaxSellOrdersCountReached"] = product.ActiveSellOrdersCount >= ApplicationConstants.ProductMaxActiveSellOrders ? true : false;

@@ -14,16 +14,15 @@ namespace TradingApp.Controllers
         private IProductOperationsService _productOperationsService;
         private IProductFileService _productFileService;
         private IProductService _productService;
+        private IUserService _userService;        
 
-
-        
-        public ProductOperationsController(ApplicationDbContext context, IProductBoolsService productBoolsService, IProductOperationsService productOperationsService, IProductFileService productFileService, IProductService productService)
+        public ProductOperationsController(ApplicationDbContext context, IProductBoolsService productBoolsService, IProductOperationsService productOperationsService, IProductFileService productFileService, IProductService productService, IUserService userService)
         {
             _productBoolsService = productBoolsService;
             _productOperationsService = productOperationsService;
             _productFileService = productFileService;
             _productService = productService;
-
+            _userService = userService;           
         }       
 
        
@@ -210,7 +209,7 @@ namespace TradingApp.Controllers
         {
             
             string productName = await _productService.GetProductNameAsync(productId: productId);
-            string creatorName = await _productService.GetCreatorNameOfProductAsync(productId: productId);
+            string creatorName = await _userService.GetCreatorNameOfProductAsync(productId: productId);
             try
             {
                 //attempting to delete the product in the database

@@ -14,13 +14,6 @@ namespace TradingApp.Services.Core
             _context = context;
         }
 
-        public async Task<bool> DoesUserExistAsync(string userId)
-        {
-            return await _context.Users
-                    .AsNoTracking()
-                    .AnyAsync(u => u.Id == userId);
-        }
-
         public async Task<bool> DoesProductExistAsync(Guid productId)
         {
             return await _context.Products

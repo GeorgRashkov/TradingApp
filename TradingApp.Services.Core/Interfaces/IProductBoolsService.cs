@@ -6,7 +6,6 @@ namespace TradingApp.Services.Core.Interfaces
         Task<bool> DoesProductCreatedByUserExistAsync(string userId, string productName);
         Task<bool> DoesProductExistAsync(Guid productId);
 
-        Task<bool> DoesUserExistAsync(string userId);
         Task<bool> DoesProductCreatedByUserExistAsync(string userId, Guid productId);
         Task<bool> DoesProductHaveActiveSaleOrdersAsync(Guid productId);
         Task<bool> IsProductApprovedAsync(Guid productId);

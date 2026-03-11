@@ -12,15 +12,11 @@ namespace TradingApp.Services.Core.Interfaces
         Task<ProductViewModel?> GetDetailsForApprovedProductWithActiveSellOrdersAsync(Guid productId);
         Task<IEnumerable<MyProductsViewModel>> GetProductsCreatedByUserAsync(int pageIndex, string userId);
         Task<MyProductViewModel?> GetDetailsForProductAsync(Guid productId);
-        Task<int> GetUserActiveSellOrdersCountAsync(string userId);
-
         Task<int> GetProductActiveSellOrdersCountAsync(Guid productId);
-
         Task<UpdatedProductModel?> GetUpdatedProductModelAsync(Guid productId);
         Task<DeletedProductModel?> GetDeletedProductModelAsync(Guid productId);
 
-        Task<string?> GetProductNameAsync(Guid productId);
-        Task<string?> GetCreatorNameOfProductAsync(Guid productId);
+        Task<string?> GetProductNameAsync(Guid productId);        
 
         int ProductPageIndex { get; }
     }

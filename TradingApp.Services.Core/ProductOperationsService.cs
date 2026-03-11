@@ -13,17 +13,19 @@ namespace TradingApp.Services.Core
         private ApplicationDbContext _context;
         private IProductBoolsService _productBoolsService;
         private IProductService _productService;
-        public ProductOperationsService(ApplicationDbContext context, IProductBoolsService productBoolsService, IProductService productService)
+        private IUserService _userService;        
+        public ProductOperationsService(ApplicationDbContext context, IProductBoolsService productBoolsService, IProductService productService, IUserService userService)
         {
             _context = context;
             _productBoolsService = productBoolsService;
             _productService = productService;
+            _userService = userService;            
         }
 
         //saves the product in the database
         public async Task<Result> AddProductAsync(string name, string description, decimal price, string creatorId)
         {
-            bool doesUserExist = await _productBoolsService.DoesUserExistAsync(userId: creatorId);
+            bool doesUserExist = await _userService.DoesUserExistAsync(userId: creatorId);
             if (doesUserExist == false)
             {
                 return new Result(errorCode: UserErrorCodes.UserNotFound);
