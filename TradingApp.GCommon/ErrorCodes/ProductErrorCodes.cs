@@ -11,5 +11,6 @@ namespace TradingApp.GCommon.ErrorCodes
         public const string ProductInvalidStatus = "Product.InvalidStatus";
         public const string ProductMaxActiveSellOrdersReached = "Product.MaxActiveSellOrdersReached";
         public const string ProductAlreadyPurchased = "Product.AlreadyPurchased";
+        public const string ProductAlreadySuggestedToRequest = "Product.AlreadySuggestedToRequest";
     }
 }

@@ -33,7 +33,8 @@ namespace TradingApp
             builder.Services.AddScoped<IInvoiceService, InvoiceService>();
             builder.Services.AddScoped<IBalanceService, BalanceService>();
             builder.Services.AddScoped<IOrderRequestService, OrderRequestService>();
-
+            builder.Services.AddScoped<IOrderRequestBoolsService, OrderRequestBoolsService>();
+            builder.Services.AddScoped<IOrderRequestOperationsService, OrderRequestOperationsService>();
 
 
 

@@ -22,15 +22,17 @@
 
 @if (Model.idsAndNamesOfProducts.Count() > 0)
 {
-    <form asp-controller="OrderRequestOperations" asp-action="CreateSellOrderSuggestion">
+    <form asp-controller="OrderRequestOperations" asp-action="CreateSuggestionForOrderRequest">
 
-        <label for="products">Suggest a product:</label>
-        <select name="products">
+        <label for="productId">Suggest a product:</label>
+        <select name="productId">
             @foreach ((string id, string name) in Model.idsAndNamesOfProducts)
             {
                 <option value="@id">@name</option>
             }
         </select>
+
+        <input name="requestId" type="hidden" value="@(Model.request.Id)"/>
         <br />
         <input class="btn btn-sm btn-primary" type="submit" value="Suggest" />
     </form>

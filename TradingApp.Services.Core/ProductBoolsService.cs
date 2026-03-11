@@ -1,6 +1,7 @@
 ﻿
 using Microsoft.EntityFrameworkCore;
 using TradingApp.Data;
+using TradingApp.GCommon.Enums;
 using TradingApp.Services.Core.Interfaces;
 
 namespace TradingApp.Services.Core
@@ -20,6 +21,12 @@ namespace TradingApp.Services.Core
                     .AnyAsync(u => u.Id == userId);
         }
 
+        public async Task<bool> DoesProductExistAsync(Guid productId)
+        {
+            return await _context.Products
+                    .AsNoTracking()
+                    .AnyAsync(p => p.Id == productId);
+        }
         public async Task<bool> DoesProductCreatedByUserExistAsync(string userId, string productName)
         {
             return await _context.Products
@@ -34,5 +41,27 @@ namespace TradingApp.Services.Core
                     .AnyAsync(p => p.CreatorId == userId && p.Id == productId);
         }
 
+        public async Task<bool> DoesProductHaveActiveSaleOrdersAsync(Guid productId)
+        {
+            return await _context.SellOrders
+                .AsNoTracking()
+                .AnyAsync(so => so.ProductId == productId && so.Status == SellOrderStatus.active);                     
+        }
+
+        public async Task<bool> IsProductApprovedAsync(Guid productId)
+        {
+            return await _context.Products
+                    .AsNoTracking()
+                    .AnyAsync(p => p.Id == productId && p.Status==GCommon.Enums.ProductStatus.approved);
+        }
+
+        public async Task<bool> IsProductSuggestedToOrderRequestAsync(Guid productId, Guid orderRequestId)
+        {
+            return await _context
+                .SellOrderSuggestions
+                .AsNoTracking()
+                .Where(sos => sos.ProductId == productId && sos.OrderRequestId == orderRequestId)
+                .AnyAsync();
+        }
     }
 }
