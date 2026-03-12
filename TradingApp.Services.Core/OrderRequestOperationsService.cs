@@ -1,10 +1,11 @@
 ﻿
 
+using Azure.Core;
+using TradingApp.Data;
+using TradingApp.Data.Models;
 using TradingApp.GCommon;
 using TradingApp.GCommon.ErrorCodes;
-using TradingApp.Data;
 using TradingApp.Services.Core.Interfaces;
-using TradingApp.Data.Models;
 
 namespace TradingApp.Services.Core
 {
@@ -99,6 +100,29 @@ namespace TradingApp.Services.Core
             await _context.OrderRequests.AddAsync(orderRequest);
             await _context.SaveChangesAsync();
 
+            return new Result();
+        }
+
+        public async Task<Result> UpdateOrderRequest(Guid id, string title, string description, decimal maxPrice, string creatorId)
+        {
+            string? orderRequestCreatorId = await _userService.GetCreatorIdOfRequestAsync(orderRequestId: id);
+            if(orderRequestCreatorId == null) 
+            { return new Result(errorCode: OrderRequestErrorCodes.RequestNotFound); }
+            else if (orderRequestCreatorId != creatorId)
+            { return new Result(errorCode: OrderRequestErrorCodes.RequestInvalidCreator); }
+
+            bool doesOrderRequestCreatedByUserExist = await _orderRequestBoolsService.DoesOrderRequestCreatedByUserExistAsync(userId: creatorId, orderRequestTitle: title, orderRequestIdsToIgnore: new Guid[1] { id });
+            if (doesOrderRequestCreatedByUserExist == true)
+            { return new Result(errorCode: OrderRequestErrorCodes.RequestWithSameTitleAlreadyExists); }
+
+            //update the order request
+            OrderRequest orderRequest = (await _context.OrderRequests.FindAsync(id))!;
+            orderRequest.Title = title;
+            orderRequest.Description = description;
+            orderRequest.MaxPrice = maxPrice;
+
+            //apply the changes to the database
+            await _context.SaveChangesAsync();
             return new Result();
         }
     }

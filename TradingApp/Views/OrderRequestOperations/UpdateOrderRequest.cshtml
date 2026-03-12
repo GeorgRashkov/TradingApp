@@ -1,0 +1,43 @@
+﻿@model TradingApp.ViewModels.InputOrderRequest.UpdatedOrderRequestModel
+
+@{
+    ViewData["Title"] = "Update Request";
+}
+
+<h1>@(ViewData["Title"])</h1>
+<br />
+<br />
+
+
+<form asp-controller="OrderRequestOperations" asp-action="UpdateOrderRequest_execute" method="post">
+
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <label>Title</label>
+    <input type="text" asp-for="Title" />
+    <span asp-validation-for="Title" class="text-danger"></span>
+    <br />
+    <br />
+
+    <label>Description</label>
+    <input type="text" asp-for="Description" />
+    <span asp-validation-for="Description" class="text-danger"></span>
+    <br />
+    <br />
+
+    <label>Max Price</label>
+    <input type="text" asp-for="MaxPrice" />
+    <span asp-validation-for="MaxPrice" class="text-danger"></span>
+    <br />
+    <br />
+
+    <input type="hidden" value="@Model.Id" asp-for="Id" />
+
+    <input type="submit" class="btn btn-sm btn-primary" value="Apply Changes" />
+
+</form>
+
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial"></partial>
+}

@@ -5,6 +5,7 @@ using TradingApp.Data;
 using TradingApp.GCommon;
 using TradingApp.GCommon.Enums;
 using TradingApp.Services.Core.Interfaces;
+using TradingApp.ViewModels.InputOrderRequest;
 using TradingApp.ViewModels.OrderRequest;
 
 namespace TradingApp.Services.Core
@@ -139,6 +140,24 @@ namespace TradingApp.Services.Core
                 .CountAsync();
 
             return requestsCount;
+        }
+
+
+        public async Task<UpdatedOrderRequestModel?> GetUpdatedOrderRequestModelAsync(Guid orderRequestId)
+        {
+            UpdatedOrderRequestModel? updatedOrderRequestModel = await _context
+                .OrderRequests
+                .AsNoTracking()
+                .Where(or => or.Id == orderRequestId)
+                .Select(or => new UpdatedOrderRequestModel
+                {
+                    Id = or.Id,
+                    Title = or.Title,
+                    Description = or.Description,
+                    MaxPrice = or.MaxPrice
+                }).SingleOrDefaultAsync();
+
+            return updatedOrderRequestModel;
         }
     }
 }

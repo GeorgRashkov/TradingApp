@@ -1,21 +1,23 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
 using TradingApp.GCommon;
 using TradingApp.GCommon.ErrorCodes;
 using TradingApp.Services.Core.Interfaces;
 using TradingApp.ViewModels.InputOrderRequest;
-using TradingApp.ViewModels.InputProduct;
 
 namespace TradingApp.Controllers
 {
     public class OrderRequestOperationsController : ControllerBase
     {
+        private IOrderRequestService _orderRequestService;
         private IOrderRequestOperationsService _orderRequestOperationsService;
         private IProductService _productService;
-        public OrderRequestOperationsController(IOrderRequestOperationsService orderRequestOperationsService, IProductService productService)
+        private IUserService _userService;
+        public OrderRequestOperationsController(IOrderRequestService orderRequestService, IOrderRequestOperationsService orderRequestOperationsService, IProductService productService, IUserService userService)
         {
             _orderRequestOperationsService = orderRequestOperationsService;
             _productService = productService;
+            _userService = userService;
+            _orderRequestService = orderRequestService;
         }
 
 
@@ -143,6 +145,89 @@ namespace TradingApp.Controllers
                 return RedirectToAction(nameof(Message));
             }
 
+        }
+
+
+
+
+        [HttpGet]
+        public async Task<IActionResult> UpdateOrderRequest(Guid orderRequestId)
+        {
+            string? userId = await _userService.GetCreatorIdOfRequestAsync(orderRequestId: orderRequestId);
+
+            if (userId == null)
+            { return NotFound(); }
+            else if (userId != LoggedUserId)
+            { return Unauthorized(); }
+
+            UpdatedOrderRequestModel updatedOrderRequestModel = (await _orderRequestService.GetUpdatedOrderRequestModelAsync(orderRequestId: orderRequestId))!;
+
+            return View(updatedOrderRequestModel);
+        }
+
+        //this method is formed based on the logic of the service method for updating an order request 
+        //its purpose is to provide a proper error message which will be shown to the user based on the error code
+        public string Get_UpdateOrderRequest_ErrorMessage(string errorCode)
+        {
+
+            string errorMessage = errorCode switch
+            {
+                string code when code == OrderRequestErrorCodes.RequestNotFound =>
+                    "The request you are trying to edit could not be found!",
+
+                string code when code == OrderRequestErrorCodes.RequestInvalidCreator =>
+                    "You are not allowed to edit requests created by other users!",
+
+                string code when code == OrderRequestErrorCodes.RequestWithSameTitleAlreadyExists =>
+                "A request with the same title already exists!\n Consider using unique title before updating the request.",
+
+                _ => "Something went wrong."
+            };
+
+            return errorMessage;
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateOrderRequest_execute(UpdatedOrderRequestModel updatedOrderRequestModel)
+        {
+            if (ModelState.IsValid == false)
+            {
+                return View(viewName: nameof(UpdateOrderRequest), model: updatedOrderRequestModel);
+            }
+
+            Result result;
+
+            try
+            {
+                result = await _orderRequestOperationsService.UpdateOrderRequest(
+                    id: updatedOrderRequestModel.Id,
+                    title: updatedOrderRequestModel.Title,
+                    description: updatedOrderRequestModel.Description,
+                    maxPrice: updatedOrderRequestModel.MaxPrice,
+                    creatorId: LoggedUserId);
+            }
+            catch (Exception e)
+            {
+                Console.Write(e.Message.ToString());
+
+                TempData["title"] = "Error";
+                TempData["message"] = "An error occurred while updating the order request. Please try again later.";
+                return RedirectToAction(nameof(Message));
+            }
+
+            if (result.Success == false)
+            {
+                string errorMessage = Get_UpdateOrderRequest_ErrorMessage(result.ErrorCode);
+                ModelState.AddModelError(key: string.Empty, errorMessage: errorMessage);
+                return View(viewName: nameof(UpdateOrderRequest), model: updatedOrderRequestModel);
+            }
+            else
+            {
+                TempData["title"] = "Success";
+                TempData["message"] = $"Your request was updated succesfully.";
+                return RedirectToAction(nameof(Message));
+            }           
+            
         }
     }
 }
