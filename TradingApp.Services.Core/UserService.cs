@@ -34,6 +34,18 @@ namespace TradingApp.Services.Core
             return creatorName;
         }
 
+        public async Task<string?> GetCreatorIdOfRequestAsync(Guid orderRequestId)
+        {
+            string? creatorId = await _context
+                .OrderRequests                
+                .AsNoTracking()
+                .Where(or => or.Id == orderRequestId)
+                .Select(or => or.CreatorId)
+                .SingleOrDefaultAsync();
+
+            return creatorId;
+        }
+
         public async Task<int> GetUserActiveSellOrdersCountAsync(string userId)
         {
             int sellOrdersCount = await _context

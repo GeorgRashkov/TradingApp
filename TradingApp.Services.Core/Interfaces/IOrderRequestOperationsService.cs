@@ -5,7 +5,7 @@ namespace TradingApp.Services.Core.Interfaces
 {
     public interface IOrderRequestOperationsService
     {
-        Task<Result> CreateSuggestionForOrderRequest(Guid productId, string userId, Guid requestId);
+        Task<Result> CreateSuggestionForOrderRequest(Guid productId, string suggesterId, Guid requestId);
         Task<Result> CreateOrderRequest(string title, string description, decimal maxPrice, string creatorId);
     }
 }

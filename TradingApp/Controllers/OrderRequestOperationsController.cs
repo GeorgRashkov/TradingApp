@@ -17,15 +17,15 @@ namespace TradingApp.Controllers
             _orderRequestOperationsService = orderRequestOperationsService;
             _productService = productService;
         }
-        
-        
+
+
         public async Task<IActionResult> CreateSuggestionForOrderRequest(Guid productId, Guid requestId)
         {
-            Result result = await _orderRequestOperationsService.CreateSuggestionForOrderRequest(productId: productId, userId: LoggedUserId, requestId: requestId);
+            Result result = await _orderRequestOperationsService.CreateSuggestionForOrderRequest(productId: productId, suggesterId: LoggedUserId, requestId: requestId);
             string? productName = await _productService.GetProductNameAsync(productId);
 
             if (result.Success == false)
-            {                               
+            {
                 string errorMessage = Get_CreateSuggestion_ErrorMessage(result.ErrorCode, productName);
                 TempData["title"] = "Error";
                 TempData["message"] = errorMessage;
@@ -35,7 +35,7 @@ namespace TradingApp.Controllers
             //return a success message page
             TempData["title"] = "Success";
             TempData["message"] = $"You successfully suggested the product {productName}.";
-            return RedirectToAction(nameof(Message));            
+            return RedirectToAction(nameof(Message));
         }
 
         //this method is formed based on the logic of the service method for creating a suggestion for order request 
@@ -45,6 +45,16 @@ namespace TradingApp.Controllers
 
             string errorMessage = errorCode switch
             {
+                string code when code == OrderRequestErrorCodes.RequestNotFound =>
+               "The request was not found!",
+
+                string code when code == OrderRequestErrorCodes.RequestSuggestionSameCreator =>
+              "You are not allowed to suggest products to your own requests!",
+
+
+                string code when code == OrderRequestErrorCodes.RequestInvalidStatus =>
+                    "The request cannot receice product suggestions because its status is not `active`!",
+
                 string code when code == ProductErrorCodes.ProductNotFound =>
                     "The product was not found!",
 
@@ -57,12 +67,6 @@ namespace TradingApp.Controllers
                 string code when code == ProductErrorCodes.ProductHasNoActiveSaleOrders =>
                     $"You cannot suggest the product {productName} because it has no active sale orders!",
 
-                string code when code == OrderRequestErrorCodes.RequestNotFound =>
-                "The request was not found!",
-
-                string code when code == OrderRequestErrorCodes.RequestInvalidStatus =>
-                    "The request cannot receice product suggestions because its status is not `active`!",
-                
                 string code when code == ProductErrorCodes.ProductAlreadySuggestedToRequest =>
                     $"You have already suggested the product {productName} to this request!",
 
@@ -101,9 +105,9 @@ namespace TradingApp.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateOrderRequest_execute([FromForm]CreatedOrderRequestModel createdOrderRequestModel)
+        public async Task<IActionResult> CreateOrderRequest_execute([FromForm] CreatedOrderRequestModel createdOrderRequestModel)
         {
-            if (ModelState.IsValid == false) 
+            if (ModelState.IsValid == false)
             {
                 return View(viewName: nameof(CreateOrderRequest), model: createdOrderRequestModel);
             }
@@ -112,10 +116,10 @@ namespace TradingApp.Controllers
 
             try
             {
-                result = await _orderRequestOperationsService.CreateOrderRequest(title: createdOrderRequestModel.Title, 
-                    description: createdOrderRequestModel.Description, 
-                    maxPrice: createdOrderRequestModel.MaxPrice, 
-                    creatorId:LoggedUserId);
+                result = await _orderRequestOperationsService.CreateOrderRequest(title: createdOrderRequestModel.Title,
+                    description: createdOrderRequestModel.Description,
+                    maxPrice: createdOrderRequestModel.MaxPrice,
+                    creatorId: LoggedUserId);
             }
             catch (Exception e)
             {
@@ -138,7 +142,7 @@ namespace TradingApp.Controllers
                 TempData["message"] = $"Your request was created succesfully.";
                 return RedirectToAction(nameof(Message));
             }
-            
+
         }
     }
 }

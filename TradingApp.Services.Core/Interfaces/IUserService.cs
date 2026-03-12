@@ -5,6 +5,7 @@ namespace TradingApp.Services.Core.Interfaces
     {
         Task<bool> DoesUserExistAsync(string userId);
         Task<string?> GetCreatorNameOfProductAsync(Guid productId);
+        Task<string?> GetCreatorIdOfRequestAsync(Guid orderRequestId);
         Task<int> GetUserActiveSellOrdersCountAsync(string userId);
     }
 }

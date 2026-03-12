@@ -23,15 +23,30 @@ namespace TradingApp.Services.Core
             _userService = userService;
         }
 
-        public async Task<Result> CreateSuggestionForOrderRequest(Guid productId, string userId, Guid requestId)
+        public async Task<Result> CreateSuggestionForOrderRequest(Guid productId, string suggesterId, Guid requestId)
         {
+            //<request validations
+            bool doesOrderRequestExist = await _orderRequestBoolsService.DoesOrderRequestExistAsync(orderRequestId: requestId);
+            if (doesOrderRequestExist == false)
+            { return new Result(errorCode: OrderRequestErrorCodes.RequestNotFound); }
+
+            string orderRequestCreatorId = (await _userService.GetCreatorIdOfRequestAsync(orderRequestId: requestId))!;
+            if (suggesterId == orderRequestCreatorId)
+            { return new Result(errorCode: OrderRequestErrorCodes.RequestSuggestionSameCreator);}
+
+            bool isOrderRequestActive = await _orderRequestBoolsService.IsOrderRequestActiveAsync(orderRequestId: requestId);
+            if (doesOrderRequestExist == false)
+            { return new Result(errorCode: OrderRequestErrorCodes.RequestInvalidStatus); }
+            //request validations>
+
+
             //<product validations
             bool doesProductExist = await _productBoolsService.DoesProductExistAsync(productId: productId);
             if (doesProductExist == false)
             { return new Result(errorCode: ProductErrorCodes.ProductNotFound); }
 
-            bool isUserCreatorOfTheProduct = await _productBoolsService.DoesProductCreatedByUserExistAsync(userId: userId, productId: productId);
-            if (isUserCreatorOfTheProduct == false)
+            bool isSuggesterCreatorOfTheProduct = await _productBoolsService.DoesProductCreatedByUserExistAsync(userId: suggesterId, productId: productId);
+            if (isSuggesterCreatorOfTheProduct == false)
             { return new Result(errorCode: ProductErrorCodes.ProductInvalidCreator); }
 
             bool isProductApproved = await _productBoolsService.IsProductApprovedAsync(productId: productId);
@@ -47,16 +62,7 @@ namespace TradingApp.Services.Core
             { return new Result(errorCode: ProductErrorCodes.ProductAlreadySuggestedToRequest); }
             //product validations>
 
-            //<request validations
-            bool doesOrderRequestExist = await _orderRequestBoolsService.DoesOrderRequestExistAsync(orderRequestId: requestId);
-            if (doesOrderRequestExist == false)
-            { return new Result(errorCode: OrderRequestErrorCodes.RequestNotFound); }
-
-            bool isOrderRequestActive = await _orderRequestBoolsService.IsOrderRequestActiveAsync(orderRequestId: requestId);
-            if (doesOrderRequestExist == false)
-            { return new Result(errorCode: OrderRequestErrorCodes.RequestInvalidStatus); }
-            //request validations>
-
+           
 
             SellOrderSuggestion sellOrderSuggestion = new SellOrderSuggestion
             {
