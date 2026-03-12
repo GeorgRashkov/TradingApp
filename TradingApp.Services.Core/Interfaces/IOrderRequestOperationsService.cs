@@ -9,5 +9,6 @@ namespace TradingApp.Services.Core.Interfaces
         Task<Result> CreateOrderRequest(string title, string description, decimal maxPrice, string creatorId);
 
         Task<Result> UpdateOrderRequest(Guid id, string title, string description, decimal maxPrice, string creatorId);
+        Task<Result> CancelOrderRequestAsync(Guid id, string userId);
     }
 }

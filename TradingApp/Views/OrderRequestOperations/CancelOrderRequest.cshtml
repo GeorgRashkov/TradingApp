@@ -1,0 +1,36 @@
+﻿@using TradingApp.ViewModels.Order;
+@model Guid
+
+@{
+    ViewData["Title"] = "Confirmation";
+}
+
+<div style="text-align:center">
+    <h2><b>"Are you sure you want to delete the request?"</b></h2>
+</div>
+
+<br />
+
+<div style="text-align:center">
+    <form method="post"
+          asp-controller="OrderRequestOperations"
+          asp-action="CancelOrderRequest_execute"
+          asp-route-orderRequestId="@(Model)">
+
+        <input class="btn btn-sm btn-primary" type="submit" value="Confirm" />
+
+        @if (TempData["ReturnUrl"] is not null)
+        {
+            <a class="btn btn-sm btn-primary" href="@(TempData["ReturnUrl"])">
+                Cancel
+            </a>
+        }
+        else
+        {
+            <a class="btn btn-sm btn-primary" asp-controller="OrderRequest" asp-action="MyOrderRequests">
+                Cancel
+            </a>
+        }
+
+    </form>
+</div>

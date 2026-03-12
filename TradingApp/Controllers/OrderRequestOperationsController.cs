@@ -226,8 +226,80 @@ namespace TradingApp.Controllers
                 TempData["title"] = "Success";
                 TempData["message"] = $"Your request was updated succesfully.";
                 return RedirectToAction(nameof(Message));
-            }           
-            
+            }
+
+        }
+
+
+
+
+
+
+        [HttpGet]
+        public async Task<IActionResult> CancelOrderRequest(Guid orderRequestId)
+        {
+            string? userId = await _userService.GetCreatorIdOfRequestAsync(orderRequestId: orderRequestId);
+
+            if (userId == null)
+            { return NotFound(); }
+            else if (userId != LoggedUserId)
+            { return Unauthorized(); }
+
+            return View(model: orderRequestId);
+        }
+
+
+        //this method is formed based on the logic of the service method for cancelling an order request 
+        //its purpose is to provide a proper error message which will be shown to the user based on the error code
+        public string Get_CancelOrderRequest_ErrorMessage(string errorCode)
+        {
+
+            string errorMessage = errorCode switch
+            {
+                string code when code == OrderRequestErrorCodes.RequestNotFound =>
+                    "The request you are trying to delete could not be found!",
+
+                string code when code == OrderRequestErrorCodes.RequestInvalidCreator =>
+                    "You are not allowed to delete requests created by other users!",
+
+                string code when code == OrderRequestErrorCodes.RequestInvalidStatus =>
+                "The request cannot be deleted because its status is not `active`.",
+
+                _ => "Something went wrong."
+            };
+
+            return errorMessage;
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CancelOrderRequest_execute(Guid orderRequestId)
+        {
+            Result result;
+            try
+            {
+                result = await _orderRequestOperationsService.CancelOrderRequestAsync(id: orderRequestId, userId: LoggedUserId);
+            }
+            catch (Exception e)
+            {
+                Console.Write(e.Message.ToString());
+
+                TempData["title"] = "Error";
+                TempData["message"] = "An error occurred while deleting the request. Please try again later.";
+                return RedirectToAction(nameof(Message));
+            }
+
+            if (result.Success == false)
+            {
+                TempData["title"] = "Error";
+                TempData["message"] = Get_CancelOrderRequest_ErrorMessage(result.ErrorCode);
+                return RedirectToAction(nameof(Message));
+            }
+            else
+            {
+                TempData["title"] = "Success";
+                TempData["message"] = $"Your request was deleted succesfully.";
+                return RedirectToAction(nameof(Message));
+            }
         }
     }
 }

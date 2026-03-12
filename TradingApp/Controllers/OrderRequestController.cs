@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using TradingApp.GCommon;
 using TradingApp.Services.Core.Interfaces;
@@ -17,6 +18,7 @@ namespace TradingApp.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> OrderRequests(int pageIndex)
         {
             IEnumerable<OrderRequestsViewModel> orderRequests = await _orderRequestService.GetActiveRequestsAsync(pageIndex: pageIndex);
@@ -29,6 +31,7 @@ namespace TradingApp.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> OrderRequest(Guid orderRequestId)
         {
             OrderRequestViewModel? orderRequest = await _orderRequestService.GetDetailsForActiveRequestAsync(requestId: orderRequestId);

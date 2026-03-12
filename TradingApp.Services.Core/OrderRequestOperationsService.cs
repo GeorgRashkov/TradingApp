@@ -1,6 +1,4 @@
 ﻿
-
-using Azure.Core;
 using TradingApp.Data;
 using TradingApp.Data.Models;
 using TradingApp.GCommon;
@@ -123,6 +121,23 @@ namespace TradingApp.Services.Core
 
             //apply the changes to the database
             await _context.SaveChangesAsync();
+            return new Result();
+        }
+        
+
+        public async Task<Result> CancelOrderRequestAsync(Guid id, string userId)
+        {
+            OrderRequest? orderRequest = await _context.OrderRequests.FindAsync(id);
+            if (orderRequest == null)
+            { return new Result(errorCode: OrderRequestErrorCodes.RequestNotFound); }
+            else if (orderRequest.CreatorId != userId)
+            { return new Result(errorCode: OrderRequestErrorCodes.RequestInvalidCreator); }
+            else if (orderRequest.Status != GCommon.Enums.OrderRequestStatus.active)
+            { return new Result(errorCode: OrderRequestErrorCodes.RequestInvalidStatus); }
+
+            orderRequest.Status = GCommon.Enums.OrderRequestStatus.cancelled;
+            await _context.SaveChangesAsync();
+
             return new Result();
         }
     }
