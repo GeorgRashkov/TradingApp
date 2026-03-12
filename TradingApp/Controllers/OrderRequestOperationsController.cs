@@ -3,6 +3,8 @@ using System.Threading.Tasks;
 using TradingApp.GCommon;
 using TradingApp.GCommon.ErrorCodes;
 using TradingApp.Services.Core.Interfaces;
+using TradingApp.ViewModels.InputOrderRequest;
+using TradingApp.ViewModels.InputProduct;
 
 namespace TradingApp.Controllers
 {
@@ -15,6 +17,8 @@ namespace TradingApp.Controllers
             _orderRequestOperationsService = orderRequestOperationsService;
             _productService = productService;
         }
+        
+        
         public async Task<IActionResult> CreateSuggestionForOrderRequest(Guid productId, Guid requestId)
         {
             Result result = await _orderRequestOperationsService.CreateSuggestionForOrderRequest(productId: productId, userId: LoggedUserId, requestId: requestId);
@@ -66,6 +70,75 @@ namespace TradingApp.Controllers
             };
 
             return errorMessage;
+        }
+
+
+
+
+        [HttpGet]
+        public IActionResult CreateOrderRequest()
+        {
+            return View();
+        }
+
+        //this method is formed based on the logic of the service method for creating an order request 
+        //its purpose is to provide a proper error message which will be shown to the user based on the error code
+        public string Get_CreateOrderRequest_ErrorMessage(string errorCode)
+        {
+
+            string errorMessage = errorCode switch
+            {
+                string code when code == UserErrorCodes.UserNotFound =>
+                    "You have to login in order to create a request.",
+
+                string code when code == OrderRequestErrorCodes.RequestWithSameTitleAlreadyExists =>
+                    "A request with the same title already exists!\n Consider using unique title before creating the request.",
+
+                _ => "Something went wrong."
+            };
+
+            return errorMessage;
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateOrderRequest_execute([FromForm]CreatedOrderRequestModel createdOrderRequestModel)
+        {
+            if (ModelState.IsValid == false) 
+            {
+                return View(viewName: nameof(CreateOrderRequest), model: createdOrderRequestModel);
+            }
+
+            Result result;
+
+            try
+            {
+                result = await _orderRequestOperationsService.CreateOrderRequest(title: createdOrderRequestModel.Title, 
+                    description: createdOrderRequestModel.Description, 
+                    maxPrice: createdOrderRequestModel.MaxPrice, 
+                    creatorId:LoggedUserId);
+            }
+            catch (Exception e)
+            {
+                Console.Write(e.Message.ToString());
+
+                TempData["title"] = "Error";
+                TempData["message"] = "An error occurred while creating the order request. Please try again later.";
+                return RedirectToAction(nameof(Message));
+            }
+
+            if (result.Success == false)
+            {
+                string errorMessage = Get_CreateOrderRequest_ErrorMessage(result.ErrorCode);
+                ModelState.AddModelError(key: string.Empty, errorMessage: errorMessage);
+                return View(viewName: nameof(CreateOrderRequest), model: createdOrderRequestModel);
+            }
+            else
+            {
+                TempData["title"] = "Success";
+                TempData["message"] = $"Your request was created succesfully.";
+                return RedirectToAction(nameof(Message));
+            }
+            
         }
     }
 }

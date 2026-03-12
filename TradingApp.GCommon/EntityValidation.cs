@@ -31,6 +31,9 @@
             public const int DescriptionMinLength = 10;
             public const int DescriptionMaxLength = 2000;
 
+            public const double PriceMinValue = 0.1;
+            public const double PriceMaxValue = 999_999;
+
             public const string PriceDbType = "decimal (10,4)";
 
             public const string DateType = "datetime2";

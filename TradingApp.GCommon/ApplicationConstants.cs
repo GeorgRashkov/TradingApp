@@ -15,7 +15,9 @@ namespace TradingApp.GCommon
 
         public const string DateFormat = "dd/MM/yyyy";
         public const string DateTimeFormat = "dd/MM/yyyy HH:mm:ss";
+        
         public const ProductStatus CreatedProductDefaultStatus = ProductStatus.approved;
         public const SellOrderStatus CreatedSellOrderDefaultStatus = SellOrderStatus.active;
+        public const OrderRequestStatus CreatedOrderRequestDefaultStatus = OrderRequestStatus.active;
     }
 }

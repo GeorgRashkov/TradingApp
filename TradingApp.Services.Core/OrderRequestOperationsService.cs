@@ -8,17 +8,19 @@ using TradingApp.Data.Models;
 
 namespace TradingApp.Services.Core
 {
-    public class OrderRequestOperationsService: IOrderRequestOperationsService
+    public class OrderRequestOperationsService : IOrderRequestOperationsService
     {
         private ApplicationDbContext _context;
         private IProductBoolsService _productBoolsService;
         private IOrderRequestBoolsService _orderRequestBoolsService;
+        private IUserService _userService;
 
-        public OrderRequestOperationsService(ApplicationDbContext context, IProductBoolsService productBoolsService, IOrderRequestBoolsService orderRequestBoolsService)
+        public OrderRequestOperationsService(ApplicationDbContext context, IProductBoolsService productBoolsService, IOrderRequestBoolsService orderRequestBoolsService, IUserService userService)
         {
             _context = context;
             _productBoolsService = productBoolsService;
             _orderRequestBoolsService = orderRequestBoolsService;
+            _userService = userService;
         }
 
         public async Task<Result> CreateSuggestionForOrderRequest(Guid productId, string userId, Guid requestId)
@@ -39,9 +41,9 @@ namespace TradingApp.Services.Core
             bool doesProductHaveActiveSaleOrders = await _productBoolsService.DoesProductHaveActiveSaleOrdersAsync(productId: productId);
             if (doesProductHaveActiveSaleOrders == false)
             { return new Result(errorCode: ProductErrorCodes.ProductHasNoActiveSaleOrders); }
-            
+
             bool isProductAlreadySuggestedToOrderRequest = await _productBoolsService.IsProductSuggestedToOrderRequestAsync(productId: productId, orderRequestId: requestId);
-            if(isProductAlreadySuggestedToOrderRequest == true) 
+            if (isProductAlreadySuggestedToOrderRequest == true)
             { return new Result(errorCode: ProductErrorCodes.ProductAlreadySuggestedToRequest); }
             //product validations>
 
@@ -63,6 +65,32 @@ namespace TradingApp.Services.Core
             };
 
             await _context.SellOrderSuggestions.AddAsync(sellOrderSuggestion);
+            await _context.SaveChangesAsync();
+
+            return new Result();
+        }
+
+        public async Task<Result> CreateOrderRequest(string title, string description, decimal maxPrice, string creatorId)
+        {
+            bool doesUserExist = await _userService.DoesUserExistAsync(userId: creatorId);
+            if (doesUserExist == false)
+            { return new Result(errorCode: ProductErrorCodes.ProductNotFound); }
+
+            bool doesOrderRequestCreatedByUserExist = await _orderRequestBoolsService.DoesOrderRequestCreatedByUserExistAsync(userId: creatorId, orderRequestTitle: title);
+            if(doesOrderRequestCreatedByUserExist == true) 
+            { return new Result(errorCode: OrderRequestErrorCodes.RequestWithSameTitleAlreadyExists); }
+
+            OrderRequest orderRequest = new OrderRequest
+            {
+                Title = title,
+                Description = description,
+                MaxPrice = maxPrice,
+                CreatedAt = DateTime.UtcNow,
+                Status = ApplicationConstants.CreatedOrderRequestDefaultStatus,
+                CreatorId = creatorId
+            };
+
+            await _context.OrderRequests.AddAsync(orderRequest);
             await _context.SaveChangesAsync();
 
             return new Result();

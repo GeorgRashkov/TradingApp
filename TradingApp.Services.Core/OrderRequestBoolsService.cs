@@ -21,6 +21,14 @@ namespace TradingApp.Services.Core
                 .AnyAsync(or => or.Id == orderRequestId);
         }
 
+        public async Task<bool> DoesOrderRequestCreatedByUserExistAsync(string userId, string orderRequestTitle)
+        {
+            return await _context
+                .OrderRequests
+                .AsNoTracking()
+                .AnyAsync(or => or.CreatorId==userId && or.Title == orderRequestTitle);
+        }
+
         public async Task<bool> IsOrderRequestActiveAsync(Guid orderRequestId)
         {
             return await _context
