@@ -6,9 +6,11 @@ namespace TradingApp.Data.Seed
     public class BalanceSeeder
     {
         private ApplicationDbContext _context;
-        public BalanceSeeder(ApplicationDbContext context)
+        private SeederHelper _seederHelper;
+        public BalanceSeeder(ApplicationDbContext context, SeederHelper seederHelper)
         {
             _context = context;
+            _seederHelper = seederHelper;
         }
 
         public async Task SeedAsync()
@@ -17,10 +19,8 @@ namespace TradingApp.Data.Seed
             { return; }
 
             decimal initialBalanceAmount = 1000m;
-
-            var userIds = await _context
-                .Users
-                .AsNoTracking()
+            
+            var userIds = await _seederHelper.GetUsersWithRoleUser()
                 .Select(u => u.Id)
                 .ToListAsync();
 

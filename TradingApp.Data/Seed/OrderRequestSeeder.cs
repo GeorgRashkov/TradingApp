@@ -7,10 +7,12 @@ namespace TradingApp.Data.Seed
     public class OrderRequestSeeder
     {
         private readonly ApplicationDbContext _context;
+        private SeederHelper _seederHelper;
 
-        public OrderRequestSeeder(ApplicationDbContext context)
+        public OrderRequestSeeder(ApplicationDbContext context, SeederHelper seederHelper)
         {
             _context = context;
+            _seederHelper = seederHelper;
         }
 
         public async Task SeedAsync()
@@ -18,9 +20,7 @@ namespace TradingApp.Data.Seed
             if (await _context.OrderRequests.AnyAsync())
                { return; }
 
-            List<string> userIds = await _context
-               .Users
-               .AsNoTracking()
+            List<string> userIds = await _seederHelper.GetUsersWithRoleUser()
                .OrderByDescending(u => u.UserName)
                .Select(u => u.Id)
                .Take(3)

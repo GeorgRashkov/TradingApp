@@ -8,9 +8,12 @@ namespace TradingApp.Data.Seed
     {
         private readonly ApplicationDbContext _context;
 
-        public ProductSeeder(ApplicationDbContext context)
+        private SeederHelper _seederHelper;
+
+        public ProductSeeder(ApplicationDbContext context, SeederHelper seederHelper)
         {
             _context = context;
+            _seederHelper = seederHelper;
         }
 
         public async Task SeedAsync()
@@ -18,9 +21,7 @@ namespace TradingApp.Data.Seed
             if (await _context.Products.AnyAsync())
                { return; }
 
-             List<string> userIds = await _context
-                .Users
-                .AsNoTracking()
+             List<string> userIds = await _seederHelper.GetUsersWithRoleUser()
                 .OrderBy(u => u.UserName)
                 .Select(u => u.Id)
                 .Take(5)

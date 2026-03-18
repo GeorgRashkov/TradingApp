@@ -1,10 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using TradingApp.GCommon;
 
 namespace TradingApp.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = ApplicationRoles.User)]
     public class ControllerBase : Controller
     {
         //this is the Id of the currently logged user; if the user is not logged the value will be null 
