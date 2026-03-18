@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 using TradingApp.Data;
@@ -20,7 +21,9 @@ namespace TradingApp
                 options.UseSqlServer(connectionString));
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-            builder.Services.AddDefaultIdentity<User>(options => options.SignIn.RequireConfirmedAccount = false)
+            builder.Services.AddDefaultIdentity<User>(
+                options => options.SignIn.RequireConfirmedAccount = false
+                ).AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
             builder.Services.AddControllersWithViews();
 
@@ -40,12 +43,15 @@ namespace TradingApp
 
 
             //add the seeder classes to the services
+            builder.Services.AddTransient<SeederHelper>();
+            builder.Services.AddTransient<RoleSeeder>();
             builder.Services.AddTransient<UserSeeder>();
             builder.Services.AddTransient<BalanceSeeder>();
             builder.Services.AddTransient<ProductSeeder>();
             builder.Services.AddTransient<OrderRequestSeeder>();
             builder.Services.AddTransient<SellOrderSeeder>();
             builder.Services.AddTransient<SellOrderSuggestionSeeder>();
+           
             
 
 
@@ -94,6 +100,9 @@ namespace TradingApp
             using (var scope = app.Services.CreateScope())
             {
                 var services = scope.ServiceProvider;
+
+                RoleSeeder roleSeeder = services.GetRequiredService<RoleSeeder>();
+                await roleSeeder.SeedAsync();
 
                 UserSeeder userSeeder = services.GetRequiredService<UserSeeder>();
                 await userSeeder.SeedAsync();

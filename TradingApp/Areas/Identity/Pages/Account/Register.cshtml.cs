@@ -19,6 +19,7 @@ using System.Text.Encodings.Web;
 using System.Threading;
 using System.Threading.Tasks;
 using TradingApp.Data.Models;
+using TradingApp.GCommon;
 using TradingApp.Services.Core.Interfaces;
 
 namespace TradingApp.Areas.Identity.Pages.Account
@@ -133,6 +134,10 @@ namespace TradingApp.Areas.Identity.Pages.Account
 
                 if (result.Succeeded)
                 {
+                    IdentityResult addUserToRoleresult = await _userManager.AddToRoleAsync(user, ApplicationRoles.User);
+                    if(addUserToRoleresult.Succeeded == false) 
+                    { throw new Exception($"The user could not be added to the role {ApplicationRoles.User}"); }
+
                     _logger.LogInformation("User created a new account with password.");
 
                     var userId = await _userManager.GetUserIdAsync(user);
