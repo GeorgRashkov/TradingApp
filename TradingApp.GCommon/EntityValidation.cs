@@ -2,6 +2,12 @@
 {
     public static class EntityValidation
     {
+        public static class  User
+        {
+            public const int LockoutMessageMinLength = 5;
+            public const int LockoutMessageMaxLength = 300;
+        }
+
         public static class Balance
         {
             public const string AmountDbType = "decimal (12,4)"; 
