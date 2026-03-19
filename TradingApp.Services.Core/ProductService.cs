@@ -249,6 +249,22 @@ namespace TradingApp.Services.Core
             return product;
         }
 
+        public async Task<ManagedProductModel?> GetManagedProductModelAsync(Guid productId) 
+        {
+            ManagedProductModel? product = await _context
+                .Products
+                .AsNoTracking()
+                .Where(p => p.Id == productId)
+                .Select(p => new ManagedProductModel()
+                {
+                    Id = productId,
+                    Name = p.Name,
+                    Status = p.Status
+                }).SingleOrDefaultAsync(); 
+            
+            return product;
+        }
+
 
         public async Task<string?> GetProductNameAsync(Guid productId)
         {

@@ -10,6 +10,10 @@ namespace TradingApp.Areas.Admin.Controllers
     [Authorize(Roles = ApplicationRoles.Admin)]
     public class ControllerBase : Controller
     {
-        
+        [HttpGet]        
+        public IActionResult Message()
+        {
+            return View();
+        }
     }
 }
