@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
-using TradingApp.Data;
-using TradingApp.Data.Models;
 using TradingApp.GCommon;
 using TradingApp.Services.Core.Interfaces;
 using TradingApp.ViewModels.Product;
@@ -15,7 +13,7 @@ namespace TradingApp.Controllers
         private IProductService _productService;   
         private IUserService _userService;
 
-        public ProductController(ApplicationDbContext context, IProductService productService, IUserService userService)
+        public ProductController(IProductService productService, IUserService userService)
         {          
             _productService = productService;
             _userService = userService;
