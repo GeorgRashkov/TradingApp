@@ -1,0 +1,42 @@
+﻿@*Area `Admin`*@
+
+@using TradingApp.ViewModels.Product;
+@using TradingApp.GCommon.Enums;
+
+@model MyProductViewModel
+@{
+    ViewData["Title"] = Model.ProductName;
+    List<string> imageNames = new List<string>() { "front", "back", "top", "bottom", "left", "right" };
+}
+
+
+<h1>Product: @(Model.ProductName)</h1>
+<h1>Product status: @(Model.ProductStatus)</h1>
+<h2>Creator: @(Model.CreatorName)</h2>
+<h3>Active sale orders: @(Model.ActiveSellOrdersCount)</h3>
+<h3>Price: @(Model.Price)$</h3>
+
+<partial name="_MyProduct_Images" model="@Model"></partial>
+
+<br />
+
+<div>
+    <p>@(Model.Description)</p>
+</div>
+
+<br />
+
+<a class="btn btn-sm btn-primary" asp-area ="@(ApplicationRoles.Admin)" asp-controller="Product" asp-action="ManageProduct" asp-route-productId="@(Model.Id)">
+    Manage
+    </a>
+
+<a class="btn btn-primary" asp-area="@(ApplicationRoles.Admin)" asp-controller="Product" asp-action="Download3dModelFile" asp-route-productName="@(Model.ProductName)" asp-route-productCreatorName="@(Model.CreatorName)">
+    Download
+</a>
+<br />
+<br />
+
+
+@section Styles {
+    <partial name="_ProductStyle"></partial>
+}
