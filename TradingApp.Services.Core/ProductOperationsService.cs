@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using TradingApp.Data;
 using TradingApp.Data.Models;
 using TradingApp.GCommon;
+using TradingApp.GCommon.Enums;
 using TradingApp.GCommon.ErrorCodes;
 using TradingApp.Services.Core.Interfaces;
 
@@ -91,7 +92,7 @@ namespace TradingApp.Services.Core
         //deletes an existing product in the database
         public async Task<Result> DeleteProductAsync(Guid id, string creatorId)
         {
-            Product product = (await _context.Products.FindAsync(id))!;
+            Product? product = await _context.Products.FindAsync(id);
 
             if (product == null)
             {
@@ -108,6 +109,26 @@ namespace TradingApp.Services.Core
 
             _context.Products.Attach(product);
             _context.Products.Remove(product);
+            await _context.SaveChangesAsync();
+
+            return new Result();
+        }
+
+        //changes the status of an existing product in the database
+        public async Task<Result> ChangeProductStatusAsync(Guid id, ProductStatus productStatus) 
+        {
+            Product? product = await _context.Products.FindAsync(id);
+
+            if (product == null)
+            {
+                return new Result(errorCode: ProductErrorCodes.ProductNotFound);
+            }
+            else if (product.Status == productStatus) 
+            {
+                return new Result(errorCode: ProductErrorCodes.ProductInvalidStatus);
+            }
+
+            product.Status = productStatus;
             await _context.SaveChangesAsync();
 
             return new Result();

@@ -15,6 +15,7 @@ namespace TradingApp.Services.Core.Interfaces
         Task<MyProductViewModel?> GetDetailsForProductAsync(Guid productId);
         Task<int> GetProductActiveSellOrdersCountAsync(Guid productId);
         Task<UpdatedProductModel?> GetUpdatedProductModelAsync(Guid productId);
+        Task<ManagedProductModel?> GetManagedProductModelAsync(Guid productId);
         Task<DeletedProductModel?> GetDeletedProductModelAsync(Guid productId);
 
         Task<string?> GetProductNameAsync(Guid productId);        

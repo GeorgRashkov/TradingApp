@@ -1,21 +1,26 @@
 ﻿//Area `Admin`
 
 using Microsoft.AspNetCore.Mvc;
+using TradingApp.GCommon;
+using TradingApp.GCommon.ErrorCodes;
 using TradingApp.Services.Core.Interfaces;
+using TradingApp.ViewModels.InputProduct;
 using TradingApp.ViewModels.Product;
 
 namespace TradingApp.Areas.Admin.Controllers
 {
     public class ProductController : ControllerBase
     {
-        private IProductService _productService;
         private IUserService _userService;
+        private IProductService _productService;
+        private IProductOperationsService _productOperationsService;
         private IProductFileService _productFileService;
-        public ProductController(IProductService productService, IUserService userService, IProductFileService productFileService)
+        public ProductController(IUserService userService, IProductService productService, IProductOperationsService productOperationsService, IProductFileService productFileService)
         {
-            _productService = productService;
             _userService = userService;
-            _productFileService = productFileService;
+            _productService = productService;
+            _productOperationsService = productOperationsService;
+            _productFileService = productFileService;            
         }
 
         [HttpGet]
@@ -48,7 +53,7 @@ namespace TradingApp.Areas.Admin.Controllers
 
 
         [HttpGet]
-        public async Task<IActionResult> Download3dModelFile(string productName, string productCreatorName)
+        public IActionResult Download3dModelFile(string productName, string productCreatorName)
         {
             
             byte[] bytes;
@@ -65,6 +70,74 @@ namespace TradingApp.Areas.Admin.Controllers
             }
 
             return File(bytes, "image/jpg", productName + ".jpg");
+        }
+
+
+
+        [HttpGet]
+        public async Task<IActionResult> ManageProduct(Guid productId) 
+        {
+            ManagedProductModel? managedProductModel = await _productService.GetManagedProductModelAsync(productId: productId);
+            
+            if(managedProductModel == null) 
+            { return NotFound(); }
+
+            return View(model: managedProductModel);
+        }
+
+        //this method is formed based on the logic of the service method for changing the status of a product 
+        //its purpose is to provide a proper error message which will be shown to the user based on the error code
+        private string Get_ManageProduct_ErrorMessage(string errorCode)
+        {
+
+            string errorMessage = errorCode switch
+            {
+                string code when code == ProductErrorCodes.ProductNotFound =>
+                    "The product you are trying to manage could not be found!",
+
+                string code when code == ProductErrorCodes.ProductInvalidStatus =>
+                    "The product status was not changed!",
+
+                _ => "Something went wrong."
+            };
+
+            return errorMessage;
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ManageProduct_execute([FromForm]ManagedProductModel managedProductModel) 
+        {
+            //model state validation
+            if (ModelState.IsValid == false)
+            {
+                return View(viewName:nameof(ManageProduct), model: managedProductModel);
+            }
+
+            Result result;
+            try 
+            {
+                result = await _productOperationsService.ChangeProductStatusAsync(id: managedProductModel.Id, productStatus: managedProductModel.Status);
+            }
+            catch(Exception e) 
+            {
+                Console.Write(e.Message.ToString());
+
+                TempData["title"] = "Error";
+                TempData["message"] = "An error occured while attempting to apply the product changes! Please try again later.";
+                return RedirectToAction(nameof(Message));
+            }
+
+            if (result.Success == false)
+            {
+                string errorMessage = Get_ManageProduct_ErrorMessage(result.ErrorCode);
+                TempData["title"] = "Error";
+                TempData["message"] = errorMessage;
+                return RedirectToAction(nameof(Message));
+            }
+
+            TempData["title"] = "Success";
+            TempData["message"] = $"The product status was updated succesfully.";
+            return RedirectToAction(nameof(Message));
         }
     }
 }
