@@ -51,6 +51,34 @@ namespace TradingApp.Services.Core
             return products;
         }
 
+        public async Task<IEnumerable<ProductsViewModel>> GetProductsAsync(int pageIndex)
+        {
+            int productsCount = await _context
+                .Products
+               .AsNoTracking()               
+               .CountAsync();
+
+            if (productsCount == 0)
+            { return new List<ProductsViewModel>(); }
+
+            SetProductPage(pageIndex, productsCount);
+
+            IEnumerable<ProductsViewModel> products = await _context
+                .Products
+              .AsNoTracking()              
+              .Skip(ProductPageIndex * _productsPerPage).Take(_productsPerPage)
+              .Select(p => new ProductsViewModel
+              {
+                  Id = p.Id,
+                  CreatorName = p.Creator.UserName,
+                  Price = p.Price.ToString("f2"),
+                  ProductName = p.Name,
+                  Status = p.Status.ToString()
+              }).ToListAsync();
+
+            return products;
+        }
+
         public async Task<IEnumerable<ProductsViewModel>> Get_SuggestedApprovedProductsWithActiveSellOrders_for_OrderRequest_Async(int pageIndex, Guid orderRequestId)
         {
             int productsCount = await _context
