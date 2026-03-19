@@ -5,6 +5,7 @@
 
     <!-- Previous page-->
     <a class="btn btn-outline-secondary @(Model.PageIndex <= 0 ? "disabled" : "")"
+       asp-area="@(Model.Area)"
        asp-controller="@(Model.Controller)"
        asp-action="@(Model.Action)"
        asp-route-pageIndex="@(Model.PageIndex - 1)">
@@ -16,6 +17,7 @@
 
     <!-- Next page-->
     <a class="btn btn-outline-secondary"
+       asp-area="@(Model.Area)"
        asp-controller="@(Model.Controller)"
        asp-action="@(Model.Action)"
        asp-route-pageIndex="@(Model.PageIndex + 1)">
