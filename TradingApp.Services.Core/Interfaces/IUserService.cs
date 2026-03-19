@@ -7,5 +7,6 @@ namespace TradingApp.Services.Core.Interfaces
         Task<string?> GetCreatorNameOfProductAsync(Guid productId);
         Task<string?> GetCreatorIdOfRequestAsync(Guid orderRequestId);
         Task<int> GetUserActiveSellOrdersCountAsync(string userId);
+        Task<string?> GetUserIdAsync(string userName);
     }
 }

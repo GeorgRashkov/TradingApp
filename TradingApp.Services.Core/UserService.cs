@@ -56,5 +56,17 @@ namespace TradingApp.Services.Core
             return sellOrdersCount;
         }
 
+
+        public async Task<string?> GetUserIdAsync(string userName) 
+        {
+            string? userId = await _context
+                .Users
+                .AsNoTracking()
+                .Where(u => u.UserName == userName)
+                .Select(u => u.Id)
+                .SingleOrDefaultAsync();
+
+            return userName;
+        }
     }
 }
