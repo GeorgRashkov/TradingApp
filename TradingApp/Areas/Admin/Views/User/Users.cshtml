@@ -1,0 +1,37 @@
+﻿@*Area `Admin`*@
+
+@using TradingApp.ViewModels.Invoice
+@using TradingApp.ViewModels.User
+
+@model List<UsersViewModel>
+@{
+    ViewData["Title"] = "Users";
+
+    PaginationHelper paginationHelper = new PaginationHelper()
+    {
+        Area = "Admin",
+        Controller = "User",
+        Action = "Users",
+        PageIndex = (int)(ViewData["page"] ?? 0)
+    };
+}
+
+<div class="container mt-4">
+
+    @if (Model.Count == 0)
+    {
+        <div class="alert alert-info text-center">
+            <h2>No users found!</h2>
+        </div>
+    }
+    else
+    {
+        <h2 class="mb-3">Users</h2>
+
+        <partial name="_Users_Table" model="@(Model)"></partial>
+
+        <br />
+
+        <partial name="_Pagination" model="@(paginationHelper)"></partial>
+    }
+</div>
