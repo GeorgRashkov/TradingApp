@@ -6,6 +6,9 @@
         {
             public const int LockoutMessageMinLength = 5;
             public const int LockoutMessageMaxLength = 300;
+
+            public const int MinDaysToSuspendUser = 0;
+            public const int MaxDaysToSuspendUser = 999;
         }
 
         public static class Balance

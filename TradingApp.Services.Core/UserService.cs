@@ -6,6 +6,7 @@ using TradingApp.Data.Models;
 using TradingApp.GCommon;
 using TradingApp.GCommon.Enums;
 using TradingApp.Services.Core.Interfaces;
+using TradingApp.ViewModels.InputUser;
 using TradingApp.ViewModels.User;
 
 namespace TradingApp.Services.Core
@@ -15,11 +16,13 @@ namespace TradingApp.Services.Core
         private ApplicationDbContext _context;
         private const int _usersPerPage = ApplicationConstants.UsersPerPage;
         private UserManager<User> _userManager;
+        private RoleManager<IdentityRole> _roleManager;
 
-        public UserService(ApplicationDbContext context, UserManager<User> userManager)
+        public UserService(ApplicationDbContext context, UserManager<User> userManager, RoleManager<IdentityRole> roleManager)
         {
             _context = context;
             _userManager = userManager;
+            _roleManager = roleManager;
         }
         public int UserPageIndex { get; private set; }
         public async Task<bool> DoesUserExistAsync(string userId)
@@ -76,6 +79,42 @@ namespace TradingApp.Services.Core
 
             return userName;
         }
+
+        
+
+        public async Task<ManagedUserModel?> GetManagedUserAsync(string userId) 
+        {
+            User? user = await _userManager.Users.Where(u => u.Id == userId).SingleOrDefaultAsync();
+            
+            if(user == null) 
+            { return null; }
+
+            Helper_ManagedUserModel userHelper = new Helper_ManagedUserModel()
+            {
+                UserName = user.UserName,
+                Roles = await _roleManager.Roles.Where(r => r.Name != ApplicationRoles.Admin).Select(r => r.Name).ToListAsync()
+            };
+
+            DateTimeOffset? userLockoutTime = user.LockoutEnd;            
+            int daysToSuspend = 0;
+            if (userLockoutTime != null) 
+            {
+                daysToSuspend = (DateTime.UtcNow - userLockoutTime.Value).Days;
+                daysToSuspend = Math.Max(0, daysToSuspend);
+            }
+
+            ManagedUserModel managedUser = new ManagedUserModel()
+            {
+                UserId = userId,
+                DaysToSuspend = daysToSuspend,
+                IsBanned = user.Banned,
+                Role = (await _userManager.GetRolesAsync(user: user))[0],
+                UserHelper = userHelper
+            };
+
+            return managedUser;
+        }
+
 
         public async Task<IEnumerable<UsersViewModel>> GetUsers(int pageIndex)
         {
