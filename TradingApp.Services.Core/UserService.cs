@@ -95,14 +95,8 @@ namespace TradingApp.Services.Core
                 Roles = await _roleManager.Roles.Where(r => r.Name != ApplicationRoles.Admin).Select(r => r.Name).ToListAsync()
             };
 
-            DateTimeOffset? userLockoutTime = user.LockoutEnd;            
-            int daysToSuspend = 0;
-            if (userLockoutTime != null) 
-            {
-                daysToSuspend = (DateTime.UtcNow - userLockoutTime.Value).Days;
-                daysToSuspend = Math.Max(0, daysToSuspend);
-            }
-
+            int daysToSuspend = GetDaysToSuspendUser(user);
+            
             ManagedUserModel managedUser = new ManagedUserModel()
             {
                 UserId = userId,
@@ -139,15 +133,17 @@ namespace TradingApp.Services.Core
 
             foreach (User user in usersFromDB)
             {
-                List<string> currentUserRoles = (List<string>)(await _userManager.GetRolesAsync(user: user));
+                string currentUserRole = (await _userManager.GetRolesAsync(user: user))[0];                
 
                 UsersViewModel usersViewModel = new UsersViewModel()
                 {
                     Id = user.Id,
                     UserName = user.UserName,
                     Email = user.Email,
-                    Roles = string.Join(", ", currentUserRoles),
-                    IsAdmin = currentUserRoles.Contains(ApplicationRoles.Admin)
+                    Role = currentUserRole,
+                    DaysToSuspend = GetDaysToSuspendUser(user),
+                    IsBanned = user.Banned,
+                    IsAdmin = currentUserRole == ApplicationRoles.Admin
                 };
                 users.Add(usersViewModel);
             }
@@ -155,6 +151,18 @@ namespace TradingApp.Services.Core
             return users;
         }
 
+        private int GetDaysToSuspendUser(User user) 
+        {
+            DateTimeOffset? userLockoutTime = user.LockoutEnd;
+            int daysToSuspend = 0;
+            if (userLockoutTime != null)
+            {
+                daysToSuspend = (DateTime.UtcNow - userLockoutTime.Value).Days;
+                daysToSuspend = Math.Max(0, daysToSuspend);
+            }
+
+            return daysToSuspend;
+        }
 
         private void SetUserPage(int pageIndex, int usersCount)
         {

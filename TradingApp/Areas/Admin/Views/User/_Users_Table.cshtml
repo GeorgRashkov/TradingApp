@@ -11,6 +11,8 @@
             <th>Username</th>
             <th>Email</th>
             <th>Role</th>
+            <th>Suspended for</th>
+            <th>Banned</th>
             <th class="text-center">Manage</th>
         </tr>
     </thead>
@@ -20,7 +22,16 @@
             <tr>
                 <td>@(user.UserName)</td>
                 <td>@(user.Email)</td>
-                <td>@(user.Roles)</td>
+                <td>@(user.Role)</td>
+
+                @if (user.DaysToSuspend > 0)
+                {
+                    <td>@(user.DaysToSuspend) days</td>
+                }
+                else {<td></td> }
+
+                <td>@(user.IsBanned.ToString())</td>
+
                 <td class="text-center">
 
                     @if (user.IsAdmin == true)
