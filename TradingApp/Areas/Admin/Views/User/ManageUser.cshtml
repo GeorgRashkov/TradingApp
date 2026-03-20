@@ -1,0 +1,47 @@
+﻿@*Area `Admin`*@
+
+@using TradingApp.ViewModels.InputUser
+@model ManagedUserModel
+@{
+    ViewData["Title"] = "Manage user";
+}
+
+<h1>Managed user: @(Model.UserHelper!.UserName)</h1>
+
+<br />
+<br />
+
+<form asp-area="Admin" asp-controller="User" asp-action="ManageUser" method="post">
+    
+    <label>Role:</label>
+    <select asp-for="@(Model.Role)">
+        @foreach (string role in Model.UserHelper.Roles)
+        {
+            <option>@(role)</option>
+        }       
+    </select>
+
+    <br />
+    <br />
+
+    <label>Days to suspend:</label>
+    <input type="number" asp-for="@(Model.DaysToSuspend)" />
+    <span asp-validation-for="@(Model.DaysToSuspend)"></span>
+
+    <br />
+    <br />
+        
+    <input type="checkbox" asp-for="@(Model.IsBanned)"/>
+    <label>Ban</label>
+
+    <br />
+    <br />
+
+    <input type="hidden" asp-for="@(Model.UserId)"/>
+    <input type="submit" class="btn btn-sm btn-primary" />
+
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial"></partial>
+}

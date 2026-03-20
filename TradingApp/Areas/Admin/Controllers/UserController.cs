@@ -2,6 +2,7 @@
 
 using Microsoft.AspNetCore.Mvc;
 using TradingApp.Services.Core.Interfaces;
+using TradingApp.ViewModels.InputUser;
 using TradingApp.ViewModels.User;
 
 namespace TradingApp.Areas.Admin.Controllers
@@ -25,6 +26,18 @@ namespace TradingApp.Areas.Admin.Controllers
             ViewData["page"] = _userService.UserPageIndex;            
 
             return View(model: users);
+        }
+
+
+        [HttpGet]
+        public async Task<IActionResult> ManageUser(string userId) 
+        {
+            ManagedUserModel? user = await _userService.GetManagedUserAsync(userId: userId);
+            
+            if(user == null) 
+            { return NotFound(); }            
+
+            return View(model: user);
         }
     }
 }
