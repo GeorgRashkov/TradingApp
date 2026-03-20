@@ -1,4 +1,6 @@
 ﻿
+using TradingApp.ViewModels.User;
+
 namespace TradingApp.Services.Core.Interfaces
 {
     public interface IUserService
@@ -8,5 +10,8 @@ namespace TradingApp.Services.Core.Interfaces
         Task<string?> GetCreatorIdOfRequestAsync(Guid orderRequestId);
         Task<int> GetUserActiveSellOrdersCountAsync(string userId);
         Task<string?> GetUserIdAsync(string userName);
+        Task<IEnumerable<UsersViewModel>> GetUsers(int pageIndex);
+
+        int UserPageIndex { get;}
     }
 }

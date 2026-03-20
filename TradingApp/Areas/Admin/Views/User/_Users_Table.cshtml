@@ -1,0 +1,45 @@
+﻿@*Area `Admin`*@
+
+@using TradingApp.ViewModels.User
+
+@model List<UsersViewModel>
+
+
+<table class="table table-striped table-bordered table-hover">
+    <thead class="table-dark">
+        <tr>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th class="text-center">Manage</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (UsersViewModel user in Model)
+        {
+            <tr>
+                <td>@(user.UserName)</td>
+                <td>@(user.Email)</td>
+                <td>@(user.Roles)</td>
+                <td class="text-center">
+
+                    @if (user.IsAdmin == true)
+                    {
+                        <b>"Cannot edit Admin"</b>
+                    }
+                    else
+                    {
+                        <a class="btn btn-sm btn-primary"
+                           asp-area="Admin"
+                           asp-controller="User"
+                           asp-action="User"
+                           asp-route-UserId="@(user.Id)">
+                            manage
+                        </a>
+                    }
+                    
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
