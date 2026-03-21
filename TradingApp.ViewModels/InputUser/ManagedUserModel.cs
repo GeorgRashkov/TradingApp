@@ -13,6 +13,8 @@ namespace TradingApp.ViewModels.InputUser
         public int DaysToSuspend { get; set; }
         public bool IsBanned { get; set; }
 
+        public string? LockoutMessage { get; set; }
+
         public Helper_ManagedUserModel? UserHelper {  get; set; }
     }
 }
