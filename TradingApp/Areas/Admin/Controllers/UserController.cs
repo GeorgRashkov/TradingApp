@@ -53,9 +53,6 @@ namespace TradingApp.Areas.Admin.Controllers
                 string code when code == UserErrorCodes.UserNotFound =>
                     "The user was not found.",
 
-                string code when code == UserErrorCodes.UserDaysToSuspendOutOfBoundaries =>
-                    $"You are not allowed suspend a user for less than {EntityValidation.User.MinDaysToSuspendUser} nor for more than {EntityValidation.User.MaxDaysToSuspendUser}.",
-
                 string code when code == RoleErrorCodes.RoleNotFound =>
                 "The role you are trying to assign to the user was not found.",
 
