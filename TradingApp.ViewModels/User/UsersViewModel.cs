@@ -8,8 +8,7 @@ namespace TradingApp.ViewModels.User
         public string UserName { get; set; } = null!;
         public string Email { get; set; } = null!;
         public string Role { get; set; } = null!;
-        public int DaysToSuspend { get; set; }
-        public bool IsBanned { get; set; }
+        public int DaysToSuspend { get; set; }       
         public bool IsAdmin { get; set; }
     }
 }

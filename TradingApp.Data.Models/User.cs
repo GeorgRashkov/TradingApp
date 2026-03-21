@@ -6,9 +6,7 @@ namespace TradingApp.Data.Models
 {
     public class User: IdentityUser
     {
-        [Required]
-        public bool Banned { get; set; } = false;
-
+       
         [MaxLength(EntityValidation.User.LockoutMessageMaxLength)]
         public string? LockoutMessage { get; set; }
 

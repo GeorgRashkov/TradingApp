@@ -100,8 +100,7 @@ namespace TradingApp.Services.Core
             ManagedUserModel managedUser = new ManagedUserModel()
             {
                 UserId = userId,
-                DaysToSuspend = daysToSuspend,
-                IsBanned = user.Banned,
+                DaysToSuspend = daysToSuspend,                
                 Role = (await _userManager.GetRolesAsync(user: user))[0],
                 LockoutMessage = user.LockoutMessage,
                 UserHelper = userHelper
@@ -142,8 +141,7 @@ namespace TradingApp.Services.Core
                     UserName = user.UserName,
                     Email = user.Email,
                     Role = currentUserRole,
-                    DaysToSuspend = GetDaysToSuspendUser(user),
-                    IsBanned = user.Banned,
+                    DaysToSuspend = GetDaysToSuspendUser(user),                    
                     IsAdmin = currentUserRole == ApplicationRoles.Admin
                 };
                 users.Add(usersViewModel);
