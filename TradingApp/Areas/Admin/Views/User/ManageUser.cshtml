@@ -26,13 +26,19 @@
 
     <label>Days to suspend:</label>
     <input type="number" asp-for="@(Model.DaysToSuspend)" />
-    <span asp-validation-for="@(Model.DaysToSuspend)"></span>
+    <span asp-validation-for="@(Model.DaysToSuspend)" style="color:red"></span>
 
     <br />
     <br />
         
     <input type="checkbox" asp-for="@(Model.IsBanned)"/>
     <label>Ban</label>
+
+    <br />
+    <br />
+
+    <label>Lockout message: </label>
+    <input type="text" asp-for="@(Model.LockoutMessage)"/>    
 
     <br />
     <br />

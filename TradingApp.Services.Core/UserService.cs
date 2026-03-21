@@ -103,6 +103,7 @@ namespace TradingApp.Services.Core
                 DaysToSuspend = daysToSuspend,
                 IsBanned = user.Banned,
                 Role = (await _userManager.GetRolesAsync(user: user))[0],
+                LockoutMessage = user.LockoutMessage,
                 UserHelper = userHelper
             };
 
@@ -157,7 +158,7 @@ namespace TradingApp.Services.Core
             int daysToSuspend = 0;
             if (userLockoutTime != null)
             {
-                daysToSuspend = (DateTime.UtcNow - userLockoutTime.Value).Days;
+                daysToSuspend = (userLockoutTime.Value - DateTimeOffset.UtcNow.Date).Days;
                 daysToSuspend = Math.Max(0, daysToSuspend);
             }
 
