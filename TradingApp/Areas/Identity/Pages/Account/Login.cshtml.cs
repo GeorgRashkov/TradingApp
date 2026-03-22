@@ -3,17 +3,11 @@
 #nullable disable
 
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
+using System.Globalization;
 using TradingApp.Data.Models;
 
 namespace TradingApp.Areas.Identity.Pages.Account
@@ -22,11 +16,13 @@ namespace TradingApp.Areas.Identity.Pages.Account
     {
         private readonly SignInManager<User> _signInManager;
         private readonly ILogger<LoginModel> _logger;
+        private readonly UserManager<User> _userManager;
 
-        public LoginModel(SignInManager<User> signInManager, ILogger<LoginModel> logger)
+        public LoginModel(SignInManager<User> signInManager, ILogger<LoginModel> logger, UserManager<User> userManager)
         {
             _signInManager = signInManager;
             _logger = logger;
+            _userManager = userManager;
         }
 
         /// <summary>
@@ -124,7 +120,8 @@ namespace TradingApp.Areas.Identity.Pages.Account
                 if (result.IsLockedOut)
                 {
                     _logger.LogWarning("User account locked out.");
-                    return RedirectToPage("./Lockout");
+                    User? user = await _userManager.FindByNameAsync(Input.Username);
+                    return RedirectToPage(pageName: "./Lockout", routeValues: new { message = user.LockoutMessage, lockoutEnd = user.LockoutEnd.Value.ToString(TradingApp.GCommon.ApplicationConstants.DateTimeFormat, CultureInfo.InvariantCulture) });
                 }
                 else
                 {
