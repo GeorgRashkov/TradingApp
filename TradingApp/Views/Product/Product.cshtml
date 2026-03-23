@@ -25,6 +25,8 @@
 <p>Price: @(Model.Price)$</p>
 
 <a class="btn btn-sm btn-primary" asp-controller="Order" asp-action="BuySellOrder" asp-route-productId="@(Model.Id)">Buy</a>
+<a class="btn btn-sm btn-primary" asp-controller="ReportedProductOperations" asp-action="Create_ProductReport" asp-route-reportedProductId="@(Model.Id)">Report</a>
+
 
 @section Styles {
     <partial name="_ProductStyle"></partial>
