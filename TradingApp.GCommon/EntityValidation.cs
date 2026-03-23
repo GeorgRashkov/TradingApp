@@ -2,7 +2,7 @@
 {
     public static class EntityValidation
     {
-        public static class  User
+        public static class User
         {
             public const int LockoutMessageMinLength = 5;
             public const int LockoutMessageMaxLength = 300;
@@ -13,7 +13,7 @@
 
         public static class Balance
         {
-            public const string AmountDbType = "decimal (12,4)"; 
+            public const string AmountDbType = "decimal (12,4)";
         }
 
         public static class Product
@@ -28,10 +28,10 @@
             public const double PriceMinValue = 0.1;
             public const double PriceMaxValue = 999_999;
 
-            public const string PriceDbType = "decimal (10,4)"; 
+            public const string PriceDbType = "decimal (10,4)";
         }
 
-        
+
         public static class Order
         {
             public const int TitleMinLength = 2;
@@ -44,6 +44,17 @@
             public const double PriceMaxValue = 999_999;
 
             public const string PriceDbType = "decimal (10,4)";
+
+            public const string DateType = "datetime2";
+        }
+
+        public static class ProductReport
+        {
+            public const int TitleMinLength = 5;
+            public const int TitleMaxLength = 100;
+
+            public const int MessageMinLength = 10;
+            public const int MessageMaxLength = 2000;
 
             public const string DateType = "datetime2";
         }
