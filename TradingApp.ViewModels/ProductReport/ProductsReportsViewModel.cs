@@ -1,6 +1,4 @@
 ﻿
-using TradingApp.GCommon.Enums;
-
 namespace TradingApp.ViewModels.ProductReport
 {
     public class ProductsReportsViewModel
