@@ -13,6 +13,8 @@ namespace TradingApp.Data
 
         public virtual DbSet<Balance> Balances { get; set; } = null!;
         public virtual DbSet<Product> Products { get; set; } = null!;
+        public virtual DbSet<ReportedProduct> ReportedProducts { get; set; } = null!;
+
 
         public virtual DbSet<SellOrder> SellOrders { get; set; } = null!;
         public virtual DbSet<OrderRequest> OrderRequests { get; set; } = null!;
@@ -23,7 +25,9 @@ namespace TradingApp.Data
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
+
             ConfigureSellOrder(builder);
+            ConfigureReportedProduct(builder);
             ConfigureSellOrderSuggestion(builder);
             ConfigureCompletedOrder(builder);
 
@@ -31,13 +35,25 @@ namespace TradingApp.Data
 
         public void ConfigureSellOrder(ModelBuilder builder)
         {
-            builder.Entity<SellOrder>(e => 
+            builder.Entity<SellOrder>(e =>
             {
                 e.HasOne(so => so.Product)
                 .WithMany(p => p.SellOrders)
                 .HasForeignKey(so => so.ProductId)
                 .OnDelete(DeleteBehavior.Restrict);
             });
+        }
+
+        public void ConfigureReportedProduct(ModelBuilder builder)
+        {
+            builder.Entity<ReportedProduct>(e =>
+            {
+                e.HasOne(rp => rp.Product)
+                .WithMany(p => p.ReportedProducts)
+                .HasForeignKey(rp => rp.ReportedProductId)
+                .OnDelete(DeleteBehavior.Restrict);
+            }
+            );
         }
 
         public void ConfigureSellOrderSuggestion(ModelBuilder builder)

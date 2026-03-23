@@ -36,5 +36,7 @@ namespace TradingApp.Data.Models
         public virtual ICollection<CompletedOrder> CompletedOrders { get; set; } = new HashSet<CompletedOrder>();
         public virtual ICollection<SellOrder> SellOrders { get; set; } = new HashSet<SellOrder>();
         public virtual ICollection<SellOrderSuggestion> SellOrderSuggestions { get; set; } = new HashSet<SellOrderSuggestion>();
+
+        public virtual ICollection<ReportedProduct> ReportedProducts { get; set; } = new List<ReportedProduct>();
     }
 }
