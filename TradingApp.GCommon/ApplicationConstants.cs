@@ -8,6 +8,7 @@ namespace TradingApp.GCommon
         public const int ProductsPerPage = 4;
         public const int RequestsPerPage = 6;
         public const int UsersPerPage = 4;
+        public const int ProductReportsPerPage = 3;
 
 
         public const int UserMaxActiveSellOrders = 5;
@@ -20,5 +21,6 @@ namespace TradingApp.GCommon
         public const ProductStatus CreatedProductDefaultStatus = ProductStatus.approved;
         public const SellOrderStatus CreatedSellOrderDefaultStatus = SellOrderStatus.active;
         public const OrderRequestStatus CreatedOrderRequestDefaultStatus = OrderRequestStatus.active;
+        public const ProductReportStatus CreatedProductReportDefaultStatus = ProductReportStatus.open;
     }
 }
