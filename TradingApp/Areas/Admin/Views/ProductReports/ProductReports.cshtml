@@ -1,0 +1,37 @@
+﻿@*Area `Admin`*@
+
+@using TradingApp.Areas.Admin.Controllers
+@using TradingApp.ViewModels.ProductReport
+
+@model List<ProductsReportsViewModel>
+@{
+    ViewData["Title"] = "Reports";
+
+    PaginationHelper paginationHelper = new PaginationHelper()
+    {
+        Area = "Admin",
+        Controller = "ProductReports",
+        Action = ViewData["Action"]?.ToString() ?? nameof(ProductReportsController.ProductsReports),
+        PageIndex = (int)(ViewData["page"] ?? 0)
+    };
+}
+
+<div class="container mt-4">
+
+    @if (Model is null)
+    {
+        <div class="alert alert-info text-center">
+            <h2>No reports found!</h2>
+        </div>
+    }
+    else
+    {
+        <h2 class="mb-3">Product Reports</h2>
+
+        <partial name="_ProductReports_Table" model="@(Model)"></partial>
+
+        <br />
+
+        <partial name="_Pagination" model="@(paginationHelper)"></partial>
+    }
+</div>

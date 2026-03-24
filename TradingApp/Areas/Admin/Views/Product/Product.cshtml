@@ -26,13 +26,18 @@
 
 <br />
 
-<a class="btn btn-sm btn-primary" asp-area ="@(ApplicationRoles.Admin)" asp-controller="Product" asp-action="ManageProduct" asp-route-productId="@(Model.Id)">
+<a class="btn btn-primary" asp-area="@(ApplicationRoles.Admin)" asp-controller="Product" asp-action="ManageProduct" asp-route-productId="@(Model.Id)">
     Manage
-    </a>
+</a>
 
 <a class="btn btn-primary" asp-area="@(ApplicationRoles.Admin)" asp-controller="Product" asp-action="Download3dModelFile" asp-route-productName="@(Model.ProductName)" asp-route-productCreatorName="@(Model.CreatorName)">
     Download
 </a>
+
+<a class="btn btn-primary" asp-area="@(ApplicationRoles.Admin)" asp-controller="ProductReports" asp-action="ProductReports" asp-route-pageIndex="0" asp-route-reportedProductId="@(Model.Id)">
+    View reports
+</a>
+
 <br />
 <br />
 

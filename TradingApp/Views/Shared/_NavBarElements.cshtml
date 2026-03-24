@@ -3,11 +3,13 @@
     @if (User.IsInRole(ApplicationRoles.Admin) == true)
     {
         <li class="nav-item">
+            <a class="nav-link text-dark" asp-area=@(ApplicationRoles.Admin) asp-controller="User" asp-action="Users">Users</a>
+        </li>
+        <li class="nav-item">
             <a class="nav-link text-dark" asp-area=@(ApplicationRoles.Admin) asp-controller="Product" asp-action="Products">Products</a>
         </li>
-
         <li class="nav-item">
-            <a class="nav-link text-dark" asp-area=@(ApplicationRoles.Admin) asp-controller="User" asp-action="Users">Users</a>
+            <a class="nav-link text-dark" asp-area=@(ApplicationRoles.Admin) asp-controller="ProductReports" asp-action="ProductsReports">Reports</a>
         </li>
     }
     else if (User.IsInRole(ApplicationRoles.User) == true)
