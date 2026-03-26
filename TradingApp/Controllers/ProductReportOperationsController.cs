@@ -9,13 +9,13 @@ using TradingApp.ViewModels.Input_ProductReport;
 
 namespace TradingApp.Controllers
 {
-    public class ReportedProductOperationsController : ControllerBase
+    public class ProductReportOperationsController : ControllerBase
     {
-        private IProductReportOperationsService _reportedProductOperationsService;
+        private IProductReportOperationsService _productReportOperationsService;
         private IProductBoolsService _productBoolsService;
-        public ReportedProductOperationsController(IProductReportOperationsService reportedProductOperationsService, IProductBoolsService productBoolsService)
+        public ProductReportOperationsController(IProductReportOperationsService productReportOperationsService, IProductBoolsService productBoolsService)
         {
-            _reportedProductOperationsService = reportedProductOperationsService;
+            _productReportOperationsService = productReportOperationsService;
             _productBoolsService = productBoolsService;
         }
 
@@ -75,7 +75,7 @@ namespace TradingApp.Controllers
             Result result;
             try
             {
-                result = await _reportedProductOperationsService.CreateReportAsync(
+                result = await _productReportOperationsService.CreateReportAsync(
                     reporterId: LoggedUserId,
                     reportedProductId: productReport.ReportedProductId,
                     title: productReport.Title,
