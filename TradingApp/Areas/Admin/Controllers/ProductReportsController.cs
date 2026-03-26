@@ -26,7 +26,7 @@ namespace TradingApp.Areas.Admin.Controllers
             List<ProductsReportsViewModel> productReports = await _productReport_Service.GetReportsAsync(pageIndex: pageIndex);
 
             if (productReports.Count() == 0)
-            { return View(model: null); }
+            { return View(viewName: nameof(ProductReports), model: null); }
 
             ViewData["page"] = _productReport_Service.ProductReportPageIndex;
             ViewData["action"] = "ProductsReports";

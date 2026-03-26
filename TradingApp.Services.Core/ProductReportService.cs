@@ -18,7 +18,7 @@ namespace TradingApp.Services.Core
             _context = context;
         }
         public int ProductReportPageIndex { get; set; }
-        private void SetReportedProductPage(int pageIndex, int reportsCount)
+        private void SetReportPage(int pageIndex, int reportsCount)
         {
             pageIndex = pageIndex < 0 ? 0 : pageIndex;
             pageIndex = pageIndex * _productReportsPerPage >= reportsCount ? (int)Math.Ceiling((decimal)reportsCount / (decimal)_productReportsPerPage) - 1 : pageIndex;
@@ -35,7 +35,7 @@ namespace TradingApp.Services.Core
             if (reportsCount == 0)
             { return new List<ProductsReportsViewModel>(); }
 
-            SetReportedProductPage(pageIndex, reportsCount);
+            SetReportPage(pageIndex, reportsCount);
 
             List<ProductsReportsViewModel> reports = await _context
                 .ProductReports
@@ -64,7 +64,7 @@ namespace TradingApp.Services.Core
             if (reportsForProductCount == 0)
             { return new List<ProductsReportsViewModel>(); }
 
-            SetReportedProductPage(pageIndex, reportsForProductCount);
+            SetReportPage(pageIndex, reportsForProductCount);
 
             List<ProductsReportsViewModel> reportsForProduct = await _context
                 .ProductReports
