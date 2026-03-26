@@ -11,9 +11,9 @@ namespace TradingApp.Controllers
 {
     public class ReportedProductOperationsController : ControllerBase
     {
-        private IReportedProductOperationsService _reportedProductOperationsService;
+        private IProductReportOperationsService _reportedProductOperationsService;
         private IProductBoolsService _productBoolsService;
-        public ReportedProductOperationsController(IReportedProductOperationsService reportedProductOperationsService, IProductBoolsService productBoolsService)
+        public ReportedProductOperationsController(IProductReportOperationsService reportedProductOperationsService, IProductBoolsService productBoolsService)
         {
             _reportedProductOperationsService = reportedProductOperationsService;
             _productBoolsService = productBoolsService;

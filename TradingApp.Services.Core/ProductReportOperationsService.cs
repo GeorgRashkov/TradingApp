@@ -9,10 +9,10 @@ using TradingApp.Services.Core.Interfaces;
 
 namespace TradingApp.Services.Core
 {
-    public class ReportedProductOperationsService: IReportedProductOperationsService
+    public class ProductReportOperationsService: IProductReportOperationsService
     {
         private ApplicationDbContext _context;
-        public ReportedProductOperationsService(ApplicationDbContext context)
+        public ProductReportOperationsService(ApplicationDbContext context)
         {
             _context = context;
         }

@@ -11,9 +11,9 @@ namespace TradingApp.Areas.Admin.Controllers
 {
     public class ProductReportsController : ControllerBase
     {
-        private IReportedProductService _productReport_Service;
-        IReportedProductOperationsService _productReport_OperationsService;
-        public ProductReportsController(IReportedProductService productReport_Service, IReportedProductOperationsService productReport_OperationsService) 
+        private IProductReportService _productReport_Service;
+        IProductReportOperationsService _productReport_OperationsService;
+        public ProductReportsController(IProductReportService productReport_Service, IProductReportOperationsService productReport_OperationsService) 
         {
             _productReport_Service = productReport_Service;
             _productReport_OperationsService = productReport_OperationsService;
