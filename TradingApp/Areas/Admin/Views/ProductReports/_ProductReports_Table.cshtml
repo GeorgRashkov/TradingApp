@@ -10,7 +10,8 @@
         <tr>
             <th>Title</th>
             <th>CreatedAt</th>
-            <th>Type</th>            
+            <th>Type</th> 
+            <th>Status</th>
             <th class="text-center">Details</th>
         </tr>
     </thead>
@@ -22,13 +23,14 @@
                 <td>@(productsReports.Title)</td>
                 <td>@(productsReports.CreatedAt)</td>
                 <td>@(productsReports.Type)</td>
+                <td>@(productsReports.Status)</td>
 
                 <td class="text-center">
                 <a class="btn btn-sm btn-primary"
                    asp-area="Admin"
-                       asp-controller="ProductReportsController"
+                       asp-controller="ProductReports"
                    asp-action="ProductReport"
-                       asp-route-reportedProductId="@(productsReports.ReportedProductId)">
+                       asp-route-reportId="@(productsReports.ReportId)">
                         Details
                 </a>
                 </td>

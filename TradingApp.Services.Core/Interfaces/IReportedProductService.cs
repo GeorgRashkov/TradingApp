@@ -5,8 +5,9 @@ namespace TradingApp.Services.Core.Interfaces
 {
     public interface IReportedProductService
     {
+        int ProductReportPageIndex { get; set; }
         Task<List<ProductsReportsViewModel>> GetReportsAsync(int pageIndex);
         Task<List<ProductsReportsViewModel>> GetReportsForProductAsync(int pageIndex, Guid reportedProductId);
-        int ProductReportPageIndex { get; set; }
+        Task<ProductReportViewModel?> GetProductReportAsync(Guid reportId);
     }
 }

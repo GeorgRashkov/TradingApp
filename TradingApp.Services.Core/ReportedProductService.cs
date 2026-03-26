@@ -18,7 +18,12 @@ namespace TradingApp.Services.Core
             _context = context;
         }
         public int ProductReportPageIndex { get; set; }
-
+        private void SetReportedProductPage(int pageIndex, int reportsCount)
+        {
+            pageIndex = pageIndex < 0 ? 0 : pageIndex;
+            pageIndex = pageIndex * _productReportsPerPage >= reportsCount ? (int)Math.Ceiling((decimal)reportsCount / (decimal)_productReportsPerPage) - 1 : pageIndex;
+            ProductReportPageIndex = pageIndex;
+        }
 
         public async Task<List<ProductsReportsViewModel>> GetReportsAsync(int pageIndex)
         {
@@ -38,8 +43,7 @@ namespace TradingApp.Services.Core
                 .Skip(ProductReportPageIndex * _productReportsPerPage).Take(_productReportsPerPage)
                 .Select(rp => new ProductsReportsViewModel
                 {
-                    ReporterId = rp.ReporterId,
-                    ReportedProductId = rp.ReportedProductId,
+                    ReportId = rp.Id,                    
                     Title = rp.Title,
                     CreatedAt = rp.CreatedAt.ToString(ApplicationConstants.DateFormat, CultureInfo.InvariantCulture),
                     Type = rp.Type.ToString(),
@@ -69,8 +73,7 @@ namespace TradingApp.Services.Core
                 .Skip(ProductReportPageIndex * _productReportsPerPage).Take(_productReportsPerPage)
                 .Select(rp => new ProductsReportsViewModel
                 {
-                    ReporterId = rp.ReporterId,
-                    ReportedProductId = rp.ReportedProductId,
+                    ReportId = rp.Id,                    
                     Title = rp.Title,
                     CreatedAt = rp.CreatedAt.ToString(ApplicationConstants.DateFormat, CultureInfo.InvariantCulture),
                     Type = rp.Type.ToString(),
@@ -81,11 +84,29 @@ namespace TradingApp.Services.Core
 
         }
 
-        private void SetReportedProductPage(int pageIndex, int reportsCount)
+
+        public async Task<ProductReportViewModel?> GetProductReportAsync(Guid reportId) 
         {
-            pageIndex = pageIndex < 0 ? 0 : pageIndex;
-            pageIndex = pageIndex * _productReportsPerPage >= reportsCount ? (int)Math.Ceiling((decimal)reportsCount / (decimal)_productReportsPerPage) - 1 : pageIndex;
-            ProductReportPageIndex = pageIndex;
+            ProductReportViewModel? report = await _context
+                .ReportedProducts
+                .Include(rp => rp.Product)
+                .Include(rp => rp.Reporter)
+                .AsNoTracking()
+                .Where(rp => rp.Id == reportId)
+                .Select(rp => new ProductReportViewModel 
+                {
+                    ReportId = rp.Id,
+                    Title = rp.Title,
+                    CreatedAt = rp.CreatedAt.ToString(ApplicationConstants.DateTimeFormat, CultureInfo.InvariantCulture),
+                    Type = rp.Type.ToString(),
+                    Status = rp.Status.ToString(),
+                    ReportedProductId = rp.Product.Id,
+                    ReporterName = rp.Reporter.UserName,
+                    Message = rp.Message,
+                })
+                .FirstOrDefaultAsync();
+
+            return report;
         }
     }
 }

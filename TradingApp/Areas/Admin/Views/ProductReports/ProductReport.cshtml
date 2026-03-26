@@ -1,0 +1,51 @@
+﻿@*Area `Admin`*@
+
+@using TradingApp.GCommon.Enums
+@using TradingApp.ViewModels.ProductReport
+
+@{
+    ViewData["Title"] = "Report";
+    List<string> productReportStatuses = ViewData["productReportStatuses"] as List<string>;
+}
+
+@model ProductReportViewModel
+
+<h2>Title: @(Model.Title)</h2>
+
+<br />
+
+<h3>Creation date: @(Model.CreatedAt)</h3>
+
+<h3>Type: @(Model.Type)</h3>
+
+<h3>Status: @(Model.Status)</h3>
+
+<h3>Reported by: @(Model.ReporterName)</h3>
+
+<br />
+
+<h4>Report description</h4>
+<p>@(Model.Message)</p>
+
+<br />
+
+<form method="post" asp-area="Admin" asp-controller="ProductReports" asp-action="SetProductReportStatus">
+    <input class="btn btn-primary" type="submit" value="Set Status" />
+    <select name="reportStatus">
+
+        @foreach (string status in productReportStatuses)
+        {
+            <option>@(status)</option>
+        }
+
+    </select>
+
+    <input type="hidden" value="@(Model.ReportId)" name="reportId" />
+</form>
+
+<br />
+
+<a class="btn btn-primary" asp-area="@(ApplicationRoles.Admin)" asp-controller="Product" asp-action="Product" asp-route-productId="@(Model.ReportedProductId)">
+    View reported product
+</a>
+
