@@ -8,11 +8,11 @@ using TradingApp.ViewModels.ProductReport;
 
 namespace TradingApp.Services.Core
 {
-    public class ReportedProductService : IReportedProductService
+    public class ProductReportService : IProductReportService
     {
         private ApplicationDbContext _context;
         private int _productReportsPerPage;
-        public ReportedProductService(ApplicationDbContext context) 
+        public ProductReportService(ApplicationDbContext context) 
         {
             _productReportsPerPage = ApplicationConstants.ProductReportsPerPage;
             _context = context;

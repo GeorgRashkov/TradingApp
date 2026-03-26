@@ -4,7 +4,7 @@ using TradingApp.GCommon.Enums;
 
 namespace TradingApp.Services.Core.Interfaces
 {
-    public interface IReportedProductOperationsService
+    public interface IProductReportOperationsService
     {
         Task<Result> CreateReportAsync(string reporterId, Guid reportedProductId, string title, string message, ProductReportType reportType);
         Task<Result> SetReportStatusAsync(Guid reportId, ProductReportStatus newReportStatus);

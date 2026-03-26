@@ -40,8 +40,8 @@ namespace TradingApp
             builder.Services.AddScoped<IOrderRequestBoolsService, OrderRequestBoolsService>();
             builder.Services.AddScoped<IOrderRequestOperationsService, OrderRequestOperationsService>();
             builder.Services.AddScoped<IUserOperationsService, UserOperationsService>();
-            builder.Services.AddScoped<IReportedProductService, ReportedProductService>();
-            builder.Services.AddScoped<IReportedProductOperationsService, ReportedProductOperationsService>();
+            builder.Services.AddScoped<IProductReportService, ProductReportService>();
+            builder.Services.AddScoped<IProductReportOperationsService, ProductReportOperationsService>();
 
 
             //add the seeder classes to the services

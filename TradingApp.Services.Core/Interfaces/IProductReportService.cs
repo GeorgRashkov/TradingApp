@@ -3,7 +3,7 @@ using TradingApp.ViewModels.ProductReport;
 
 namespace TradingApp.Services.Core.Interfaces
 {
-    public interface IReportedProductService
+    public interface IProductReportService
     {
         int ProductReportPageIndex { get; set; }
         Task<List<ProductsReportsViewModel>> GetReportsAsync(int pageIndex);
