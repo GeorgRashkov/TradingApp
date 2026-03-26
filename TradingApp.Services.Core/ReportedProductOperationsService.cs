@@ -47,5 +47,20 @@ namespace TradingApp.Services.Core
 
             return new Result();
         }
+        
+        
+        public async Task<Result> SetReportStatusAsync(Guid reportId, ProductReportStatus newReportStatus) 
+        {
+            ReportedProduct? report = await _context.ReportedProducts.FindAsync(reportId);
+
+            if(report == null) 
+            { return new Result(errorCode: ProductReportErrorCodes.ProductReportNotFound); }
+
+            report.Status = newReportStatus;
+            await _context.SaveChangesAsync();
+
+            return new Result();
+        }
+
     }
 }
