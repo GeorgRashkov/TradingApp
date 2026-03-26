@@ -28,7 +28,7 @@ namespace TradingApp.Services.Core
         public async Task<List<ProductsReportsViewModel>> GetReportsAsync(int pageIndex)
         {
             int reportsCount = await _context
-                .ReportedProducts
+                .ProductReports
               .AsNoTracking()              
               .CountAsync();
 
@@ -38,16 +38,16 @@ namespace TradingApp.Services.Core
             SetReportedProductPage(pageIndex, reportsCount);
 
             List<ProductsReportsViewModel> reports = await _context
-                .ReportedProducts
+                .ProductReports
                 .AsNoTracking()               
                 .Skip(ProductReportPageIndex * _productReportsPerPage).Take(_productReportsPerPage)
-                .Select(rp => new ProductsReportsViewModel
+                .Select(pr => new ProductsReportsViewModel
                 {
-                    ReportId = rp.Id,                    
-                    Title = rp.Title,
-                    CreatedAt = rp.CreatedAt.ToString(ApplicationConstants.DateFormat, CultureInfo.InvariantCulture),
-                    Type = rp.Type.ToString(),
-                    Status = rp.Status.ToString()
+                    ReportId = pr.Id,                    
+                    Title = pr.Title,
+                    CreatedAt = pr.CreatedAt.ToString(ApplicationConstants.DateFormat, CultureInfo.InvariantCulture),
+                    Type = pr.Type.ToString(),
+                    Status = pr.Status.ToString()
                 }).ToListAsync();
 
             return reports;
@@ -56,9 +56,9 @@ namespace TradingApp.Services.Core
         public async Task<List<ProductsReportsViewModel>> GetReportsForProductAsync(int pageIndex, Guid reportedProductId) 
         {
             int reportsForProductCount = await _context
-                .ReportedProducts
+                .ProductReports
               .AsNoTracking()
-              .Where(rp => rp.ReportedProductId == reportedProductId)
+              .Where(pr => pr.ReportedProductId == reportedProductId)
               .CountAsync();
 
             if (reportsForProductCount == 0)
@@ -67,17 +67,17 @@ namespace TradingApp.Services.Core
             SetReportedProductPage(pageIndex, reportsForProductCount);
 
             List<ProductsReportsViewModel> reportsForProduct = await _context
-                .ReportedProducts
+                .ProductReports
                 .AsNoTracking()
-                .Where(rp => rp.ReportedProductId == reportedProductId)
+                .Where(pr => pr.ReportedProductId == reportedProductId)
                 .Skip(ProductReportPageIndex * _productReportsPerPage).Take(_productReportsPerPage)
-                .Select(rp => new ProductsReportsViewModel
+                .Select(pr => new ProductsReportsViewModel
                 {
-                    ReportId = rp.Id,                    
-                    Title = rp.Title,
-                    CreatedAt = rp.CreatedAt.ToString(ApplicationConstants.DateFormat, CultureInfo.InvariantCulture),
-                    Type = rp.Type.ToString(),
-                    Status = rp.Status.ToString()
+                    ReportId = pr.Id,                    
+                    Title = pr.Title,
+                    CreatedAt = pr.CreatedAt.ToString(ApplicationConstants.DateFormat, CultureInfo.InvariantCulture),
+                    Type = pr.Type.ToString(),
+                    Status = pr.Status.ToString()
                 }).ToListAsync();
 
             return reportsForProduct;
@@ -88,21 +88,21 @@ namespace TradingApp.Services.Core
         public async Task<ProductReportViewModel?> GetProductReportAsync(Guid reportId) 
         {
             ProductReportViewModel? report = await _context
-                .ReportedProducts
-                .Include(rp => rp.Product)
-                .Include(rp => rp.Reporter)
+                .ProductReports
+                .Include(pr => pr.Product)
+                .Include(pr => pr.Reporter)
                 .AsNoTracking()
-                .Where(rp => rp.Id == reportId)
-                .Select(rp => new ProductReportViewModel 
+                .Where(pr => pr.Id == reportId)
+                .Select(pr => new ProductReportViewModel 
                 {
-                    ReportId = rp.Id,
-                    Title = rp.Title,
-                    CreatedAt = rp.CreatedAt.ToString(ApplicationConstants.DateTimeFormat, CultureInfo.InvariantCulture),
-                    Type = rp.Type.ToString(),
-                    Status = rp.Status.ToString(),
-                    ReportedProductId = rp.Product.Id,
-                    ReporterName = rp.Reporter.UserName,
-                    Message = rp.Message,
+                    ReportId = pr.Id,
+                    Title = pr.Title,
+                    CreatedAt = pr.CreatedAt.ToString(ApplicationConstants.DateTimeFormat, CultureInfo.InvariantCulture),
+                    Type = pr.Type.ToString(),
+                    Status = pr.Status.ToString(),
+                    ReportedProductId = pr.Product.Id,
+                    ReporterName = pr.Reporter.UserName,
+                    Message = pr.Message,
                 })
                 .FirstOrDefaultAsync();
 

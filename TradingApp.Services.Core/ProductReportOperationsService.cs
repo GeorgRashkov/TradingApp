@@ -31,7 +31,7 @@ namespace TradingApp.Services.Core
             if (isReportedProductCreatedByReporter == true)
             { return new Result(errorCode: ProductReportErrorCodes.ProductReportInvalidCreator); }
 
-            ReportedProduct reportedProduct = new ReportedProduct()
+            ProductReport productReport = new ProductReport()
             {
                 ReporterId = reporterId,
                 ReportedProductId = reportedProductId,
@@ -42,7 +42,7 @@ namespace TradingApp.Services.Core
                 Status = ApplicationConstants.CreatedProductReportDefaultStatus
             };
 
-            await _context.ReportedProducts.AddAsync(reportedProduct);
+            await _context.ProductReports.AddAsync(productReport);
             await _context.SaveChangesAsync();
 
             return new Result();
@@ -51,7 +51,7 @@ namespace TradingApp.Services.Core
         
         public async Task<Result> SetReportStatusAsync(Guid reportId, ProductReportStatus newReportStatus) 
         {
-            ReportedProduct? report = await _context.ReportedProducts.FindAsync(reportId);
+            ProductReport? report = await _context.ProductReports.FindAsync(reportId);
 
             if(report == null) 
             { return new Result(errorCode: ProductReportErrorCodes.ProductReportNotFound); }

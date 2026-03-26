@@ -18,6 +18,6 @@ namespace TradingApp.Data.Models
         public virtual ICollection<CompletedOrder> CompletedPurchaseOrders { get; set; } = new HashSet<CompletedOrder>();
 
         //These are the products reported by the user
-        public virtual ICollection<ReportedProduct> ReportedProducts { get; set; } = new List<ReportedProduct>();
+        public virtual ICollection<ProductReport> ProductReports { get; set; } = new List<ProductReport>();
     }
 }

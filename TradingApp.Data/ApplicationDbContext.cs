@@ -13,7 +13,7 @@ namespace TradingApp.Data
 
         public virtual DbSet<Balance> Balances { get; set; } = null!;
         public virtual DbSet<Product> Products { get; set; } = null!;
-        public virtual DbSet<ReportedProduct> ReportedProducts { get; set; } = null!;
+        public virtual DbSet<ProductReport> ProductReports { get; set; } = null!;
 
 
         public virtual DbSet<SellOrder> SellOrders { get; set; } = null!;
@@ -27,7 +27,7 @@ namespace TradingApp.Data
             base.OnModelCreating(builder);
 
             ConfigureSellOrder(builder);
-            ConfigureReportedProduct(builder);
+            ConfigureProductReport(builder);
             ConfigureSellOrderSuggestion(builder);
             ConfigureCompletedOrder(builder);
 
@@ -44,13 +44,13 @@ namespace TradingApp.Data
             });
         }
 
-        public void ConfigureReportedProduct(ModelBuilder builder)
+        public void ConfigureProductReport(ModelBuilder builder)
         {
-            builder.Entity<ReportedProduct>(e =>
+            builder.Entity<ProductReport>(e =>
             {
-                e.HasOne(rp => rp.Product)
-                .WithMany(p => p.ReportedProducts)
-                .HasForeignKey(rp => rp.ReportedProductId)
+                e.HasOne(pr => pr.Product)
+                .WithMany(p => p.ProductReports)
+                .HasForeignKey(pr => pr.ReportedProductId)
                 .OnDelete(DeleteBehavior.Restrict);
             }
             );

@@ -6,7 +6,7 @@ using TradingApp.GCommon.Enums;
 
 namespace TradingApp.Data.Models
 {
-    public class ReportedProduct
+    public class ProductReport
     {
         [Key]
         public Guid Id { get; set; }
