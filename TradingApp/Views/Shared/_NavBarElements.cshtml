@@ -1,10 +1,13 @@
 ﻿<ul class="navbar-nav flex-grow-1">
 
-    @if (User.IsInRole(ApplicationRoles.Admin) == true)
+    @if (User.IsInRole(ApplicationRoles.Admin) == true || User.IsInRole(ApplicationRoles.Moderator) == true)
     {
-        <li class="nav-item">
-            <a class="nav-link text-dark" asp-area=@(ApplicationRoles.Admin) asp-controller="User" asp-action="Users">Users</a>
-        </li>
+        if (User.IsInRole(ApplicationRoles.Admin) == true)
+        {
+            <li class="nav-item">
+                <a class="nav-link text-dark" asp-area=@(ApplicationRoles.Admin) asp-controller="User" asp-action="Users">Users</a>
+            </li>
+        }
         <li class="nav-item">
             <a class="nav-link text-dark" asp-area=@(ApplicationRoles.Admin) asp-controller="Product" asp-action="Products">Products</a>
         </li>

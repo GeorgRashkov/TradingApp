@@ -1,5 +1,6 @@
 ﻿//Area `Admin`
 
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TradingApp.GCommon;
 using TradingApp.GCommon.ErrorCodes;
@@ -9,6 +10,7 @@ using TradingApp.ViewModels.User;
 
 namespace TradingApp.Areas.Admin.Controllers
 {
+    [Authorize(Roles = ApplicationRoles.Admin)]
     public class UserController : ControllerBase
     {
         private IUserService _userService;
