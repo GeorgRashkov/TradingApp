@@ -13,10 +13,14 @@ namespace TradingApp.Controllers
     {
         private IProductReportOperationsService _productReportOperationsService;
         private IProductBoolsService _productBoolsService;
-        public ProductReportOperationsController(IProductReportOperationsService productReportOperationsService, IProductBoolsService productBoolsService)
+
+        private ILogger<InvoiceController> _logger;
+        public ProductReportOperationsController(IProductReportOperationsService productReportOperationsService, IProductBoolsService productBoolsService, ILogger<InvoiceController> logger)
         {
             _productReportOperationsService = productReportOperationsService;
             _productBoolsService = productBoolsService;
+
+            _logger = logger;
         }
 
         [HttpGet]
@@ -85,7 +89,7 @@ namespace TradingApp.Controllers
             }
             catch (Exception e)
             {
-                Console.Write(e.Message.ToString());
+                _logger.LogError(e, "An error occured while attempting to create a product report!");
 
                 TempData["title"] = "Error";
                 TempData["message"] = "An error occured while attempting to create the product report! Please try again later.";

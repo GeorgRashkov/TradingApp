@@ -13,10 +13,14 @@ namespace TradingApp.Areas.Admin.Controllers
     {
         private IUserService _userService;
         private IUserOperationsService _userOperationsService;
-        public UserController(IUserService userService, IUserOperationsService userOperationsService) 
+
+        private ILogger<UserController> _logger;
+        public UserController(IUserService userService, IUserOperationsService userOperationsService, ILogger<UserController> logger) 
         {
             _userService = userService;
             _userOperationsService = userOperationsService;
+
+            _logger = logger;
         }
 
         [HttpGet]
@@ -81,7 +85,7 @@ namespace TradingApp.Areas.Admin.Controllers
             }
             catch (Exception e) 
             {
-                Console.Write(e.Message.ToString());
+                _logger.LogError(e, "An error occured while attempting to change the user properties!");
 
                 TempData["title"] = "Error";
                 TempData["message"] = $"An error occured while attempting to change the user properties! Please try again later.";

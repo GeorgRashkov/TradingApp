@@ -11,10 +11,14 @@ namespace TradingApp.Controllers
         private IInvoiceService _invoiceService;
         private IProductFileService _productFileService;
 
-        public InvoiceController(ApplicationDbContext context, IInvoiceService invoiceService, IProductFileService productFileService)
+        private ILogger<InvoiceController> _logger;
+
+        public InvoiceController(ApplicationDbContext context, IInvoiceService invoiceService, IProductFileService productFileService, ILogger<InvoiceController> logger)
         {           
             _invoiceService = invoiceService;
             _productFileService = productFileService;
+
+            _logger = logger;
         }
 
 
@@ -60,7 +64,8 @@ namespace TradingApp.Controllers
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                _logger.LogError(e, "An error occured while attempting to dowload a 3D model file!");
+
                 TempData["title"] = "Error";
                 TempData["message"] = "An error occured while attempting to dowload the file!";
                 return View(viewName: "Message");

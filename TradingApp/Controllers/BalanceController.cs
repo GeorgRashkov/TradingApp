@@ -6,9 +6,13 @@ namespace TradingApp.Controllers
     public class BalanceController : ControllerBase
     {
         private readonly IBalanceService _balanceService;
-        public BalanceController(IBalanceService balanceService) 
+
+        private ILogger<BalanceController> _logger;
+        public BalanceController(IBalanceService balanceService, ILogger<BalanceController> logger) 
         {
             _balanceService = balanceService;
+
+            _logger = logger;
         }
 
         
@@ -30,7 +34,7 @@ namespace TradingApp.Controllers
             }
             catch (Exception e)
             {
-                Console.Write(e.Message.ToString());
+                _logger.LogError(e, "An error occured while attempting to increase the user balance!");
 
                 TempData["title"] = "Error";
                 TempData["message"] = $"An error occured while attempting to increase your balance!";
@@ -52,7 +56,7 @@ namespace TradingApp.Controllers
             }
             catch (Exception e)
             {
-                Console.Write(e.Message.ToString());
+                _logger.LogError(e, "An error occured while attempting to decrease the user balance!");
 
                 TempData["title"] = "Error";
                 TempData["message"] = $"An error occurred while attempting to transfer money from your balance to your bank account!";

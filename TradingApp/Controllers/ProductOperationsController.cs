@@ -14,15 +14,18 @@ namespace TradingApp.Controllers
         private IProductOperationsService _productOperationsService;
         private IProductFileService _productFileService;
         private IProductService _productService;
-        private IUserService _userService;        
+        private IUserService _userService;
 
-        public ProductOperationsController(ApplicationDbContext context, IProductBoolsService productBoolsService, IProductOperationsService productOperationsService, IProductFileService productFileService, IProductService productService, IUserService userService)
+        private ILogger<InvoiceController> _logger;
+        public ProductOperationsController(ApplicationDbContext context, IProductBoolsService productBoolsService, IProductOperationsService productOperationsService, IProductFileService productFileService, IProductService productService, IUserService userService, ILogger<InvoiceController> logger)
         {
             _productBoolsService = productBoolsService;
             _productOperationsService = productOperationsService;
             _productFileService = productFileService;
             _productService = productService;
-            _userService = userService;           
+            _userService = userService;
+
+            _logger = logger;
         }       
 
        
@@ -57,10 +60,10 @@ namespace TradingApp.Controllers
             }
             catch (Exception e)
             {
-                Console.Write(e.Message.ToString());
+                _logger.LogError(e, "An error occured while attempting to create a product!");
 
                 TempData["title"] = "Error";
-                TempData["message"] = $"An error occured while attempting to save you product! Please try again later.";
+                TempData["message"] = "An error occured while attempting to save you product! Please try again later.";
                 return RedirectToAction(nameof(Message));
             }
 
@@ -146,7 +149,7 @@ namespace TradingApp.Controllers
             }
             catch (Exception e)
             {
-                Console.Write(e.Message.ToString());
+                _logger.LogError(e, "An error occured while attempting to update a product!");
 
                 TempData["title"] = "Error";
                 TempData["message"] = "An error occured while attempting to apply the product changes! Please try again later.";
@@ -227,10 +230,10 @@ namespace TradingApp.Controllers
             }
             catch (Exception e)
             {
-                Console.Write(e.Message.ToString());
+                _logger.LogError(e, "An error occured while attempting to delete a product!");
 
                 TempData["title"] = "Error";
-                TempData["message"] = $"An error occured while attempting to delete you product! Please try again later.";
+                TempData["message"] = $"An error occured while attempting to delete your product! Please try again later.";
                 return RedirectToAction(nameof(Message));
             }
 

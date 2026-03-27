@@ -12,10 +12,14 @@ namespace TradingApp.Controllers
         private IProductService _productService;
         private IOrderService _orderService;
 
-        public OrderController(IProductService productService, IOrderService orderService)
+        private ILogger<InvoiceController> _logger;
+
+        public OrderController(IProductService productService, IOrderService orderService, ILogger<InvoiceController> logger)
         {
             _productService = productService;
             _orderService = orderService;
+
+            _logger = logger;
 
         }
 
@@ -102,7 +106,7 @@ namespace TradingApp.Controllers
             }
             catch (Exception e)
             {
-                Console.Write(e.Message.ToString());
+                _logger.LogError(e, "An error occured while attempting to create sell order/s!");
 
                 TempData["title"] = "Error";
                 TempData["message"] = $"An error occured while attempting to create your order/s! Please try again later.";
@@ -205,7 +209,7 @@ namespace TradingApp.Controllers
             }
             catch (Exception e)
             {
-                Console.Write(e.Message.ToString());
+                _logger.LogError(e, "An error occured while attempting to cancel sell order/s!");
 
                 TempData["title"] = "Error";
                 TempData["message"] = $"An error occured while attempting to cancel your active sell order/s! Please try again later.";
@@ -313,7 +317,7 @@ namespace TradingApp.Controllers
             }
             catch (Exception e)
             {
-                Console.Write(e.Message.ToString());
+                _logger.LogError(e, "An error occured while attempting to purchase product {productName}!", productName);
 
                 TempData["title"] = "Error";
                 TempData["message"] = $"An error occured while attempting to purchase product {productName}! Please try again later.";

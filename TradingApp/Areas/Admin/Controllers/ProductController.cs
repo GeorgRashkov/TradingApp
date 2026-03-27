@@ -15,12 +15,16 @@ namespace TradingApp.Areas.Admin.Controllers
         private IProductService _productService;
         private IProductOperationsService _productOperationsService;
         private IProductFileService _productFileService;
-        public ProductController(IUserService userService, IProductService productService, IProductOperationsService productOperationsService, IProductFileService productFileService)
+
+        private ILogger<ProductController> _logger;
+        public ProductController(IUserService userService, IProductService productService, IProductOperationsService productOperationsService, IProductFileService productFileService, ILogger <ProductController> logger)
         {
             _userService = userService;
             _productService = productService;
             _productOperationsService = productOperationsService;
-            _productFileService = productFileService;            
+            _productFileService = productFileService;
+            
+            _logger = logger;
         }
 
         [HttpGet]
@@ -63,9 +67,10 @@ namespace TradingApp.Areas.Admin.Controllers
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message);
+                _logger.LogError(e, "An error occured while attemping to download a 3D model file!");
+
                 TempData["title"] = "Error";
-                TempData["message"] = "An error occured while attempting to dowload the file!";
+                TempData["message"] = "An error occured while attempting to download the file!";
                 return View(viewName: "Message");
             }
 
@@ -120,7 +125,7 @@ namespace TradingApp.Areas.Admin.Controllers
             }
             catch(Exception e) 
             {
-                Console.Write(e.Message.ToString());
+                _logger.LogError(e, "An error occured while attempting to change the product status!");
 
                 TempData["title"] = "Error";
                 TempData["message"] = "An error occured while attempting to apply the product changes! Please try again later.";

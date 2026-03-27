@@ -12,12 +12,16 @@ namespace TradingApp.Controllers
         private IOrderRequestOperationsService _orderRequestOperationsService;
         private IProductService _productService;
         private IUserService _userService;
-        public OrderRequestOperationsController(IOrderRequestService orderRequestService, IOrderRequestOperationsService orderRequestOperationsService, IProductService productService, IUserService userService)
+
+        private ILogger<InvoiceController> _logger;
+        public OrderRequestOperationsController(IOrderRequestService orderRequestService, IOrderRequestOperationsService orderRequestOperationsService, IProductService productService, IUserService userService, ILogger<InvoiceController> logger)
         {
             _orderRequestOperationsService = orderRequestOperationsService;
             _productService = productService;
             _userService = userService;
             _orderRequestService = orderRequestService;
+
+            _logger = logger;
         }
 
 
@@ -125,10 +129,10 @@ namespace TradingApp.Controllers
             }
             catch (Exception e)
             {
-                Console.Write(e.Message.ToString());
+                _logger.LogError(e, "An error occurred while attempting to create an order request!");
 
                 TempData["title"] = "Error";
-                TempData["message"] = "An error occurred while creating the order request. Please try again later.";
+                TempData["message"] = "An error occurred while creating the order request! Please try again later.";
                 return RedirectToAction(nameof(Message));
             }
 
@@ -208,10 +212,10 @@ namespace TradingApp.Controllers
             }
             catch (Exception e)
             {
-                Console.Write(e.Message.ToString());
+                _logger.LogError(e, "An error occurred while attempting to update an order request!");
 
                 TempData["title"] = "Error";
-                TempData["message"] = "An error occurred while updating the order request. Please try again later.";
+                TempData["message"] = "An error occurred while updating the order request! Please try again later.";
                 return RedirectToAction(nameof(Message));
             }
 
@@ -281,7 +285,7 @@ namespace TradingApp.Controllers
             }
             catch (Exception e)
             {
-                Console.Write(e.Message.ToString());
+                _logger.LogError(e, "An error occurred while attempting to cancel an order request!");
 
                 TempData["title"] = "Error";
                 TempData["message"] = "An error occurred while deleting the request. Please try again later.";

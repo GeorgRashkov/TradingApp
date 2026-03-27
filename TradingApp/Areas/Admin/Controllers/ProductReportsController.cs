@@ -13,10 +13,14 @@ namespace TradingApp.Areas.Admin.Controllers
     {
         private IProductReportService _productReport_Service;
         IProductReportOperationsService _productReport_OperationsService;
-        public ProductReportsController(IProductReportService productReport_Service, IProductReportOperationsService productReport_OperationsService) 
+
+         private ILogger<ProductReportsController> _logger;
+        public ProductReportsController(IProductReportService productReport_Service, IProductReportOperationsService productReport_OperationsService, ILogger <ProductReportsController> logger) 
         {
             _productReport_Service = productReport_Service;
             _productReport_OperationsService = productReport_OperationsService;
+
+            _logger = logger;
         }
 
 
@@ -105,7 +109,7 @@ namespace TradingApp.Areas.Admin.Controllers
             }
             catch (Exception e) 
             {
-                Console.Write(e.Message.ToString());
+                _logger.LogError(e, "An error occured while attempting change the report status!");
 
                 TempData["title"] = "Error";
                 TempData["message"] = "An error occured while attempting to change the report status! Please try again later.";
