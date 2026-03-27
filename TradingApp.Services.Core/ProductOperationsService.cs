@@ -71,8 +71,19 @@ namespace TradingApp.Services.Core
                 return new Result(errorCode: ProductErrorCodes.ProductInvalidCreator);
             }
 
-            int productActiveSellOrdersCount = await _productService.GetProductActiveSellOrdersCountAsync(productId: id);
+            bool doesCreatorHaveOtherProductsWithTheSameName = await _context.Products.AsNoTracking().AnyAsync(p => p.Name == name && p.Id != id && p.CreatorId == creatorId);
+            if(doesCreatorHaveOtherProductsWithTheSameName == true) 
+            {
+                return new Result(errorCode: ProductErrorCodes.ProductWithSameNameAlreadyExists);
+            }
 
+            bool doesProductHaveNonResolvedReports = await _context.ProductReports.AsNoTracking().AnyAsync(pr => pr.ReportedProductId == id && pr.Status != ProductReportStatus.resolved);
+            if (doesProductHaveNonResolvedReports == true)
+            {
+                return new Result(errorCode: ProductErrorCodes.ProductHasNonResolvedReports);
+            }
+
+            int productActiveSellOrdersCount = await _productService.GetProductActiveSellOrdersCountAsync(productId: id);
             if (productActiveSellOrdersCount > 0)
             {
                 return new Result(errorCode: ProductErrorCodes.ProductHasActiveSaleOrders);
@@ -103,8 +114,16 @@ namespace TradingApp.Services.Core
                 return new Result(errorCode: ProductErrorCodes.ProductInvalidCreator);
             }
 
+            bool doesProductHaveNonResolvedReports = await _context.ProductReports.AsNoTracking().AnyAsync(pr => pr.ReportedProductId == id && pr.Status != ProductReportStatus.resolved);
+            if(doesProductHaveNonResolvedReports == true)
+            {
+                return new Result(errorCode: ProductErrorCodes.ProductHasNonResolvedReports);
+            }
+
+
             await DeleteSellOrdersOfProductAsync(id);
             await DeleteSellOrderSuggestionsOfProductAsync(id);
+            await DeleteReportsOfProductAsync(id);
             await SetFkToNullForCompletedOrdersOfProductAsync(id);
 
             _context.Products.Attach(product);
@@ -134,6 +153,7 @@ namespace TradingApp.Services.Core
             return new Result();
         }
 
+
         private async Task DeleteSellOrdersOfProductAsync(Guid productId)
         {
             IEnumerable<SellOrder> sellOrders = await _context
@@ -155,6 +175,16 @@ namespace TradingApp.Services.Core
             _context.SellOrderSuggestions.RemoveRange(sellOrderSuggestions);
         }
 
+        private async Task DeleteReportsOfProductAsync(Guid productId)
+        {
+            IEnumerable<ProductReport> productReports = await _context
+                .ProductReports
+                .Where(pr => pr.ReportedProductId == productId)
+                .ToListAsync();
+
+            _context.ProductReports.RemoveRange(productReports);
+        }
+
         private async Task SetFkToNullForCompletedOrdersOfProductAsync(Guid productId)
         {
             IEnumerable<CompletedOrder> completedOrders = await _context
@@ -168,5 +198,7 @@ namespace TradingApp.Services.Core
                 completedOrder.Product = null;
             }
         }
+
+        
     }
 }

@@ -21,8 +21,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{1D
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TradingApp.Services.Core", "TradingApp.Services.Core\TradingApp.Services.Core.csproj", "{CEFA2AC3-C94A-47B2-B897-03D976F57CCF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TradingApp.Services.Errors", "TradingApp.Services.Errors\TradingApp.Services.Errors.csproj", "{FA9CE103-BE52-D056-AC37-873942922837}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -53,10 +51,6 @@ Global
 		{CEFA2AC3-C94A-47B2-B897-03D976F57CCF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CEFA2AC3-C94A-47B2-B897-03D976F57CCF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CEFA2AC3-C94A-47B2-B897-03D976F57CCF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{FA9CE103-BE52-D056-AC37-873942922837}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{FA9CE103-BE52-D056-AC37-873942922837}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{FA9CE103-BE52-D056-AC37-873942922837}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{FA9CE103-BE52-D056-AC37-873942922837}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -67,7 +61,6 @@ Global
 		{EC7260CF-939E-432F-B425-91ED689DEA73} = {0601B9EF-9D1D-4416-91A3-669E38B8B19A}
 		{9D9F0417-A39B-4CAD-B7FC-859156C2A58E} = {0601B9EF-9D1D-4416-91A3-669E38B8B19A}
 		{CEFA2AC3-C94A-47B2-B897-03D976F57CCF} = {1DE4AF5D-F1B8-436D-B630-B96AA1A0F590}
-		{FA9CE103-BE52-D056-AC37-873942922837} = {1DE4AF5D-F1B8-436D-B630-B96AA1A0F590}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {68606563-A3CB-4154-B98A-508DA7A5F177}

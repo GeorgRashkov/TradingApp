@@ -174,6 +174,12 @@ namespace TradingApp.Controllers
                 string code when code == ProductErrorCodes.ProductInvalidCreator =>
                 "You are not allowed to edit products created by other users!",
 
+                string code when code == ProductErrorCodes.ProductWithSameNameAlreadyExists =>
+                   "A product with the same name already exists!\n Consider using unique name for the product you want to update.",
+                
+                string code when code == ProductErrorCodes.ProductHasNonResolvedReports =>
+             "The product cannot be altered currently because it was reported! When the reports are resolved you will be able to update your product.",
+
                 string code when code == ProductErrorCodes.ProductHasActiveSaleOrders =>
                 "The product you are trying to update has at least one sell order! Make sure you cancel all sell orders of the product before editing it!",
 
@@ -254,6 +260,9 @@ namespace TradingApp.Controllers
 
                 string code when code == ProductErrorCodes.ProductInvalidCreator =>
                 "You are not allowed to delete products created by other users!",
+
+                string code when code == ProductErrorCodes.ProductHasNonResolvedReports =>
+                "The product cannot be deleted currently because it was reported! When the reports are resolved you will be able to delete your product.",
 
                 _ => "Something went wrong."
             };
