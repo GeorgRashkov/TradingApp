@@ -213,45 +213,37 @@ namespace TradingApp.Services.Core
 
             if (product == null)
             {
-                return new Result(errorCode: ProductErrorCodes.ProductNotFound);
-                //return "The product was not found!";
+                return new Result(errorCode: ProductErrorCodes.ProductNotFound);                
             }
 
             if (user == null)
             {
-                return new Result(errorCode: UserErrorCodes.UserNotFound);
-                //return "You cannot create sell orders if you are not logged in!";
+                return new Result(errorCode: UserErrorCodes.UserNotFound);                
             }
 
             if (user.Id != product.CreatorId)
             {
-                return new Result(errorCode: ProductErrorCodes.ProductInvalidCreator);
-                //return $"You are not allowed to create sell orders of products created by other users!";
+                return new Result(errorCode: ProductErrorCodes.ProductInvalidCreator);               
             }
 
             if (product.Status != ProductStatus.approved)
             {
-                return new Result(errorCode: ProductErrorCodes.ProductInvalidStatus);
-                //return $"You cannot create a sell order of the product {product.Name} because it's status is not 'approved'!";
+                return new Result(errorCode: ProductErrorCodes.ProductInvalidStatus);                
             }
 
             if (product.ActiveSellOrdersCount >= ApplicationConstants.ProductMaxActiveSellOrders)
             {
-                return new Result(errorCode: ProductErrorCodes.ProductMaxActiveSellOrdersReached);
-                //return $"You cannot create sell orders for product {product.Name} because the product has reached the maximum number of active sale orders!";
+                return new Result(errorCode: ProductErrorCodes.ProductMaxActiveSellOrdersReached);                
             }
 
             if (user.ActiveSellOrdersCount >= ApplicationConstants.UserMaxActiveSellOrders)
             {
-                return new Result(errorCode: UserErrorCodes.UserMaxActiveSellOrdersReached);
-                //return $"You cannot create sell orders because you reached the maximum number of active sale orders.";
+                return new Result(errorCode: UserErrorCodes.UserMaxActiveSellOrdersReached);                
             }
 
             //the success message is the number of sell orders which the user is allowed to create (this will always be either the input value of the orders count or the maximum number of sell orders which the user can create for the product)
             int numberOfAllowedSellOrdersToCreate = FitOrdersCreationCountInBoundaries(newOrdersCount: ordersCount, productId: productId, userId: userId, productActiveSellOrdersCount: product.ActiveSellOrdersCount, userActiveSellOrdersCount: user.ActiveSellOrdersCount);
             return new Result(successMessage: numberOfAllowedSellOrdersToCreate.ToString());
-            //return "";
-
         }
 
 
@@ -286,45 +278,38 @@ namespace TradingApp.Services.Core
 
             if (product == null)
             {
-                return new Result(errorCode: ProductErrorCodes.ProductNotFound);
-                //return "The product was not found!";
+                return new Result(errorCode: ProductErrorCodes.ProductNotFound);                
             }
 
             if (user == null)
             {
-                return new Result(errorCode: UserErrorCodes.UserNotFound);
-                //return "You cannot cancel sell orders if you are not logged in!";
+                return new Result(errorCode: UserErrorCodes.UserNotFound);               
             }
 
             if (user.Id != product.CreatorId)
             {
-                return new Result(errorCode: ProductErrorCodes.ProductInvalidCreator);
-                //return $"You are not allowed to cancel sell orders of products created by other users!";
+                return new Result(errorCode: ProductErrorCodes.ProductInvalidCreator);                
             }
 
             if (product.Status != ProductStatus.approved)
             {
-                return new Result(errorCode: ProductErrorCodes.ProductInvalidStatus);
-                //return $"You cannot create a sell order of the product {product.Name} because it's status is not 'approved'!";
+                return new Result(errorCode: ProductErrorCodes.ProductInvalidStatus);                
             }
 
             if (product.ActiveSellOrdersCount < 1)
             {
-                return new Result(errorCode: ProductErrorCodes.ProductHasNoActiveSaleOrders);
-                //return $"The product {product.Name} has no active sell orders to cancel!";
+                return new Result(errorCode: ProductErrorCodes.ProductHasNoActiveSaleOrders);                
             }
 
             // the success message is the number of sell orders which the user is allowed to cancel(this will always be either the input value of the orders count or all active sell orders of the product)
             int numberOfAllowedSellOrdersToCancel = FitOrdersCancelationCountInBoundaries(newOrdersCount: ordersCount, productId: productId, productActiveSellOrdersCount: product.ActiveSellOrdersCount);
             return new Result(successMessage: numberOfAllowedSellOrdersToCancel.ToString());
-            //return "";
-
         }
 
 
 
 
-        //this method returns an error message; if the output is '' than there are no errors (the user can create a sell order of the product)
+        
         public async Task<Result> CanUserBuySellOrderOfSpecificProductAsync(Guid productId, string userId)
         {
             var product = await _context
@@ -355,51 +340,42 @@ namespace TradingApp.Services.Core
 
             if (product == null)
             {
-                return new Result(errorCode: ProductErrorCodes.ProductNotFound);
-                //return "The product was not found!";
+                return new Result(errorCode: ProductErrorCodes.ProductNotFound);                
             }
 
             if (user == null)
             {
-                return new Result(errorCode: UserErrorCodes.UserNotFound);
-                //return "You cannot buy products if you are not logged in!";
+                return new Result(errorCode: UserErrorCodes.UserNotFound);                
             }
 
             if (user.Id == product.CreatorId)
             {
-                return new Result(errorCode: ProductErrorCodes.ProductInvalidCreator);
-                //return $"You are not allowed to buy your own products!";
+                return new Result(errorCode: ProductErrorCodes.ProductInvalidCreator);                
             }
 
             if (product.Status != ProductStatus.approved)
             {
-                return new Result(errorCode: ProductErrorCodes.ProductInvalidStatus);
-                //return $"You cannot buy the product {product.Name} because it's status is not 'approved'!";
+                return new Result(errorCode: ProductErrorCodes.ProductInvalidStatus);                
             }
 
 
             if (product.ActiveSellOrdersCount < 1)
             {
-                return new Result(errorCode: ProductErrorCodes.ProductHasNoActiveSaleOrders);
-                //return $"You cannot buy the product {product.Name} because it has no active sell orders!";
+                return new Result(errorCode: ProductErrorCodes.ProductHasNoActiveSaleOrders);                
             }
 
             if(user.Balance < product.Price)
             {
-                return new Result(errorCode: UserErrorCodes.UserInsufficientBalance);
-                //return $"You do not have enough money in your balance to buy the product {product.Name}!";
+                return new Result(errorCode: UserErrorCodes.UserInsufficientBalance);                
             }
 
             bool didUserBoughtProduct = await DidUserBoughtProductAsync(productId: productId, userId: userId);
             if(didUserBoughtProduct == true)
             {
-                return new Result(errorCode: ProductErrorCodes.ProductAlreadyPurchased);
-                //return $"You are not allowed to buy products you previosly purchased! You can find and dowload the product {product.Name} in the ivoices page.";
+                return new Result(errorCode: ProductErrorCodes.ProductAlreadyPurchased);                
             }
 
             return new Result();
-            //return "";
-
         }
                 
     }
