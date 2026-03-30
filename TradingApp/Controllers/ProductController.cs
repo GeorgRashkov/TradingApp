@@ -24,7 +24,7 @@ namespace TradingApp.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Products(int pageIndex)
         {
-            IEnumerable<ProductsViewModel> products = await _productService.GetApprovedProductsWithActiveSellOrdersAsync(pageIndex: pageIndex);
+            IEnumerable<ProductViewModel> products = await _productService.GetApprovedProductsWithActiveSellOrdersAsync(pageIndex: pageIndex);
             if (products.Count() == 0)
             { return View(model: null); }
 
@@ -38,7 +38,7 @@ namespace TradingApp.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Product(Guid productId)
         {
-            ProductViewModel? product = await _productService.GetDetailsForApprovedProductWithActiveSellOrdersAsync(productId: productId);
+            ProductDetailsViewModel? product = await _productService.GetDetailsForApprovedProductWithActiveSellOrdersAsync(productId: productId);
 
             if (product == null)
             { return NotFound(); }
@@ -52,7 +52,7 @@ namespace TradingApp.Controllers
         [HttpGet]        
         public async Task<IActionResult> MyProducts(int pageIndex)
         {
-            IEnumerable<MyProductsViewModel> products = await _productService.GetProductsCreatedByUserAsync(pageIndex: pageIndex, userId: LoggedUserId);
+            IEnumerable<MyProductViewModel> products = await _productService.GetProductsCreatedByUserAsync(pageIndex: pageIndex, userId: LoggedUserId);
             if (products.Count() == 0)
             { return View(model: null); }
 
@@ -65,7 +65,7 @@ namespace TradingApp.Controllers
         [HttpGet]        
         public async Task<IActionResult> MyProduct(Guid productId)
         {
-            MyProductViewModel? product = await _productService.GetDetailsForProductAsync(productId: productId);
+            MyProductDetailsViewModel? product = await _productService.GetDetailsForProductAsync(productId: productId);
 
             if (product == null)
             { return NotFound(); }
@@ -91,7 +91,7 @@ namespace TradingApp.Controllers
             if(lastUsed_OrderRequestId == null) 
             { return View(viewName: nameof(Products), model: null); }
             
-            IEnumerable<ProductsViewModel> products = await _productService.Get_SuggestedApprovedProductsWithActiveSellOrders_for_OrderRequest_Async(pageIndex: pageIndex, orderRequestId: (Guid)lastUsed_OrderRequestId);
+            IEnumerable<ProductViewModel> products = await _productService.Get_SuggestedApprovedProductsWithActiveSellOrders_for_OrderRequest_Async(pageIndex: pageIndex, orderRequestId: (Guid)lastUsed_OrderRequestId);
             if (products.Count() == 0)
             { return View(viewName: nameof(Products), model: null); }
 

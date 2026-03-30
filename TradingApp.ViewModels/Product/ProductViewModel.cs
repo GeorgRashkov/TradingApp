@@ -1,13 +1,11 @@
 ﻿namespace TradingApp.ViewModels.Product
 {
-    public class ProductViewModel: ProductsViewModel
-    {      
-        public string Description { get; set; } = string.Empty;
-     
-        public string FirstSellOrderCreationDate { get; set; } = string.Empty;
-
-        public string LastSellOrderCreationDate { get; set; } = string.Empty;
-
-        public int SellOrdersCount { get; set; }
+    public class ProductViewModel
+    {
+        public Guid Id { get; set; }
+        public string ProductName { get; set; } = string.Empty;         
+        public string Price { get; set; } = string.Empty;
+        public string CreatorName { get; set; } = string.Empty;
+        public string? Status { get; set; }
     }
 }

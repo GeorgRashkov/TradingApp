@@ -1,13 +1,9 @@
 ﻿namespace TradingApp.ViewModels.Invoice
 {
-    public class InvoiceViewModel: InvoicesViewModel
+    public class InvoiceViewModel
     {
-        public Guid? ProductId { get; set; }
-        public string? ProductName { get; set; } = null!;
-        public string? ProductCreatorName { get; set; } = null!;
-
-        public string Price { get; set; } = null!;
-
-        public bool IsUserTheBuyer { get; set; }
+        public Guid Id { get; set; }
+        public string Title { get; set; } = null!;
+        public string CompletedAt { get; set; } = null!;
     }
 }

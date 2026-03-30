@@ -1,5 +1,5 @@
 ﻿@using TradingApp.ViewModels.OrderRequest;
-@model List<MyOrderRequestsViewModel>
+@model List<MyOrderRequestViewModel>
 
 @{
     ViewData["Title"] = "My Requests";
@@ -38,7 +38,7 @@ else
 
         <div class="row row-cols-1 row-cols-sm-2 g-2">
 
-            @foreach (MyOrderRequestsViewModel orderRequestsViewModel in Model)
+            @foreach (MyOrderRequestViewModel orderRequestsViewModel in Model)
             {
                 <div class="col">
 

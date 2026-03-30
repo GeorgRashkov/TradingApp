@@ -22,7 +22,7 @@ namespace TradingApp.Services.Core
         public int ProductPageIndex { get; private set; }
 
 
-        public async Task<IEnumerable<ProductsViewModel>> GetApprovedProductsWithActiveSellOrdersAsync(int pageIndex)
+        public async Task<IEnumerable<ProductViewModel>> GetApprovedProductsWithActiveSellOrdersAsync(int pageIndex)
         {   
             int productsCount = await _context
                 .Products
@@ -31,16 +31,16 @@ namespace TradingApp.Services.Core
                .CountAsync();
 
             if (productsCount == 0)
-            { return new List<ProductsViewModel>(); }
+            { return new List<ProductViewModel>(); }
 
             SetProductPage(pageIndex, productsCount);
 
-            IEnumerable<ProductsViewModel> products = await _context
+            IEnumerable<ProductViewModel> products = await _context
                 .Products
               .AsNoTracking()
               .Where(p => p.Status == ProductStatus.approved && p.SellOrders.Any(so => so.Status == SellOrderStatus.active))
               .Skip(ProductPageIndex * _productsPerPage).Take(_productsPerPage)
-              .Select(p => new ProductsViewModel
+              .Select(p => new ProductViewModel
               {
                   Id = p.Id,
                   CreatorName = p.Creator.UserName,
@@ -51,7 +51,7 @@ namespace TradingApp.Services.Core
             return products;
         }
 
-        public async Task<IEnumerable<ProductsViewModel>> GetProductsAsync(int pageIndex)
+        public async Task<IEnumerable<ProductViewModel>> GetProductsAsync(int pageIndex)
         {
             int productsCount = await _context
                 .Products
@@ -59,15 +59,15 @@ namespace TradingApp.Services.Core
                .CountAsync();
 
             if (productsCount == 0)
-            { return new List<ProductsViewModel>(); }
+            { return new List<ProductViewModel>(); }
 
             SetProductPage(pageIndex, productsCount);
 
-            IEnumerable<ProductsViewModel> products = await _context
+            IEnumerable<ProductViewModel> products = await _context
                 .Products
               .AsNoTracking()              
               .Skip(ProductPageIndex * _productsPerPage).Take(_productsPerPage)
-              .Select(p => new ProductsViewModel
+              .Select(p => new ProductViewModel
               {
                   Id = p.Id,
                   CreatorName = p.Creator.UserName,
@@ -79,7 +79,7 @@ namespace TradingApp.Services.Core
             return products;
         }
 
-        public async Task<IEnumerable<ProductsViewModel>> Get_SuggestedApprovedProductsWithActiveSellOrders_for_OrderRequest_Async(int pageIndex, Guid orderRequestId)
+        public async Task<IEnumerable<ProductViewModel>> Get_SuggestedApprovedProductsWithActiveSellOrders_for_OrderRequest_Async(int pageIndex, Guid orderRequestId)
         {
             int productsCount = await _context
                 .Products
@@ -89,16 +89,16 @@ namespace TradingApp.Services.Core
                .CountAsync();
 
             if (productsCount == 0)
-            { return new List<ProductsViewModel>(); }
+            { return new List<ProductViewModel>(); }
 
             SetProductPage(pageIndex, productsCount);
 
-            IEnumerable<ProductsViewModel> products = await _context
+            IEnumerable<ProductViewModel> products = await _context
                 .Products
               .AsNoTracking()
               .Where(p => p.Status == ProductStatus.approved && p.SellOrders.Any(so => so.Status == SellOrderStatus.active) && p.SellOrderSuggestions.Any(sos => sos.OrderRequestId == orderRequestId))
               .Skip(ProductPageIndex * _productsPerPage).Take(_productsPerPage)
-              .Select(p => new ProductsViewModel
+              .Select(p => new ProductViewModel
               {
                   Id = p.Id,
                   CreatorName = p.Creator.UserName,
@@ -123,15 +123,15 @@ namespace TradingApp.Services.Core
             return productIdsAndNamesDict;
         }
 
-        public async Task<ProductViewModel?> GetDetailsForApprovedProductWithActiveSellOrdersAsync(Guid productId)
+        public async Task<ProductDetailsViewModel?> GetDetailsForApprovedProductWithActiveSellOrdersAsync(Guid productId)
         {
 
-            ProductViewModel? product = await _context
+            ProductDetailsViewModel? product = await _context
                 .Products
                 .Include(p => p.Creator)
                 .AsNoTracking()
                 .Where(p => p.Id == productId && p.Status == ProductStatus.approved && p.SellOrders.Any(so => so.Status == SellOrderStatus.active))
-                .Select(p => new ProductViewModel
+                .Select(p => new ProductDetailsViewModel
                 {
                     Id = p.Id,
                     ProductName = p.Name,
@@ -148,7 +148,7 @@ namespace TradingApp.Services.Core
 
 
 
-        public async Task<IEnumerable<MyProductsViewModel>> GetProductsCreatedByUserAsync(int pageIndex, string userId)
+        public async Task<IEnumerable<MyProductViewModel>> GetProductsCreatedByUserAsync(int pageIndex, string userId)
         {
 
             int productsCount = await _context
@@ -158,16 +158,16 @@ namespace TradingApp.Services.Core
               .CountAsync();
 
             if (productsCount == 0)
-            { return new List<MyProductsViewModel>(); }
+            { return new List<MyProductViewModel>(); }
 
             SetProductPage(pageIndex, productsCount);
 
-            IEnumerable<MyProductsViewModel> products = await _context
+            IEnumerable<MyProductViewModel> products = await _context
                 .Products
               .AsNoTracking()
               .Where(p => p.CreatorId == userId)
               .Skip(ProductPageIndex * _productsPerPage).Take(_productsPerPage)
-              .Select(p => new MyProductsViewModel
+              .Select(p => new MyProductViewModel
               {
                   Id = p.Id,
                   Price = p.Price.ToString("f2"),
@@ -181,13 +181,13 @@ namespace TradingApp.Services.Core
 
 
 
-        public async Task<MyProductViewModel?> GetDetailsForProductAsync(Guid productId)
+        public async Task<MyProductDetailsViewModel?> GetDetailsForProductAsync(Guid productId)
         {
-            MyProductViewModel? product = await _context
+            MyProductDetailsViewModel? product = await _context
                 .Products
                 .AsNoTracking()
                 .Where(p => p.Id == productId)
-                .Select(p => new MyProductViewModel
+                .Select(p => new MyProductDetailsViewModel
                 {
                     Id = p.Id,
                     ProductName = p.Name,

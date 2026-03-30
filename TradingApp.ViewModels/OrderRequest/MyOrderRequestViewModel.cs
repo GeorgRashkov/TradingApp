@@ -1,11 +1,11 @@
 ﻿
+
 namespace TradingApp.ViewModels.OrderRequest
 {
-    public class MyOrderRequestViewModel: MyOrderRequestsViewModel
+    public class MyOrderRequestViewModel
     {
-        public string Description { get; set; } = null!;
-        public string CreationDate { get; set; } = null!;
-        
-        public bool HasSuggestions { get; set; }
+        public Guid Id { get; set; }
+        public string Title { get; set; } = null!;
+        public string MaxPrice { get; set; } = null!;
     }
 }

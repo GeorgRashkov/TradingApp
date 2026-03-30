@@ -26,7 +26,7 @@ namespace TradingApp.Controllers
         [HttpGet]
         public async Task<IActionResult> Invoices(int pageIndex)
         {
-            IEnumerable<InvoicesViewModel> loggedUserCompletedOrders = await _invoiceService.GetCompletedOrdersAsync(userId: LoggedUserId, pageIndex: pageIndex);
+            IEnumerable<InvoiceViewModel> loggedUserCompletedOrders = await _invoiceService.GetCompletedOrdersAsync(userId: LoggedUserId, pageIndex: pageIndex);
             ViewData["page"] = _invoiceService.InvoicePageIndex;
             return View(model: loggedUserCompletedOrders);
         }
@@ -35,7 +35,7 @@ namespace TradingApp.Controllers
         [HttpGet]
         public async Task<IActionResult> Invoice(Guid completedOrderId)
         {
-            InvoiceViewModel? invoiceViewModel = await _invoiceService.GetCompletedOrderAsync(userId: LoggedUserId, completedOrderId: completedOrderId);
+            InvoiceDetailsViewModel? invoiceViewModel = await _invoiceService.GetCompletedOrderAsync(userId: LoggedUserId, completedOrderId: completedOrderId);
 
             if(invoiceViewModel == null)
             {
@@ -50,7 +50,7 @@ namespace TradingApp.Controllers
         [HttpGet]
         public async Task<IActionResult> Download3dModelFile(Guid completedOrderId)
         {
-            InvoiceViewModel? invoiceViewModel = await _invoiceService.GetCompletedOrderAsync(userId:LoggedUserId,completedOrderId: completedOrderId);
+            InvoiceDetailsViewModel? invoiceViewModel = await _invoiceService.GetCompletedOrderAsync(userId:LoggedUserId,completedOrderId: completedOrderId);
 
             if (invoiceViewModel == null)
             {
