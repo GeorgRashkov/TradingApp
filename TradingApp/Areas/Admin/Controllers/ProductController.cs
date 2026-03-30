@@ -30,7 +30,7 @@ namespace TradingApp.Areas.Admin.Controllers
         [HttpGet]
         public async Task<IActionResult> Products(int pageIndex)
         {
-            IEnumerable<ProductsViewModel> products = await _productService.GetProductsAsync(pageIndex: pageIndex);
+            IEnumerable<ProductViewModel> products = await _productService.GetProductsAsync(pageIndex: pageIndex);
             if (products.Count() == 0)
             { return View(model: null); }
 
@@ -44,7 +44,7 @@ namespace TradingApp.Areas.Admin.Controllers
         [HttpGet]        
         public async Task<IActionResult> Product(Guid productId)
         {
-            MyProductViewModel? product = await _productService.GetDetailsForProductAsync(productId: productId);
+            MyProductDetailsViewModel? product = await _productService.GetDetailsForProductAsync(productId: productId);
 
             if (product == null)
             { return NotFound(); }           

@@ -21,7 +21,7 @@ namespace TradingApp.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> OrderRequests(int pageIndex)
         {
-            IEnumerable<OrderRequestsViewModel> orderRequests = await _orderRequestService.GetActiveRequestsAsync(pageIndex: pageIndex);
+            IEnumerable<OrderRequestViewModel> orderRequests = await _orderRequestService.GetActiveRequestsAsync(pageIndex: pageIndex);
             if (orderRequests.Count() == 0)
             { return View(model: null); }
 
@@ -34,7 +34,7 @@ namespace TradingApp.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> OrderRequest(Guid orderRequestId)
         {
-            OrderRequestViewModel? orderRequest = await _orderRequestService.GetDetailsForActiveRequestAsync(requestId: orderRequestId);
+            OrderRequestDetailsViewModel? orderRequest = await _orderRequestService.GetDetailsForActiveRequestAsync(requestId: orderRequestId);
 
             if (orderRequest == null)
             { return NotFound(); }
@@ -47,7 +47,7 @@ namespace TradingApp.Controllers
         [HttpGet]
         public async Task<IActionResult> MyOrderRequests(int pageIndex)
         {
-            IEnumerable<MyOrderRequestsViewModel> orderRequests = await _orderRequestService.GetActiveRequestsCreatedByUserAsync(pageIndex: pageIndex, userId: LoggedUserId);
+            IEnumerable<MyOrderRequestViewModel> orderRequests = await _orderRequestService.GetActiveRequestsCreatedByUserAsync(pageIndex: pageIndex, userId: LoggedUserId);
 
             if (orderRequests.Count() == 0)
             { return View(model: null); }
@@ -60,7 +60,7 @@ namespace TradingApp.Controllers
         [HttpGet]
         public async Task<IActionResult> MyOrderRequest(Guid orderRequestId)
         {
-            MyOrderRequestViewModel? orderRequest = await _orderRequestService.GetDetailsForActiveRequestCreatedByUserAsync(requestId: orderRequestId, userId: LoggedUserId);
+            MyOrderRequestDetailsViewModel? orderRequest = await _orderRequestService.GetDetailsForActiveRequestCreatedByUserAsync(requestId: orderRequestId, userId: LoggedUserId);
 
             if (orderRequest == null)
             { return NotFound(); }

@@ -27,7 +27,7 @@ namespace TradingApp.Areas.Admin.Controllers
         [HttpGet]
         public async Task<IActionResult> ProductsReports(int pageIndex)
         {
-            List<ProductsReportsViewModel> productReports = await _productReport_Service.GetReportsAsync(pageIndex: pageIndex);
+            List<ProductReportViewModel> productReports = await _productReport_Service.GetReportsAsync(pageIndex: pageIndex);
 
             if (productReports.Count() == 0)
             { return View(viewName: nameof(ProductReports), model: null); }
@@ -46,7 +46,7 @@ namespace TradingApp.Areas.Admin.Controllers
             if (lastUsed_ReportedProductId == null)
             { return View(viewName: nameof(ProductsReports), model: null); }
 
-            IEnumerable<ProductsReportsViewModel> productReports = await _productReport_Service.GetReportsForProductAsync(pageIndex: pageIndex, reportedProductId: (Guid)lastUsed_ReportedProductId);
+            IEnumerable<ProductReportViewModel> productReports = await _productReport_Service.GetReportsForProductAsync(pageIndex: pageIndex, reportedProductId: (Guid)lastUsed_ReportedProductId);
             if (productReports.Count() == 0)
             { return View(model: null); }
 
@@ -71,7 +71,7 @@ namespace TradingApp.Areas.Admin.Controllers
 
         public async Task<IActionResult> ProductReport(Guid reportId) 
         {
-            ProductReportViewModel? productReport = await _productReport_Service.GetProductReportAsync(reportId: reportId);
+            ProductReportDetailsViewModel? productReport = await _productReport_Service.GetProductReportAsync(reportId: reportId);
 
             if(productReport == null) 
             { return NotFound(); }

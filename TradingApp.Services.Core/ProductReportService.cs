@@ -25,7 +25,7 @@ namespace TradingApp.Services.Core
             ProductReportPageIndex = pageIndex;
         }
 
-        public async Task<List<ProductsReportsViewModel>> GetReportsAsync(int pageIndex)
+        public async Task<List<ProductReportViewModel>> GetReportsAsync(int pageIndex)
         {
             int reportsCount = await _context
                 .ProductReports
@@ -33,15 +33,15 @@ namespace TradingApp.Services.Core
               .CountAsync();
 
             if (reportsCount == 0)
-            { return new List<ProductsReportsViewModel>(); }
+            { return new List<ProductReportViewModel>(); }
 
             SetReportPage(pageIndex, reportsCount);
 
-            List<ProductsReportsViewModel> reports = await _context
+            List<ProductReportViewModel> reports = await _context
                 .ProductReports
                 .AsNoTracking()               
                 .Skip(ProductReportPageIndex * _productReportsPerPage).Take(_productReportsPerPage)
-                .Select(pr => new ProductsReportsViewModel
+                .Select(pr => new ProductReportViewModel
                 {
                     ReportId = pr.Id,                    
                     Title = pr.Title,
@@ -53,7 +53,7 @@ namespace TradingApp.Services.Core
             return reports;
 
         }
-        public async Task<List<ProductsReportsViewModel>> GetReportsForProductAsync(int pageIndex, Guid reportedProductId) 
+        public async Task<List<ProductReportViewModel>> GetReportsForProductAsync(int pageIndex, Guid reportedProductId) 
         {
             int reportsForProductCount = await _context
                 .ProductReports
@@ -62,16 +62,16 @@ namespace TradingApp.Services.Core
               .CountAsync();
 
             if (reportsForProductCount == 0)
-            { return new List<ProductsReportsViewModel>(); }
+            { return new List<ProductReportViewModel>(); }
 
             SetReportPage(pageIndex, reportsForProductCount);
 
-            List<ProductsReportsViewModel> reportsForProduct = await _context
+            List<ProductReportViewModel> reportsForProduct = await _context
                 .ProductReports
                 .AsNoTracking()
                 .Where(pr => pr.ReportedProductId == reportedProductId)
                 .Skip(ProductReportPageIndex * _productReportsPerPage).Take(_productReportsPerPage)
-                .Select(pr => new ProductsReportsViewModel
+                .Select(pr => new ProductReportViewModel
                 {
                     ReportId = pr.Id,                    
                     Title = pr.Title,
@@ -85,15 +85,15 @@ namespace TradingApp.Services.Core
         }
 
 
-        public async Task<ProductReportViewModel?> GetProductReportAsync(Guid reportId) 
+        public async Task<ProductReportDetailsViewModel?> GetProductReportAsync(Guid reportId) 
         {
-            ProductReportViewModel? report = await _context
+            ProductReportDetailsViewModel? report = await _context
                 .ProductReports
                 .Include(pr => pr.Product)
                 .Include(pr => pr.Reporter)
                 .AsNoTracking()
                 .Where(pr => pr.Id == reportId)
-                .Select(pr => new ProductReportViewModel 
+                .Select(pr => new ProductReportDetailsViewModel 
                 {
                     ReportId = pr.Id,
                     Title = pr.Title,

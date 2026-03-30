@@ -9,10 +9,10 @@ namespace TradingApp.Services.Core.Interfaces
     public interface IOrderRequestService
     {
         int RequestPageIndex { get; }
-        Task<IEnumerable<OrderRequestsViewModel>> GetActiveRequestsAsync(int pageIndex);
-        Task<OrderRequestViewModel?> GetDetailsForActiveRequestAsync(Guid requestId);
-        Task<IEnumerable<MyOrderRequestsViewModel>> GetActiveRequestsCreatedByUserAsync(int pageIndex, string userId);
-        Task<MyOrderRequestViewModel?> GetDetailsForActiveRequestCreatedByUserAsync(Guid requestId, string userId);
+        Task<IEnumerable<OrderRequestViewModel>> GetActiveRequestsAsync(int pageIndex);
+        Task<OrderRequestDetailsViewModel?> GetDetailsForActiveRequestAsync(Guid requestId);
+        Task<IEnumerable<MyOrderRequestViewModel>> GetActiveRequestsCreatedByUserAsync(int pageIndex, string userId);
+        Task<MyOrderRequestDetailsViewModel?> GetDetailsForActiveRequestCreatedByUserAsync(Guid requestId, string userId);
         Task<int> GetUserActiveRequestsCountAsync(string userId);
 
         Task<UpdatedOrderRequestModel?> GetUpdatedOrderRequestModelAsync(Guid orderRequestId);

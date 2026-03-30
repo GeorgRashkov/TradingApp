@@ -28,7 +28,7 @@ namespace TradingApp.Services.Core
             InvoicePageIndex = pageIndex;
         }
 
-        public async Task<IEnumerable<InvoicesViewModel>> GetCompletedOrdersAsync(string userId, int pageIndex)
+        public async Task<IEnumerable<InvoiceViewModel>> GetCompletedOrdersAsync(string userId, int pageIndex)
         {
             int userInvoicesCount = await _context
                 .CompletedOrders
@@ -36,17 +36,17 @@ namespace TradingApp.Services.Core
                 .CountAsync();
 
             if (userInvoicesCount == 0)
-            { return new List<InvoicesViewModel>(); }
+            { return new List<InvoiceViewModel>(); }
 
             SetInvoicePage(pageIndex, userInvoicesCount);
 
-            List<InvoicesViewModel> userCompletedOrders = await _context
+            List<InvoiceViewModel> userCompletedOrders = await _context
                 .CompletedOrders
                 .AsNoTracking()
                 .Where(co => userId == co.BuyerId || userId == co.SellerId)
                 .OrderByDescending(co => co.CompletedAt)
                 .Skip(InvoicePageIndex * _invoicesPerPage).Take(_invoicesPerPage)
-                .Select(co => new InvoicesViewModel
+                .Select(co => new InvoiceViewModel
                 {
                     Id = co.Id,
                     Title = co.BuyerId == userId ? co.TitleForBuyer:co.TitleForSeller,
@@ -56,7 +56,7 @@ namespace TradingApp.Services.Core
             return userCompletedOrders;
         }
 
-        public async Task<InvoiceViewModel?> GetCompletedOrderAsync(string userId, Guid completedOrderId)
+        public async Task<InvoiceDetailsViewModel?> GetCompletedOrderAsync(string userId, Guid completedOrderId)
         {
             CompletedOrder? completedOrder = await _context
                 .CompletedOrders
@@ -83,7 +83,7 @@ namespace TradingApp.Services.Core
             decimal price = isUserTheBuyer ? completedOrder.PricePaid : completedOrder.SellerRevenue;
             string title = isUserTheBuyer ? completedOrder.TitleForBuyer : completedOrder.TitleForSeller;
             
-            InvoiceViewModel invoiceViewModel = new InvoiceViewModel()
+            InvoiceDetailsViewModel invoiceViewModel = new InvoiceDetailsViewModel()
             {
                 Id = completedOrder.Id,
                 Title = title,

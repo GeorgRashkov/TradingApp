@@ -1,13 +1,13 @@
 ﻿
 namespace TradingApp.ViewModels.ProductReport
 {
-    public class ProductReportViewModel: ProductsReportsViewModel
+    public class ProductReportViewModel
     {
-        public Guid ReportedProductId { get; set; }
+        public Guid ReportId { get; set; }    
+        public string Title { get; set; } = null!;
+        public string CreatedAt { get; set; } = null!;
 
-        //this is the username of the user who reported the product
-        public string ReporterName { get; set; } = null!;
-
-        public string Message { get; set; } = null!;
+        public string Type { get; set; }
+        public string Status { get; set; }
     }
 }

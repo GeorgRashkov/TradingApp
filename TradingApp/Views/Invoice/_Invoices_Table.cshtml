@@ -1,5 +1,5 @@
 ﻿@using TradingApp.ViewModels.Invoice
-@model List<InvoicesViewModel>
+@model List<InvoiceViewModel>
 
 
 <table class="table table-striped table-bordered table-hover">
@@ -11,7 +11,7 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (InvoicesViewModel invoice in Model)
+        @foreach (InvoiceViewModel invoice in Model)
         {
             <tr>
                 <td>@(invoice.Title)</td>

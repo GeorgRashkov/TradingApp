@@ -30,7 +30,7 @@ namespace TradingApp.Services.Core
         }
 
 
-        public async Task<IEnumerable<OrderRequestsViewModel>> GetActiveRequestsAsync(int pageIndex)
+        public async Task<IEnumerable<OrderRequestViewModel>> GetActiveRequestsAsync(int pageIndex)
         {
             int requestsCount = await _context
                 .OrderRequests
@@ -39,17 +39,17 @@ namespace TradingApp.Services.Core
                 .CountAsync();
 
             if (requestsCount == 0)
-            { return new List<OrderRequestsViewModel>(); }
+            { return new List<OrderRequestViewModel>(); }
 
             SetRequestPage(pageIndex, requestsCount);
 
 
-            IEnumerable<OrderRequestsViewModel> orderRequests = await _context
+            IEnumerable<OrderRequestViewModel> orderRequests = await _context
                 .OrderRequests
                 .AsNoTracking()
                 .Where(or => or.Status == OrderRequestStatus.active)
                 .Skip(RequestPageIndex * _requestsPerPage).Take(_requestsPerPage)
-                .Select(or => new OrderRequestsViewModel
+                .Select(or => new OrderRequestViewModel
                 {
                     Id = or.Id,
                     Title = or.Title,
@@ -60,14 +60,14 @@ namespace TradingApp.Services.Core
             return orderRequests;
         }
 
-        public async Task<OrderRequestViewModel?> GetDetailsForActiveRequestAsync(Guid requestId)
+        public async Task<OrderRequestDetailsViewModel?> GetDetailsForActiveRequestAsync(Guid requestId)
         {
-            OrderRequestViewModel? request = await _context
+            OrderRequestDetailsViewModel? request = await _context
                 .OrderRequests
                 .Include(or => or.Creator)
                 .AsNoTracking()
                 .Where(or => or.Id == requestId && or.Status == OrderRequestStatus.active)
-                .Select(or => new OrderRequestViewModel
+                .Select(or => new OrderRequestDetailsViewModel
                 {
                     Id = or.Id,
                     Title = or.Title,
@@ -83,21 +83,21 @@ namespace TradingApp.Services.Core
 
 
 
-        public async Task<IEnumerable<MyOrderRequestsViewModel>> GetActiveRequestsCreatedByUserAsync(int pageIndex, string userId)
+        public async Task<IEnumerable<MyOrderRequestViewModel>> GetActiveRequestsCreatedByUserAsync(int pageIndex, string userId)
         {
             int requestsCount = await GetUserActiveRequestsCountAsync(userId);
 
             if (requestsCount == 0)
-            { return new List<MyOrderRequestsViewModel>(); }
+            { return new List<MyOrderRequestViewModel>(); }
 
             SetRequestPage(pageIndex, requestsCount);
 
-            IEnumerable<MyOrderRequestsViewModel> orderRequests = await _context
+            IEnumerable<MyOrderRequestViewModel> orderRequests = await _context
                 .OrderRequests
                 .AsNoTracking()
                 .Where(or => or.Status == OrderRequestStatus.active && or.CreatorId == userId)
                 .Skip(RequestPageIndex * _requestsPerPage).Take(_requestsPerPage)
-                .Select(or => new MyOrderRequestsViewModel
+                .Select(or => new MyOrderRequestViewModel
                 {
                     Id = or.Id,
                     Title = or.Title,
@@ -108,16 +108,16 @@ namespace TradingApp.Services.Core
         }
 
 
-        public async Task<MyOrderRequestViewModel?> GetDetailsForActiveRequestCreatedByUserAsync(Guid requestId, string userId)
+        public async Task<MyOrderRequestDetailsViewModel?> GetDetailsForActiveRequestCreatedByUserAsync(Guid requestId, string userId)
         {
-            MyOrderRequestViewModel? request = await _context
+            MyOrderRequestDetailsViewModel? request = await _context
                 .OrderRequests 
                 .Include(or => or.SellOrderSuggestions)
                 .ThenInclude(sos => sos.Product)
                 .ThenInclude(p => p.SellOrders)
                 .AsNoTracking()
                 .Where(or => or.Id == requestId && or.Status == OrderRequestStatus.active && or.CreatorId == userId)
-                .Select(or => new MyOrderRequestViewModel
+                .Select(or => new MyOrderRequestDetailsViewModel
                 {
                     Id = or.Id,
                     Title = or.Title,
