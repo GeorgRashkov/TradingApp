@@ -72,6 +72,7 @@ namespace TradingApp
             if (app.Environment.IsDevelopment())
             {
                 app.UseMigrationsEndPoint();
+                app.UseDeveloperExceptionPage();               
             }
             else
             {
@@ -88,6 +89,7 @@ namespace TradingApp
             app.UseAuthentication();
             app.UseAuthorization();
 
+            
             app.MapControllerRoute(
                 name: "Areas",
                 pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}"
@@ -96,7 +98,9 @@ namespace TradingApp
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
-            app.MapRazorPages();           
+            app.MapRazorPages();
+
+            app.UseStatusCodePagesWithReExecute("/ErrorContoller/StatusCodePage","?statusCode={0}");
 
             //seed some data to the database
             await new Program().SeedDataAsync(app);
