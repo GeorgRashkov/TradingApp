@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using TradingApp.Data;
 using TradingApp.Data.Models;
 using TradingApp.Data.Seed;
+using TradingApp.GCommon;
 using TradingApp.Services.Core;
 using TradingApp.Services.Core.Interfaces;
 
@@ -19,18 +20,35 @@ namespace TradingApp
             builder.Logging.ClearProviders();
             builder.Logging.AddConsole();
             builder.Logging.AddDebug();
-            
+
             // Add services to the container.
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(connectionString));
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-            builder.Services.AddDefaultIdentity<User>(
-                options => options.SignIn.RequireConfirmedAccount = false
-                ).AddRoles<IdentityRole>()
+            builder.Services.AddDefaultIdentity<User>().AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
             builder.Services.AddControllersWithViews();
+
+            //configure identity options
+            builder.Services.Configure<IdentityOptions>(options =>
+            {
+                options.SignIn.RequireConfirmedAccount = false;
+
+                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(EntityValidation.User.LockoutDefaultMinutes);
+                options.Lockout.MaxFailedAccessAttempts = EntityValidation.User.MaxFailedAccessAttempts;
+                options.Lockout.AllowedForNewUsers = true;
+
+                options.User.AllowedUserNameCharacters = EntityValidation.User.UserNameAllowedCharacters;
+                options.User.RequireUniqueEmail = true;
+
+                options.Password.RequiredLength = EntityValidation.User.PasswordMinLength;
+                options.Password.RequireDigit = true;
+                options.Password.RequireLowercase = true;
+                options.Password.RequireUppercase = true;
+                options.Password.RequireNonAlphanumeric = true;
+            });
 
             //adding custom services to the container
             builder.Services.AddScoped<IUserService, UserService>();
@@ -58,8 +76,8 @@ namespace TradingApp
             builder.Services.AddTransient<OrderRequestSeeder>();
             builder.Services.AddTransient<SellOrderSeeder>();
             builder.Services.AddTransient<SellOrderSuggestionSeeder>();
-           
-            
+
+
 
 
 
@@ -72,7 +90,7 @@ namespace TradingApp
             if (app.Environment.IsDevelopment())
             {
                 app.UseMigrationsEndPoint();
-                app.UseDeveloperExceptionPage();               
+                app.UseDeveloperExceptionPage();
             }
             else
             {
@@ -89,7 +107,7 @@ namespace TradingApp
             app.UseAuthentication();
             app.UseAuthorization();
 
-            
+
             app.MapControllerRoute(
                 name: "Areas",
                 pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}"
@@ -100,12 +118,12 @@ namespace TradingApp
                 pattern: "{controller=Home}/{action=Index}/{id?}");
             app.MapRazorPages();
 
-            app.UseStatusCodePagesWithReExecute("/ErrorContoller/StatusCodePage","?statusCode={0}");
+            app.UseStatusCodePagesWithReExecute("/ErrorContoller/StatusCodePage", "?statusCode={0}");
 
             //seed some data to the database
             await new Program().SeedDataAsync(app);
 
-            await app.RunAsync();            
+            await app.RunAsync();
         }
 
 
