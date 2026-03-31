@@ -9,6 +9,17 @@
 
             public const int MinDaysToSuspendUser = 0;
             public const int MaxDaysToSuspendUser = 9999;
+
+            public const int LockoutDefaultMinutes = 1;
+            public const int MaxFailedAccessAttempts = 5;
+
+            public const string UserNameAllowedCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            public const string UserNameRegex = @"^[a-zA-Z0-9]+$";
+            public const int UserNameMinLength = 3;
+            public const int UserNameMaxLength = 50;
+
+            public const int PasswordMinLength = 7;
+            public const int PasswordMaxLength = 100;                      
         }
 
         public static class Balance

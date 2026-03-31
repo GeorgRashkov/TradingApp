@@ -80,7 +80,8 @@ namespace TradingApp.Areas.Identity.Pages.Account
         public class InputModel
         {
             [Required]
-            [StringLength(30, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 3)]
+            [StringLength(maximumLength: EntityValidation.User.UserNameMaxLength, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = EntityValidation.User.UserNameMinLength)]
+            [RegularExpression(pattern:EntityValidation.User.UserNameRegex, ErrorMessage = "The {0} can only contain letters and digits.")]
             [Display(Name = "Username")]
             public string Username { get; set; }
 
@@ -98,7 +99,7 @@ namespace TradingApp.Areas.Identity.Pages.Account
             ///     directly from your code. This API may change or be removed in future releases.
             /// </summary>
             [Required]
-            [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
+            [StringLength(maximumLength: EntityValidation.User.PasswordMaxLength, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = EntityValidation.User.PasswordMinLength)]
             [DataType(DataType.Password)]
             [Display(Name = "Password")]
             public string Password { get; set; }

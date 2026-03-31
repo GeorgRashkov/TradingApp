@@ -8,6 +8,9 @@ namespace TradingApp.GCommon.Filters
         [MaxLength(EntityValidation.Product.NameMaxLength)]
         [RegularExpression(EntityValidation.Product.NameRegex)]
         public string? ProductName { get; set; } = null!;
+
+        [MaxLength(EntityValidation.User.UserNameMaxLength)]
+        [RegularExpression(EntityValidation.User.UserNameRegex)]
         public string? CreatorName { get; set; } = null!;
 
         [Range(EntityValidation.Product.PriceMinValue, EntityValidation.Product.PriceMaxValue)]
