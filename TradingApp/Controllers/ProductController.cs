@@ -1,9 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
 using TradingApp.GCommon;
 using TradingApp.GCommon.Filters;
-using TradingApp.Services.Core;
 using TradingApp.Services.Core.Interfaces;
 using TradingApp.ViewModels.Product;
 
@@ -94,32 +92,12 @@ namespace TradingApp.Controllers
 
 
 
+
+
         [HttpGet]
-        public async Task<IActionResult> SuggestedProducts_for_OrderRequest(int pageIndex, string? orderRequestId)
+        public async Task<IActionResult> SuggestedProducts_for_OrderRequest(Guid orderRequestId) 
         {
-            Guid? lastUsed_OrderRequestId = Get_LastUsed_OrderRequestId(orderRequestId: orderRequestId);
-            if(lastUsed_OrderRequestId == null) 
-            { return View(viewName: nameof(Products), model: null); }
-            
-            IEnumerable<ProductViewModel> products = await _productService.Get_SuggestedApprovedProductsWithActiveSellOrders_for_OrderRequest_Async(pageIndex: pageIndex, orderRequestId: (Guid)lastUsed_OrderRequestId);
-            if (products.Count() == 0)
-            { return View(viewName: nameof(Products), model: null); }
-
-            ViewData["page"] = _productService.ProductPageIndex;
-            ViewData["action"] = "SuggestedProducts_for_OrderRequest";
-
-            return View(viewName: nameof(Products), model: products);
-        }
-
-        private Guid? Get_LastUsed_OrderRequestId(string? orderRequestId)
-        {
-            if (orderRequestId.IsNullOrEmpty() == false)
-            {
-                bool is_OrderRequestId_validGuid = Guid.TryParse(orderRequestId, out Guid orderRequestIdAsGuid);
-                if (is_OrderRequestId_validGuid == true)
-                { TempData["_lastUsed_OrderRequestId"] = orderRequestIdAsGuid; }
-            }
-            return (Guid?)TempData.Peek("_lastUsed_OrderRequestId");
+            return RedirectToAction(actionName: nameof(Products), routeValues: new { pageIndex = 0, OrderRequestId = orderRequestId });
         }
     }
 }

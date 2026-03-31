@@ -48,6 +48,8 @@ else
             </tbody>
         </table>
 
+        <input type="hidden" asp-for="ProductFilter.OrderRequestId" value="@(Model.ProductFilter?.OrderRequestId)" />
+
     </form>
 
 
@@ -65,7 +67,8 @@ else
            asp-route-ProductName="@(Model.ProductFilter?.ProductName)"
            asp-route-CreatorName="@(Model.ProductFilter?.CreatorName)"
            asp-route-MinPrice="@(Model.ProductFilter?.MinPrice)"
-           asp-route-MaxPrice="@(Model.ProductFilter?.MaxPrice)">
+           asp-route-MaxPrice="@(Model.ProductFilter?.MaxPrice)"
+           asp-route-OrderRequestId="@(Model.ProductFilter?.OrderRequestId)">
             ← Previous
         </a>
 
@@ -81,7 +84,8 @@ else
            asp-route-ProductName="@(Model.ProductFilter?.ProductName)"
            asp-route-CreatorName="@(Model.ProductFilter?.CreatorName)"
            asp-route-MinPrice="@(Model.ProductFilter?.MinPrice)"
-           asp-route-MaxPrice="@(Model.ProductFilter?.MaxPrice)">
+           asp-route-MaxPrice="@(Model.ProductFilter?.MaxPrice)"
+           asp-route-OrderRequestId="@(Model.ProductFilter?.OrderRequestId)">
             Next →
         </a>
 

@@ -15,5 +15,7 @@ namespace TradingApp.GCommon.Filters
 
         [Range(EntityValidation.Product.PriceMinValue, EntityValidation.Product.PriceMaxValue)]
         public double MaxPrice { get; set; } = EntityValidation.Product.PriceMaxValue;
+
+        public Guid OrderRequestId { get; set; }
     }
 }

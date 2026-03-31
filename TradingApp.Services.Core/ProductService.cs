@@ -38,6 +38,13 @@ namespace TradingApp.Services.Core
             if (productFilter.MaxPrice < EntityValidation.Product.PriceMaxValue)
             { productsQuery = productsQuery.Where(p => p.Price <= (decimal)productFilter.MaxPrice); }
 
+            if(productFilter.OrderRequestId != default(Guid)) 
+            { 
+                productsQuery = productsQuery
+                    .Include(p => p.SellOrderSuggestions)
+                    .Where(p => p.SellOrderSuggestions.Any(sos => sos.OrderRequestId == productFilter.OrderRequestId)); 
+            }
+
             return productsQuery;
         }
 
@@ -107,37 +114,6 @@ namespace TradingApp.Services.Core
 
             return products;
         }
-
-        public async Task<IEnumerable<ProductViewModel>> Get_SuggestedApprovedProductsWithActiveSellOrders_for_OrderRequest_Async(int pageIndex, Guid orderRequestId)
-        {
-            int productsCount = await _context
-                .Products
-                .Include(p => p.SellOrderSuggestions)
-               .AsNoTracking()
-               .Where(p => p.Status == ProductStatus.approved && p.SellOrders.Any(so => so.Status == SellOrderStatus.active) && p.SellOrderSuggestions.Any(sos => sos.OrderRequestId == orderRequestId))
-               .CountAsync();
-
-            if (productsCount == 0)
-            { return new List<ProductViewModel>(); }
-
-            SetProductPage(pageIndex, productsCount);
-
-            IEnumerable<ProductViewModel> products = await _context
-                .Products
-              .AsNoTracking()
-              .Where(p => p.Status == ProductStatus.approved && p.SellOrders.Any(so => so.Status == SellOrderStatus.active) && p.SellOrderSuggestions.Any(sos => sos.OrderRequestId == orderRequestId))
-              .Skip(ProductPageIndex * _productsPerPage).Take(_productsPerPage)
-              .Select(p => new ProductViewModel
-              {
-                  Id = p.Id,
-                  CreatorName = p.Creator.UserName,
-                  Price = p.Price.ToString("f2"),
-                  ProductName = p.Name
-              }).ToListAsync();
-
-            return products;
-        }
-
 
         public async Task<Dictionary<string, string>> GetIdsAndNamesOfApprovedProductsWithActiveSaleOrdersCreatedByUserAsync(string userId)
         {
