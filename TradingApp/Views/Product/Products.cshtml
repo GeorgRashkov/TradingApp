@@ -1,14 +1,7 @@
 ﻿@using TradingApp.ViewModels.Product;
-@model List<ProductViewModel>
+@model ProductsViewModel
 @{
     ViewData["Title"] = "Products";
-   
-    PaginationHelper paginationHelper = new PaginationHelper()
-    {
-        Controller = "Product",
-        Action = (string)(ViewData["action"] ?? "Products"),
-        PageIndex = (int)(ViewData["page"] ?? 0)
-    };    
 }
 
 <div class="row row-cols-1 row-cols-sm-2 g-2">
@@ -25,11 +18,81 @@
 }
 else
 {
-    <partial name="_Products" model="@(Model)"></partial>
+    <form method="get" asp-controller="Product" asp-action="Products" asp-route-pageIndex="0">
+        <table class="table table-striped table-bordered table-hover">
+            <thead class="table-dark, text-center">
+                <tr>
+                    <th>Filters</th>
+                    <th>Product name</th>
+                    <th>Creator name</th>
+                    <th>Min price</th>
+                    <th>Max price</th>
+                </tr>
+            </thead>
 
-    <partial name="_Pagination" model="@(paginationHelper)"></partial>
+            <tbody>
+                <tr>
+                    <td><input type="submit" value="Apply" class="btn btn-sm btn-primary" /></td>
+                    <td><input type="text" asp-for="ProductFilter.ProductName" value="@(Model.ProductFilter?.ProductName)" /></td>
+                    <td><input type="text" asp-for="ProductFilter.CreatorName" value="@(Model.ProductFilter?.CreatorName)" /></td>
+                    <td><input type="text" asp-for="ProductFilter.MinPrice" value="@(Model.ProductFilter?.MinPrice)" /></td>
+                    <td><input type="text" asp-for="ProductFilter.MaxPrice" value="@(Model.ProductFilter?.MaxPrice)" /></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td> <span asp-validation-for="ProductFilter.ProductName" class="text-danger"></span> </td>
+                    <td> <span asp-validation-for="ProductFilter.CreatorName" class="text-danger"></span> </td>
+                    <td> <span asp-validation-for="ProductFilter.MinPrice" class="text-danger"></span> </td>
+                    <td> <span asp-validation-for="ProductFilter.MaxPrice" class="text-danger"></span> </td>
+                </tr>
+            </tbody>
+        </table>
+
+    </form>
+
+
+    <partial name="_Products" model="@(Model.Products)"></partial>
+
+    <!-- <Pagination -->
+    <div class="d-flex justify-content-between align-items-center mt-4">
+
+        <!-- Previous page-->
+        <a class="btn btn-outline-secondary @(Model.PageIndex <= 0 ? "disabled" : "")"
+           asp-area=""
+           asp-controller="Product"
+           asp-action="Products"
+           asp-route-pageIndex="@(Model.PageIndex - 1)"
+           asp-route-ProductName="@(Model.ProductFilter?.ProductName)"
+           asp-route-CreatorName="@(Model.ProductFilter?.CreatorName)"
+           asp-route-MinPrice="@(Model.ProductFilter?.MinPrice)"
+           asp-route-MaxPrice="@(Model.ProductFilter?.MaxPrice)">
+            ← Previous
+        </a>
+
+        <!-- Page indicator -->
+        <span class="fw-bold">Page @(Model.PageIndex + 1)</span>
+
+        <!-- Next page-->
+        <a class="btn btn-outline-secondary"
+           asp-area=""
+           asp-controller="Product"
+           asp-action="Products"
+           asp-route-pageIndex="@(Model.PageIndex + 1)"
+           asp-route-ProductName="@(Model.ProductFilter?.ProductName)"
+           asp-route-CreatorName="@(Model.ProductFilter?.CreatorName)"
+           asp-route-MinPrice="@(Model.ProductFilter?.MinPrice)"
+           asp-route-MaxPrice="@(Model.ProductFilter?.MaxPrice)">
+            Next →
+        </a>
+
+    </div>
+    <!-- Pagination> -->
 
     @section Styles {
         <partial name="_ProductStyle"></partial>
+    }
+
+    @section Scripts {
+        <partial name="_ValidationScriptsPartial"></partial>
     }
 }

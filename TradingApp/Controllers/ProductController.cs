@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using TradingApp.GCommon;
+using TradingApp.GCommon.Filters;
+using TradingApp.Services.Core;
 using TradingApp.Services.Core.Interfaces;
 using TradingApp.ViewModels.Product;
 
@@ -22,16 +24,24 @@ namespace TradingApp.Controllers
        
         [HttpGet]
         [AllowAnonymous]
-        public async Task<IActionResult> Products(int pageIndex)
+        public async Task<IActionResult> Products(int pageIndex, ProductFilter? productFilter)
         {
-            IEnumerable<ProductViewModel> products = await _productService.GetApprovedProductsWithActiveSellOrdersAsync(pageIndex: pageIndex);
+            if(ModelState.IsValid == false) 
+            { productFilter = null; }
+
+            
+            IEnumerable<ProductViewModel> products = await _productService.GetApprovedProductsWithActiveSellOrdersAsync(pageIndex: pageIndex, productFilter);
             if (products.Count() == 0)
             { return View(model: null); }
 
-            ViewData["page"] = _productService.ProductPageIndex;
-            ViewData["action"] = "Products";
+            ProductsViewModel productsViewModel = new ProductsViewModel
+            {
+                Products = products,
+                ProductFilter = productFilter,
+                PageIndex = _productService.ProductPageIndex
+            };           
 
-            return View(model: products);
+            return View(model: productsViewModel);
         }
 
         [HttpGet]
