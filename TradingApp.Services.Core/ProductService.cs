@@ -1,17 +1,19 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Globalization;
 using TradingApp.Data;
+using TradingApp.Data.Models;
 using TradingApp.GCommon;
 using TradingApp.GCommon.Enums;
+using TradingApp.GCommon.Filters;
 using TradingApp.Services.Core.Interfaces;
 using TradingApp.ViewModels.InputProduct;
 using TradingApp.ViewModels.Product;
 
 namespace TradingApp.Services.Core
 {
-    public class ProductService: IProductService
+    public class ProductService : IProductService
     {
-        private const int _productsPerPage = ApplicationConstants.ProductsPerPage;                
+        private const int _productsPerPage = ApplicationConstants.ProductsPerPage;
         private ApplicationDbContext _context;
 
         public ProductService(ApplicationDbContext context)
@@ -22,12 +24,67 @@ namespace TradingApp.Services.Core
         public int ProductPageIndex { get; private set; }
 
 
-        public async Task<IEnumerable<ProductViewModel>> GetApprovedProductsWithActiveSellOrdersAsync(int pageIndex)
-        {   
+        private IQueryable<Product> GetQueryForFilteringProducts(ProductFilter productFilter, IQueryable<Product> productsQuery)
+        {
+            if (string.IsNullOrEmpty(productFilter.ProductName) == false)
+            { productsQuery = productsQuery.Where(p => p.Name.Contains(productFilter.ProductName)); }
+
+            if (string.IsNullOrEmpty(productFilter.CreatorName) == false)
+            { productsQuery = productsQuery.Where(p => p.Creator.UserName.Contains(productFilter.CreatorName)); }
+
+            if (productFilter.MinPrice > EntityValidation.Product.PriceMinValue)
+            { productsQuery = productsQuery.Where(p => p.Price >= (decimal)productFilter.MinPrice); }
+
+            if (productFilter.MaxPrice < EntityValidation.Product.PriceMaxValue)
+            { productsQuery = productsQuery.Where(p => p.Price <= (decimal)productFilter.MaxPrice); }
+
+            return productsQuery;
+        }
+
+        public async Task<IEnumerable<ProductViewModel>> GetApprovedProductsWithActiveSellOrdersAsync(int pageIndex, ProductFilter? productFilter)
+        {
+            IQueryable<Product> productsCountQuery = _context
+                .Products
+                .Include(p => p.Creator)
+               .AsNoTracking()
+               .Where(p => p.Status == ProductStatus.approved && p.SellOrders.Any(so => so.Status == SellOrderStatus.active));
+
+            if (productFilter is not null) 
+            { productsCountQuery = GetQueryForFilteringProducts(productFilter, productsCountQuery); }
+            int productsCount = await productsCountQuery.CountAsync();
+
+            if (productsCount == 0)
+            { return new List<ProductViewModel>(); }
+
+            SetProductPage(pageIndex, productsCount);
+
+            IQueryable<Product> productsQuery = _context
+                .Products
+                .Include(p => p.Creator)
+              .AsNoTracking()
+              .Where(p => p.Status == ProductStatus.approved && p.SellOrders.Any(so => so.Status == SellOrderStatus.active));
+
+            if (productFilter is not null)
+            { productsQuery = GetQueryForFilteringProducts(productFilter, productsCountQuery); }
+
+            IEnumerable<ProductViewModel> products = await productsQuery
+            .Skip(ProductPageIndex * _productsPerPage).Take(_productsPerPage)
+          .Select(p => new ProductViewModel
+          {
+              Id = p.Id,
+              CreatorName = p.Creator.UserName,
+              Price = p.Price.ToString("f2"),
+              ProductName = p.Name
+          }).ToListAsync();
+
+            return products;
+        }
+
+        public async Task<IEnumerable<ProductViewModel>> GetProductsAsync(int pageIndex)
+        {
             int productsCount = await _context
                 .Products
                .AsNoTracking()
-               .Where(p => p.Status == ProductStatus.approved && p.SellOrders.Any(so => so.Status == SellOrderStatus.active))
                .CountAsync();
 
             if (productsCount == 0)
@@ -38,34 +95,6 @@ namespace TradingApp.Services.Core
             IEnumerable<ProductViewModel> products = await _context
                 .Products
               .AsNoTracking()
-              .Where(p => p.Status == ProductStatus.approved && p.SellOrders.Any(so => so.Status == SellOrderStatus.active))
-              .Skip(ProductPageIndex * _productsPerPage).Take(_productsPerPage)
-              .Select(p => new ProductViewModel
-              {
-                  Id = p.Id,
-                  CreatorName = p.Creator.UserName,
-                  Price = p.Price.ToString("f2"),
-                  ProductName = p.Name
-              }).ToListAsync();                     
-
-            return products;
-        }
-
-        public async Task<IEnumerable<ProductViewModel>> GetProductsAsync(int pageIndex)
-        {
-            int productsCount = await _context
-                .Products
-               .AsNoTracking()               
-               .CountAsync();
-
-            if (productsCount == 0)
-            { return new List<ProductViewModel>(); }
-
-            SetProductPage(pageIndex, productsCount);
-
-            IEnumerable<ProductViewModel> products = await _context
-                .Products
-              .AsNoTracking()              
               .Skip(ProductPageIndex * _productsPerPage).Take(_productsPerPage)
               .Select(p => new ProductViewModel
               {
@@ -85,7 +114,7 @@ namespace TradingApp.Services.Core
                 .Products
                 .Include(p => p.SellOrderSuggestions)
                .AsNoTracking()
-               .Where(p => p.Status == ProductStatus.approved && p.SellOrders.Any(so => so.Status == SellOrderStatus.active) && p.SellOrderSuggestions.Any(sos => sos.OrderRequestId==orderRequestId))
+               .Where(p => p.Status == ProductStatus.approved && p.SellOrders.Any(so => so.Status == SellOrderStatus.active) && p.SellOrderSuggestions.Any(sos => sos.OrderRequestId == orderRequestId))
                .CountAsync();
 
             if (productsCount == 0)
@@ -112,7 +141,7 @@ namespace TradingApp.Services.Core
 
         public async Task<Dictionary<string, string>> GetIdsAndNamesOfApprovedProductsWithActiveSaleOrdersCreatedByUserAsync(string userId)
         {
-            Dictionary<string,string> productIdsAndNamesDict = await _context
+            Dictionary<string, string> productIdsAndNamesDict = await _context
                 .Products
                 .Include(p => p.SellOrders)
                 .AsNoTracking()
@@ -143,7 +172,7 @@ namespace TradingApp.Services.Core
                     SellOrdersCount = p.SellOrders.Where(so => so.Status == SellOrderStatus.active).Count()
                 }).SingleOrDefaultAsync();
 
-            return product;            
+            return product;
         }
 
 
@@ -198,8 +227,8 @@ namespace TradingApp.Services.Core
                     ActiveSellOrdersCount = p.SellOrders.Where(so => so.Status == SellOrderStatus.active).Count()
                 }).SingleOrDefaultAsync();
 
-            return product;           
-        }             
+            return product;
+        }
 
         private void SetProductPage(int pageIndex, int productsCount)
         {
@@ -219,17 +248,17 @@ namespace TradingApp.Services.Core
 
         public async Task<UpdatedProductModel?> GetUpdatedProductModelAsync(Guid productId)
         {
-             UpdatedProductModel? product = await _context
-                .Products
-                .AsNoTracking()
-                .Where(p => p.Id == productId)
-                .Select(p => new UpdatedProductModel()
-                {
-                    Id = productId,
-                    ProductName = p.Name,
-                    Description = p.Description,
-                    Price = decimal.Parse(p.Price.ToString("f2"))
-                }).SingleOrDefaultAsync();          
+            UpdatedProductModel? product = await _context
+               .Products
+               .AsNoTracking()
+               .Where(p => p.Id == productId)
+               .Select(p => new UpdatedProductModel()
+               {
+                   Id = productId,
+                   ProductName = p.Name,
+                   Description = p.Description,
+                   Price = decimal.Parse(p.Price.ToString("f2"))
+               }).SingleOrDefaultAsync();
 
             return product;
         }
@@ -243,13 +272,13 @@ namespace TradingApp.Services.Core
                .Select(p => new DeletedProductModel()
                {
                    ProductId = productId,
-                   ProductName = p.Name,                   
+                   ProductName = p.Name,
                }).SingleOrDefaultAsync();
 
             return product;
         }
 
-        public async Task<ManagedProductModel?> GetManagedProductModelAsync(Guid productId) 
+        public async Task<ManagedProductModel?> GetManagedProductModelAsync(Guid productId)
         {
             ManagedProductModel? product = await _context
                 .Products
@@ -260,8 +289,8 @@ namespace TradingApp.Services.Core
                     Id = productId,
                     Name = p.Name,
                     Status = p.Status
-                }).SingleOrDefaultAsync(); 
-            
+                }).SingleOrDefaultAsync();
+
             return product;
         }
 
