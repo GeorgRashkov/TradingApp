@@ -8,8 +8,7 @@ namespace TradingApp.Services.Core.Interfaces
     public interface IProductService
     {
         Task<IEnumerable<ProductViewModel>> GetApprovedProductsWithActiveSellOrdersAsync(int pageIndex, ProductFilter? productFilter);
-        Task<IEnumerable<ProductViewModel>> GetProductsAsync(int pageIndex);
-        Task<IEnumerable<ProductViewModel>> Get_SuggestedApprovedProductsWithActiveSellOrders_for_OrderRequest_Async(int pageIndex, Guid orderRequestId);
+        Task<IEnumerable<ProductViewModel>> GetProductsAsync(int pageIndex);        
         Task<Dictionary<string, string>> GetIdsAndNamesOfApprovedProductsWithActiveSaleOrdersCreatedByUserAsync(string userId);
         Task<ProductDetailsViewModel?> GetDetailsForApprovedProductWithActiveSellOrdersAsync(Guid productId);
         Task<IEnumerable<MyProductViewModel>> GetProductsCreatedByUserAsync(int pageIndex, string userId);
