@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore;
 
 using TradingApp.Data;
 using TradingApp.Data.Models;
+using TradingApp.Data.Repository.Interfaces;
+using TradingApp.Data.Repository;
 using TradingApp.Data.Seed;
 using TradingApp.GCommon;
 using TradingApp.Services.Core;
@@ -49,6 +51,17 @@ namespace TradingApp
                 options.Password.RequireUppercase = true;
                 options.Password.RequireNonAlphanumeric = true;
             });
+
+            //adding custom repositories to the container
+            builder.Services.AddScoped<IBalanceRepository, BalanceRepository>();
+            builder.Services.AddScoped<ICompletedOrderRepository, CompletedOrderRepository>();
+            builder.Services.AddScoped<IOrderRequestRepository, OrderRequestRepository>();
+            builder.Services.AddScoped<IProductReportRepository, ProductReportRepository>();
+            builder.Services.AddScoped<IProductRepository, ProductRepository>();
+            builder.Services.AddScoped<ISellOrderRepository, SellOrderRepository>();
+            builder.Services.AddScoped<ISellOrderSuggestionRepository, SellOrderSuggestionRepository>();
+            builder.Services.AddScoped<IUserRepository, UserRepository>();
+            
 
             //adding custom services to the container
             builder.Services.AddScoped<IUserService, UserService>();
