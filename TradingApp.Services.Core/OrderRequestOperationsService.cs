@@ -1,6 +1,7 @@
 ﻿
-using TradingApp.Data;
+
 using TradingApp.Data.Models;
+using TradingApp.Data.Repository.Interfaces;
 using TradingApp.GCommon;
 using TradingApp.GCommon.ErrorCodes;
 using TradingApp.Services.Core.Interfaces;
@@ -8,55 +9,53 @@ using TradingApp.Services.Core.Interfaces;
 namespace TradingApp.Services.Core
 {
     public class OrderRequestOperationsService : IOrderRequestOperationsService
-    {
-        private ApplicationDbContext _context;
-        private IProductBoolsService _productBoolsService;
-        private IOrderRequestBoolsService _orderRequestBoolsService;
-        private IUserService _userService;
+    {       
 
-        public OrderRequestOperationsService(ApplicationDbContext context, IProductBoolsService productBoolsService, IOrderRequestBoolsService orderRequestBoolsService, IUserService userService)
+        private IProductRepository _productRepository;
+        private IOrderRequestRepository _orderRequestRepository;        
+        private IUserRepository _userRepository;
+        public OrderRequestOperationsService(IProductRepository productRepository, IOrderRequestRepository orderRequestRepository, IUserRepository userRepository)
         {
-            _context = context;
-            _productBoolsService = productBoolsService;
-            _orderRequestBoolsService = orderRequestBoolsService;
-            _userService = userService;
+            _productRepository = productRepository;
+            _orderRequestRepository = orderRequestRepository;            
+            _userRepository = userRepository;
         }
 
         public async Task<Result> CreateSuggestionForOrderRequest(Guid productId, string suggesterId, Guid requestId)
         {
             //<request validations
-            bool doesOrderRequestExist = await _orderRequestBoolsService.DoesOrderRequestExistAsync(orderRequestId: requestId);
+            bool doesOrderRequestExist = await _orderRequestRepository.DoesOrderRequestExistAsync(orderRequestId: requestId);
             if (doesOrderRequestExist == false)
             { return new Result(errorCode: OrderRequestErrorCodes.RequestNotFound); }
 
-            string orderRequestCreatorId = (await _userService.GetCreatorIdOfRequestAsync(orderRequestId: requestId))!;
+            string orderRequestCreatorId = (await _userRepository.GetCreatorIdOfRequestAsync(orderRequestId: requestId))!;
             if (suggesterId == orderRequestCreatorId)
             { return new Result(errorCode: OrderRequestErrorCodes.RequestSuggestionSameCreator);}
 
-            bool isOrderRequestActive = await _orderRequestBoolsService.IsOrderRequestActiveAsync(orderRequestId: requestId);
+            bool isOrderRequestActive = await _orderRequestRepository.IsOrderRequestActiveAsync(orderRequestId: requestId);
             if (doesOrderRequestExist == false)
             { return new Result(errorCode: OrderRequestErrorCodes.RequestInvalidStatus); }
             //request validations>
 
 
             //<product validations
-            bool doesProductExist = await _productBoolsService.DoesProductExistAsync(productId: productId);
+            bool doesProductExist = await _productRepository.DoesProductExistAsync(productId: productId);
             if (doesProductExist == false)
             { return new Result(errorCode: ProductErrorCodes.ProductNotFound); }
 
-            bool isSuggesterCreatorOfTheProduct = await _productBoolsService.DoesProductCreatedByUserExistAsync(userId: suggesterId, productId: productId);
+            bool isSuggesterCreatorOfTheProduct = await _productRepository.DoesProductCreatedByUserExistAsync(userId: suggesterId, productId: productId);
             if (isSuggesterCreatorOfTheProduct == false)
             { return new Result(errorCode: ProductErrorCodes.ProductInvalidCreator); }
 
-            bool isProductApproved = await _productBoolsService.IsProductApprovedAsync(productId: productId);
+            bool isProductApproved = await _productRepository.IsProductApprovedAsync(productId: productId);
             if (isProductApproved == false)
             { return new Result(errorCode: ProductErrorCodes.ProductInvalidStatus); }
 
-            bool doesProductHaveActiveSaleOrders = await _productBoolsService.DoesProductHaveActiveSaleOrdersAsync(productId: productId);
+            bool doesProductHaveActiveSaleOrders = await _productRepository.DoesProductHaveActiveSaleOrdersAsync(productId: productId);
             if (doesProductHaveActiveSaleOrders == false)
             { return new Result(errorCode: ProductErrorCodes.ProductHasNoActiveSaleOrders); }
 
-            bool isProductAlreadySuggestedToOrderRequest = await _productBoolsService.IsProductSuggestedToOrderRequestAsync(productId: productId, orderRequestId: requestId);
+            bool isProductAlreadySuggestedToOrderRequest = await _productRepository.IsProductSuggestedToOrderRequestAsync(productId: productId, orderRequestId: requestId);
             if (isProductAlreadySuggestedToOrderRequest == true)
             { return new Result(errorCode: ProductErrorCodes.ProductAlreadySuggestedToRequest); }
             //product validations>
@@ -69,19 +68,18 @@ namespace TradingApp.Services.Core
                 OrderRequestId = requestId
             };
 
-            await _context.SellOrderSuggestions.AddAsync(sellOrderSuggestion);
-            await _context.SaveChangesAsync();
-
+            await _orderRequestRepository.CreateSellOrderSuggestionAsync(sellOrderSuggestion: sellOrderSuggestion);
+           
             return new Result();
         }
 
         public async Task<Result> CreateOrderRequest(string title, string description, decimal maxPrice, string creatorId)
         {
-            bool doesUserExist = await _userService.DoesUserExistAsync(userId: creatorId);
+            bool doesUserExist = await _userRepository.DoesUserExistAsync(userId: creatorId);
             if (doesUserExist == false)
             { return new Result(errorCode: ProductErrorCodes.ProductNotFound); }
 
-            bool doesOrderRequestCreatedByUserExist = await _orderRequestBoolsService.DoesOrderRequestCreatedByUserExistAsync(userId: creatorId, orderRequestTitle: title);
+            bool doesOrderRequestCreatedByUserExist = await _orderRequestRepository.DoesOrderRequestCreatedByUserExistAsync(userId: creatorId, orderRequestTitle: title);
             if(doesOrderRequestCreatedByUserExist == true) 
             { return new Result(errorCode: OrderRequestErrorCodes.RequestWithSameTitleAlreadyExists); }
 
@@ -95,39 +93,34 @@ namespace TradingApp.Services.Core
                 CreatorId = creatorId
             };
 
-            await _context.OrderRequests.AddAsync(orderRequest);
-            await _context.SaveChangesAsync();
-
+            await _orderRequestRepository.CreateOrderRequestAsync(orderRequest: orderRequest);
+           
             return new Result();
         }
 
         public async Task<Result> UpdateOrderRequest(Guid id, string title, string description, decimal maxPrice, string creatorId)
         {
-            string? orderRequestCreatorId = await _userService.GetCreatorIdOfRequestAsync(orderRequestId: id);
+            string? orderRequestCreatorId = await _userRepository.GetCreatorIdOfRequestAsync(orderRequestId: id);
             if(orderRequestCreatorId == null) 
             { return new Result(errorCode: OrderRequestErrorCodes.RequestNotFound); }
             else if (orderRequestCreatorId != creatorId)
             { return new Result(errorCode: OrderRequestErrorCodes.RequestInvalidCreator); }
 
-            bool doesOrderRequestCreatedByUserExist = await _orderRequestBoolsService.DoesOrderRequestCreatedByUserExistAsync(userId: creatorId, orderRequestTitle: title, orderRequestIdsToIgnore: new Guid[1] { id });
+            bool doesOrderRequestCreatedByUserExist = await _orderRequestRepository.DoesOrderRequestCreatedByUserExistAsync(userId: creatorId, orderRequestTitle: title, orderRequestIdsToIgnore: new Guid[1] { id });
             if (doesOrderRequestCreatedByUserExist == true)
             { return new Result(errorCode: OrderRequestErrorCodes.RequestWithSameTitleAlreadyExists); }
 
             //update the order request
-            OrderRequest orderRequest = (await _context.OrderRequests.FindAsync(id))!;
-            orderRequest.Title = title;
-            orderRequest.Description = description;
-            orderRequest.MaxPrice = maxPrice;
-
-            //apply the changes to the database
-            await _context.SaveChangesAsync();
+            OrderRequest orderRequest = (await _orderRequestRepository.GetRequestAsync(requestId: id))!;
+            await _orderRequestRepository.UpdateOrderRequest(orderRequest: orderRequest, newTitle: title, newDescription: description, newMaxPrice:maxPrice);
+            
             return new Result();
         }
         
 
         public async Task<Result> CancelOrderRequestAsync(Guid id, string userId)
         {
-            OrderRequest? orderRequest = await _context.OrderRequests.FindAsync(id);
+            OrderRequest? orderRequest = await _orderRequestRepository.GetRequestAsync(requestId: id);
             if (orderRequest == null)
             { return new Result(errorCode: OrderRequestErrorCodes.RequestNotFound); }
             else if (orderRequest.CreatorId != userId)
@@ -135,8 +128,7 @@ namespace TradingApp.Services.Core
             else if (orderRequest.Status != GCommon.Enums.OrderRequestStatus.active)
             { return new Result(errorCode: OrderRequestErrorCodes.RequestInvalidStatus); }
 
-            orderRequest.Status = GCommon.Enums.OrderRequestStatus.cancelled;
-            await _context.SaveChangesAsync();
+            await _orderRequestRepository.UpdateOrderRequestStatusAsync(orderRequest: orderRequest, newStatus: GCommon.Enums.OrderRequestStatus.cancelled);
 
             return new Result();
         }
