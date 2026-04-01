@@ -50,7 +50,7 @@ namespace TradingApp.Data.Repository
                 .AsNoTracking()
                 .AnyAsync(or => or.Id == orderRequestId && or.Status == GCommon.Enums.OrderRequestStatus.active);
         }
-        
+
         //Bool methods>
 
         //<number methods
@@ -97,7 +97,7 @@ namespace TradingApp.Data.Repository
             return orderRequests;
         }
 
-        public async Task<IEnumerable<OrderRequestDto>> GetActiveRequestsCreatedByUserAsync(string userId, int skipCount, int takeCount) 
+        public async Task<IEnumerable<OrderRequestDto>> GetActiveRequestsCreatedByUserAsync(string userId, int skipCount, int takeCount)
         {
             IEnumerable<OrderRequestDto> orderRequests = await _context
                .OrderRequests
@@ -165,14 +165,62 @@ namespace TradingApp.Data.Repository
         //<entity methods
         public async Task<OrderRequest?> GetRequestAsync(Guid requestId)
         {
-            OrderRequest? request = await _context
-                .OrderRequests                
-                .AsNoTracking()
-                .Where(or => or.Id == requestId)
-                .SingleOrDefaultAsync();
+            OrderRequest? request = await _context.OrderRequests.FindAsync(requestId);
 
             return request;
-        }    
+        }
         //entity methods>
+
+
+
+        //<operation methods
+
+        public async Task CreateSellOrderSuggestionAsync(SellOrderSuggestion sellOrderSuggestion)
+        {
+            await _context.SellOrderSuggestions.AddAsync(sellOrderSuggestion);
+            int affectedEntities = await _context.SaveChangesAsync();
+            if (affectedEntities != 1)
+            {
+                throw new Exception("Failed to create sell order suggestion.");
+            }
+        }
+
+        public async Task CreateOrderRequestAsync(OrderRequest orderRequest)
+        {
+            await _context.OrderRequests.AddAsync(orderRequest);
+            int affectedEntities = await _context.SaveChangesAsync();
+            if (affectedEntities != 1)
+            {
+                throw new Exception("Failed to create order request.");
+            }
+        }
+        public async Task UpdateOrderRequest(OrderRequest orderRequest, string newTitle, string newDescription, decimal newMaxPrice)
+        {
+            _context.Attach<OrderRequest>(orderRequest);
+
+            orderRequest.Title = newTitle;
+            orderRequest.Description = newDescription;
+            orderRequest.MaxPrice = newMaxPrice;
+
+            int affectedEntities = await _context.SaveChangesAsync();
+            if (affectedEntities != 1)
+            {
+                throw new Exception("Failed to create sell order suggestion.");
+            }
+        }
+
+
+        public async Task UpdateOrderRequestStatusAsync(OrderRequest orderRequest, OrderRequestStatus newStatus)
+        {
+            _context.Attach<OrderRequest>(orderRequest);
+            orderRequest.Status = newStatus;
+
+            int affectedEntities = await _context.SaveChangesAsync();
+            if (affectedEntities != 1)
+            {
+                throw new Exception("Failed to create sell order suggestion.");
+            }
+        }
+        //operation methods>
     }
 }

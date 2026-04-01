@@ -1,5 +1,4 @@
 ﻿
-using Microsoft.EntityFrameworkCore;
 using TradingApp.Data.Dtos.OrderRequest;
 using TradingApp.Data.Models;
 using TradingApp.GCommon.Enums;
@@ -12,7 +11,7 @@ namespace TradingApp.Data.Repository.Interfaces
         Task<bool> DoesOrderRequestExistAsync(Guid orderRequestId);
         Task<bool> DoesOrderRequestCreatedByUserExistAsync(string userId, string orderRequestTitle);
         Task<bool> DoesOrderRequestCreatedByUserExistAsync(string userId, string orderRequestTitle, Guid[] orderRequestIdsToIgnore);
-        Task<bool> IsOrderRequestActiveAsync(Guid orderRequestId);        
+        Task<bool> IsOrderRequestActiveAsync(Guid orderRequestId);
         //Bool methods >
 
         //<number methods
@@ -30,5 +29,12 @@ namespace TradingApp.Data.Repository.Interfaces
         //<entity methods
         Task<OrderRequest?> GetRequestAsync(Guid requestId);
         //entity methods>
+
+        //<operation methods
+        Task CreateSellOrderSuggestionAsync(SellOrderSuggestion sellOrderSuggestion);
+        Task CreateOrderRequestAsync(OrderRequest orderRequest);
+        Task UpdateOrderRequest(OrderRequest orderRequest, string newTitle, string newDescription, decimal newMaxPrice);
+        Task UpdateOrderRequestStatusAsync(OrderRequest orderRequest, OrderRequestStatus newStatus);
+        //operation methods>
     }
 }
