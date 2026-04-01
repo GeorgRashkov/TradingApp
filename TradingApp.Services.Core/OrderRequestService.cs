@@ -1,23 +1,23 @@
 ﻿
 
-using Microsoft.EntityFrameworkCore;
-using TradingApp.Data;
+using TradingApp.Data.Dtos.OrderRequest;
+using TradingApp.Data.Models;
+using TradingApp.Data.Repository.Interfaces;
 using TradingApp.GCommon;
-using TradingApp.GCommon.Enums;
 using TradingApp.Services.Core.Interfaces;
 using TradingApp.ViewModels.InputOrderRequest;
 using TradingApp.ViewModels.OrderRequest;
 
 namespace TradingApp.Services.Core
 {
-    public class OrderRequestService: IOrderRequestService
+    public class OrderRequestService : IOrderRequestService
     {
-        private ApplicationDbContext _context;
         private const int _requestsPerPage = ApplicationConstants.RequestsPerPage;
+        private readonly IOrderRequestRepository _orderRequestRepository;
 
-        public OrderRequestService(ApplicationDbContext context)
+        public OrderRequestService(IOrderRequestRepository orderRequestRepository)
         {
-            _context = context;
+            _orderRequestRepository = orderRequestRepository;
         }
 
         public int RequestPageIndex { get; private set; }
@@ -32,52 +32,48 @@ namespace TradingApp.Services.Core
 
         public async Task<IEnumerable<OrderRequestViewModel>> GetActiveRequestsAsync(int pageIndex)
         {
-            int requestsCount = await _context
-                .OrderRequests
-                .AsNoTracking()
-                .Where(or => or.Status == OrderRequestStatus.active)
-                .CountAsync();
+            int requestsCount = await _orderRequestRepository.GetActiveRequestsCountAsync();
 
             if (requestsCount == 0)
             { return new List<OrderRequestViewModel>(); }
 
             SetRequestPage(pageIndex, requestsCount);
 
+            IEnumerable<OrderRequestDto> orderRequestsDtos = await _orderRequestRepository
+                .GetActiveRequestsAsync(skipCount: RequestPageIndex * _requestsPerPage, takeCount: _requestsPerPage);
 
-            IEnumerable<OrderRequestViewModel> orderRequests = await _context
-                .OrderRequests
-                .AsNoTracking()
-                .Where(or => or.Status == OrderRequestStatus.active)
-                .Skip(RequestPageIndex * _requestsPerPage).Take(_requestsPerPage)
-                .Select(or => new OrderRequestViewModel
-                {
-                    Id = or.Id,
-                    Title = or.Title,
-                    MaxPrice = or.MaxPrice.ToString("f2")
-                })
-                .ToListAsync();
+            List<OrderRequestViewModel> orderRequests = orderRequestsDtos
+             .Select(or => new OrderRequestViewModel
+             {
+                 Id = or.Id,
+                 Title = or.Title,
+                 MaxPrice = or.MaxPrice.ToString("f2")
+             })
+             .ToList();
+
 
             return orderRequests;
         }
 
         public async Task<OrderRequestDetailsViewModel?> GetDetailsForActiveRequestAsync(Guid requestId)
         {
-            OrderRequestDetailsViewModel? request = await _context
-                .OrderRequests
-                .Include(or => or.Creator)
-                .AsNoTracking()
-                .Where(or => or.Id == requestId && or.Status == OrderRequestStatus.active)
-                .Select(or => new OrderRequestDetailsViewModel
-                {
-                    Id = or.Id,
-                    Title = or.Title,
-                    Description = or.Description,
-                    MaxPrice = or.MaxPrice.ToString("f2"),
-                    CreationDate = or.CreatedAt.ToString(ApplicationConstants.DateFormat),
-                    CreatorName = or.Creator.UserName!
-                }).SingleOrDefaultAsync();
+            OrderRequestDetailsDto? request = await _orderRequestRepository
+                .GetDetailsForActiveRequestAsync(requestId: requestId);
 
-            return request;
+            if (request == null)
+            { return null; }
+
+            OrderRequestDetailsViewModel requestViewModel = new OrderRequestDetailsViewModel
+            {
+                Id = request.Id,
+                Title = request.Title,
+                Description = request.Description,
+                MaxPrice = request.MaxPrice.ToString("f2"),
+                CreationDate = request.CreatedAt.ToString(ApplicationConstants.DateFormat),
+                CreatorName = request.CreatorUserName
+            };
+
+            return requestViewModel;
         }
 
 
@@ -85,79 +81,71 @@ namespace TradingApp.Services.Core
 
         public async Task<IEnumerable<MyOrderRequestViewModel>> GetActiveRequestsCreatedByUserAsync(int pageIndex, string userId)
         {
-            int requestsCount = await GetUserActiveRequestsCountAsync(userId);
+            int requestsCount = await _orderRequestRepository.GetUserActiveRequestsCountAsync(userId);
 
             if (requestsCount == 0)
             { return new List<MyOrderRequestViewModel>(); }
 
             SetRequestPage(pageIndex, requestsCount);
 
-            IEnumerable<MyOrderRequestViewModel> orderRequests = await _context
-                .OrderRequests
-                .AsNoTracking()
-                .Where(or => or.Status == OrderRequestStatus.active && or.CreatorId == userId)
-                .Skip(RequestPageIndex * _requestsPerPage).Take(_requestsPerPage)
+            IEnumerable<OrderRequestDto> orderRequestsDto = await _orderRequestRepository
+                .GetActiveRequestsCreatedByUserAsync(userId: userId, skipCount: RequestPageIndex * _requestsPerPage, takeCount: _requestsPerPage);
+
+            List<MyOrderRequestViewModel> orderRequests = orderRequestsDto
                 .Select(or => new MyOrderRequestViewModel
                 {
                     Id = or.Id,
                     Title = or.Title,
                     MaxPrice = or.MaxPrice.ToString("f2")
-                }).ToListAsync();
-            
+                }).ToList();
+
             return orderRequests;
         }
 
-
         public async Task<MyOrderRequestDetailsViewModel?> GetDetailsForActiveRequestCreatedByUserAsync(Guid requestId, string userId)
         {
-            MyOrderRequestDetailsViewModel? request = await _context
-                .OrderRequests 
-                .Include(or => or.SellOrderSuggestions)
-                .ThenInclude(sos => sos.Product)
-                .ThenInclude(p => p.SellOrders)
-                .AsNoTracking()
-                .Where(or => or.Id == requestId && or.Status == OrderRequestStatus.active && or.CreatorId == userId)
-                .Select(or => new MyOrderRequestDetailsViewModel
-                {
-                    Id = or.Id,
-                    Title = or.Title,
-                    Description = or.Description,
-                    MaxPrice = or.MaxPrice.ToString("f2"),
-                    CreationDate = or.CreatedAt.ToString(ApplicationConstants.DateFormat),
-                    HasSuggestions = or.SellOrderSuggestions.Any(sos => sos.Product.Status == ProductStatus.approved && sos.Product.SellOrders.Any(so => so.Status == SellOrderStatus.active))
-                }).SingleOrDefaultAsync();
+            OrderRequestDetailsDto? requestDto = await _orderRequestRepository
+                .GetDetailsForActiveRequestCreatedByUserAsync(requestId: requestId, userId: userId);
+
+            if (requestDto == null)
+            { return null; }
+
+            MyOrderRequestDetailsViewModel request = new MyOrderRequestDetailsViewModel
+            {
+                Id = requestDto.Id,
+                Title = requestDto.Title,
+                Description = requestDto.Description,
+                MaxPrice = requestDto.MaxPrice.ToString("f2"),
+                CreationDate = requestDto.CreatedAt.ToString(ApplicationConstants.DateFormat),
+                HasSuggestions = requestDto.HasSuggestions
+            };
 
             return request;
-        }
+        }        
 
-
+        
         public async Task<int> GetUserActiveRequestsCountAsync(string userId)
         {
-            int requestsCount = await _context
-                .OrderRequests
-                .AsNoTracking()
-                .Where(or => or.Status == OrderRequestStatus.active && or.CreatorId == userId)
-                .CountAsync();
-
+            int requestsCount = await _orderRequestRepository.GetUserActiveRequestsCountAsync(userId: userId);
             return requestsCount;
         }
-
+        
 
         public async Task<UpdatedOrderRequestModel?> GetUpdatedOrderRequestModelAsync(Guid orderRequestId)
         {
-            UpdatedOrderRequestModel? updatedOrderRequestModel = await _context
-                .OrderRequests
-                .AsNoTracking()
-                .Where(or => or.Id == orderRequestId)
-                .Select(or => new UpdatedOrderRequestModel
-                {
-                    Id = or.Id,
-                    Title = or.Title,
-                    Description = or.Description,
-                    MaxPrice = or.MaxPrice
-                }).SingleOrDefaultAsync();
+            OrderRequest? orderRequest = await _orderRequestRepository.GetRequestAsync(requestId: orderRequestId);
 
-            return updatedOrderRequestModel;
+            if(orderRequest == null) 
+            { return null; }
+
+            UpdatedOrderRequestModel? updatedOrderRequestModel = new UpdatedOrderRequestModel
+            {
+                Id = orderRequest.Id,
+                Title = orderRequest.Title,
+                Description = orderRequest.Description,
+                MaxPrice = orderRequest.MaxPrice
+            };
+            return updatedOrderRequestModel;                        
         }
     }
 }
