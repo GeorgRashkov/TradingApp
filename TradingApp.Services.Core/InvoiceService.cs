@@ -1,22 +1,23 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿
 using System.Globalization;
-using TradingApp.Data;
+using TradingApp.Data.Dtos.CompletedOrder;
 using TradingApp.Data.Models;
+using TradingApp.Data.Repository.Interfaces;
 using TradingApp.GCommon;
 using TradingApp.Services.Core.Interfaces;
 using TradingApp.ViewModels.Invoice;
-using TradingApp.ViewModels.Product;
 
 namespace TradingApp.Services.Core
 {
     public class InvoiceService: IInvoiceService
     {
-        private ApplicationDbContext _context;
+        
         private const int _invoicesPerPage = ApplicationConstants.InvoicesPerPage;
+        private readonly ICompletedOrderRepository _completedOrderRepository;
 
-        public InvoiceService(ApplicationDbContext context) 
+        public InvoiceService(ICompletedOrderRepository completedOrderRepository) 
         {
-            _context = context;
+            _completedOrderRepository = completedOrderRepository;
         }
 
         public int InvoicePageIndex { get; private set; }
@@ -30,42 +31,32 @@ namespace TradingApp.Services.Core
 
         public async Task<IEnumerable<InvoiceViewModel>> GetCompletedOrdersAsync(string userId, int pageIndex)
         {
-            int userInvoicesCount = await _context
-                .CompletedOrders
-                .Where(co => co.SellerId == userId || co.BuyerId == userId)
-                .CountAsync();
+            int userInvoicesCount = await _completedOrderRepository
+                .GetCompletedOrdersCountAsync(userId: userId);
+                
 
             if (userInvoicesCount == 0)
             { return new List<InvoiceViewModel>(); }
 
             SetInvoicePage(pageIndex, userInvoicesCount);
 
-            List<InvoiceViewModel> userCompletedOrders = await _context
-                .CompletedOrders
-                .AsNoTracking()
-                .Where(co => userId == co.BuyerId || userId == co.SellerId)
-                .OrderByDescending(co => co.CompletedAt)
-                .Skip(InvoicePageIndex * _invoicesPerPage).Take(_invoicesPerPage)
-                .Select(co => new InvoiceViewModel
-                {
-                    Id = co.Id,
-                    Title = co.BuyerId == userId ? co.TitleForBuyer:co.TitleForSeller,
-                    CompletedAt = co.CompletedAt.ToString(ApplicationConstants.DateTimeFormat, CultureInfo.InvariantCulture)
-                }).ToListAsync();
+            IEnumerable<CompletedOrderDto> userCompletedOrders = await _completedOrderRepository
+                .GetCompletedOrdersAsync(userId: userId, skipCount: InvoicePageIndex * _invoicesPerPage, takeCount: _invoicesPerPage);
 
-            return userCompletedOrders;
+
+            List<InvoiceViewModel> userCompletedOrdersOutput = userCompletedOrders.Select(co => new InvoiceViewModel
+            {
+                Id = co.Id,
+                Title = co.BuyerId == userId ? co.TitleForBuyer : co.TitleForSeller,
+                CompletedAt = co.CompletedAt.ToString(ApplicationConstants.DateTimeFormat, CultureInfo.InvariantCulture)
+            }).ToList();
+
+            return userCompletedOrdersOutput;
         }
 
         public async Task<InvoiceDetailsViewModel?> GetCompletedOrderAsync(string userId, Guid completedOrderId)
         {
-            CompletedOrder? completedOrder = await _context
-                .CompletedOrders
-                .AsNoTracking()
-                .Include(co => co.Seller)
-                .Include(co => co.Buyer)
-                .Include(co => co.Product)
-                .Where(co => co.Id == completedOrderId)
-                .SingleOrDefaultAsync();
+            CompletedOrder? completedOrder = await _completedOrderRepository.GetCompletedOrderAsync(completedOrderId: completedOrderId);
 
             //checks whether the completed order exists
             if (completedOrder is null)
