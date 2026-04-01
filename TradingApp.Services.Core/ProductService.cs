@@ -50,30 +50,21 @@ namespace TradingApp.Services.Core
 
         public async Task<IEnumerable<ProductViewModel>> GetApprovedProductsWithActiveSellOrdersAsync(int pageIndex, ProductFilter? productFilter)
         {
-            IQueryable<Product> productsCountQuery = _context
+            IQueryable<Product> productsQuery = _context
                 .Products
                 .Include(p => p.Creator)
                .AsNoTracking()
                .Where(p => p.Status == ProductStatus.approved && p.SellOrders.Any(so => so.Status == SellOrderStatus.active));
 
             if (productFilter is not null) 
-            { productsCountQuery = GetQueryForFilteringProducts(productFilter, productsCountQuery); }
-            int productsCount = await productsCountQuery.CountAsync();
+            { productsQuery = GetQueryForFilteringProducts(productFilter, productsQuery); }
+            int productsCount = await productsQuery.CountAsync();
 
             if (productsCount == 0)
             { return new List<ProductViewModel>(); }
 
             SetProductPage(pageIndex, productsCount);
-
-            IQueryable<Product> productsQuery = _context
-                .Products
-                .Include(p => p.Creator)
-              .AsNoTracking()
-              .Where(p => p.Status == ProductStatus.approved && p.SellOrders.Any(so => so.Status == SellOrderStatus.active));
-
-            if (productFilter is not null)
-            { productsQuery = GetQueryForFilteringProducts(productFilter, productsCountQuery); }
-
+                        
             IEnumerable<ProductViewModel> products = await productsQuery
             .Skip(ProductPageIndex * _productsPerPage).Take(_productsPerPage)
           .Select(p => new ProductViewModel
