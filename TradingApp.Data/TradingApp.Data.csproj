@@ -15,6 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\TradingApp.Data.Dtos\TradingApp.Data.Dtos.csproj" />
     <ProjectReference Include="..\TradingApp.Data.Models\TradingApp.Data.Models.csproj" />
     <ProjectReference Include="..\TradingApp.GCommon\TradingApp.GCommon.csproj" />
   </ItemGroup>
