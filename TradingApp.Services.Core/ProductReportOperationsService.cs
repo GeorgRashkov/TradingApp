@@ -1,33 +1,37 @@
 ﻿
-using Microsoft.EntityFrameworkCore;
-using TradingApp.Data;
-using TradingApp.GCommon.ErrorCodes;
+using TradingApp.Data.Models;
+using TradingApp.Data.Repository.Interfaces;
 using TradingApp.GCommon;
 using TradingApp.GCommon.Enums;
-using TradingApp.Data.Models;
+using TradingApp.GCommon.ErrorCodes;
 using TradingApp.Services.Core.Interfaces;
 
 namespace TradingApp.Services.Core
 {
     public class ProductReportOperationsService: IProductReportOperationsService
     {
-        private ApplicationDbContext _context;
-        public ProductReportOperationsService(ApplicationDbContext context)
+        
+        private readonly IProductReportRepository _productReportRepository;
+        private readonly IProductRepository _productRepository;
+        private readonly IUserRepository _userRepository;
+        public ProductReportOperationsService(IProductReportRepository productReportRepository, IProductRepository productRepository, IUserRepository userRepository)
         {
-            _context = context;
+            _productReportRepository = productReportRepository;
+            _productRepository = productRepository;
+            _userRepository = userRepository;
         }
 
         public async Task<Result> CreateReportAsync(string reporterId, Guid reportedProductId, string title, string message, ProductReportType reportType)
         {
-            bool reporterExists = await _context.Users.AnyAsync(x => x.Id == reporterId);
+            bool reporterExists = await _userRepository.DoesUserExistAsync(userId: reporterId);
             if (reporterExists == false)
             { return new Result(errorCode: UserErrorCodes.UserNotFound); }
 
-            bool reportedProductExists = await _context.Products.AnyAsync(x => x.Id == reportedProductId);
+            bool reportedProductExists = await _productRepository.DoesProductExistAsync(productId: reportedProductId);
             if (reportedProductExists == false)
             { return new Result(errorCode: ProductErrorCodes.ProductNotFound); }
 
-            bool isReportedProductCreatedByReporter = await _context.Products.AnyAsync(x => x.Id == reportedProductId && x.CreatorId == reporterId);
+            bool isReportedProductCreatedByReporter = await _productRepository.DoesProductCreatedByUserExistAsync(userId: reporterId, productId: reportedProductId);
             if (isReportedProductCreatedByReporter == true)
             { return new Result(errorCode: ProductReportErrorCodes.ProductReportInvalidCreator); }
 
@@ -42,22 +46,20 @@ namespace TradingApp.Services.Core
                 Status = ApplicationConstants.CreatedProductReportDefaultStatus
             };
 
-            await _context.ProductReports.AddAsync(productReport);
-            await _context.SaveChangesAsync();
-
+            await _productReportRepository.CreateReportAsync(report: productReport);
+            
             return new Result();
         }
         
         
         public async Task<Result> SetReportStatusAsync(Guid reportId, ProductReportStatus newReportStatus) 
         {
-            ProductReport? report = await _context.ProductReports.FindAsync(reportId);
+            ProductReport? report = await _productReportRepository.GetProductReportByIdAsync(reportId: reportId);
 
             if(report == null) 
             { return new Result(errorCode: ProductReportErrorCodes.ProductReportNotFound); }
 
-            report.Status = newReportStatus;
-            await _context.SaveChangesAsync();
+            await _productReportRepository.SetReportStatusAsync(report: report, newReportStatus: newReportStatus);
 
             return new Result();
         }
