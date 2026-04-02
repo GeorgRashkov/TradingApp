@@ -1,5 +1,6 @@
 ﻿
 using Microsoft.EntityFrameworkCore;
+using TradingApp.Data.Dtos.User;
 using TradingApp.Data.Repository.Interfaces;
 using TradingApp.GCommon.Enums;
 
@@ -13,6 +14,7 @@ namespace TradingApp.Data.Repository
             _context = context;
         }
 
+        //<bool methods
         public async Task<bool> DoesUserExistAsync(string userId)
         {
             return await _context.Users
@@ -20,6 +22,28 @@ namespace TradingApp.Data.Repository
                     .AnyAsync(u => u.Id == userId);
         }
 
+        public async Task<bool> DidUserBoughtProductAsync(Guid productId, string userId)
+        {
+            return await _context
+                .CompletedOrders
+                .AsNoTracking()
+                .AnyAsync(co => co.BuyerId == userId && co.ProductId == productId);
+        }
+        //bool methods>
+
+        //<number methods
+        public async Task<int> GetUserActiveSellOrdersCountAsync(string userId)
+        {
+            int sellOrdersCount = await _context
+                .SellOrders
+                 .AsNoTracking()
+                 .Where(so => so.CreatorId == userId && so.Status == SellOrderStatus.active)
+                 .CountAsync();
+            return sellOrdersCount;
+        }
+        //number methods>
+
+        //<text methods
         public async Task<string?> GetCreatorNameOfProductAsync(Guid productId)
         {
             string? creatorName = await _context
@@ -45,15 +69,7 @@ namespace TradingApp.Data.Repository
             return creatorId;
         }
 
-        public async Task<int> GetUserActiveSellOrdersCountAsync(string userId)
-        {
-            int sellOrdersCount = await _context
-                .SellOrders
-                 .AsNoTracking()
-                 .Where(so => so.CreatorId == userId && so.Status == SellOrderStatus.active)
-                 .CountAsync();
-            return sellOrdersCount;
-        }
+        
 
 
         public async Task<string?> GetUserIdAsync(string userName)
@@ -67,5 +83,57 @@ namespace TradingApp.Data.Repository
 
             return userName;
         }
+        //text methods>
+
+
+        //<dto methods
+        public async Task<User_CreateSellOrderEligibilityDto?> GetUserForCreateSellOrderAsync(string userId) 
+        {
+            User_CreateSellOrderEligibilityDto? user = await _context
+                .Users
+                .Include(u => u.SellOrders)
+                .AsNoTracking()
+                .Where(u => u.Id == userId)
+                .Select(u => new User_CreateSellOrderEligibilityDto
+                {
+                    UserId = u.Id,
+                    ActiveSellOrdersCount = u.SellOrders.Where(so => so.Status == SellOrderStatus.active).Count()
+                }).SingleOrDefaultAsync();
+
+            return user;
+        }
+
+        public async Task<User_CancelSellOrderEligibilityDto?> GetUserForCancelSellOrderAsync(string userId)
+        {
+            User_CancelSellOrderEligibilityDto? user = await _context
+               .Users
+               .Include(u => u.SellOrders)
+               .AsNoTracking()
+               .Where(u => u.Id == userId)
+               .Select(u => new User_CancelSellOrderEligibilityDto
+               {
+                   UserId = u.Id,
+                   ActiveSellOrdersCount = u.SellOrders.Where(so => so.Status == SellOrderStatus.active).Count()
+               }).SingleOrDefaultAsync();
+
+            return user;
+        }
+
+        public async Task<User_BuySellOrderEligibilityDto?> GetUserForBuySellOrderAsync(string userId)
+        {
+            User_BuySellOrderEligibilityDto? user = await _context
+                .Users
+                .Include(u => u.Balance)
+                .AsNoTracking()
+                .Where(u => u.Id == userId)
+                .Select(u => new User_BuySellOrderEligibilityDto
+                {
+                    UserId = u.Id,
+                    Balance = u.Balance.Amount
+                }).SingleOrDefaultAsync();
+
+            return user;
+        }
+        //dto methods>
     }
 }

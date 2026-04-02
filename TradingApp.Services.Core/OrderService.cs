@@ -1,7 +1,9 @@
 ﻿
 using Microsoft.EntityFrameworkCore;
-using TradingApp.Data;
+using TradingApp.Data.Dtos.Product;
+using TradingApp.Data.Dtos.User;
 using TradingApp.Data.Models;
+using TradingApp.Data.Repository.Interfaces;
 using TradingApp.GCommon;
 using TradingApp.GCommon.Enums;
 using TradingApp.GCommon.ErrorCodes;
@@ -11,18 +13,22 @@ namespace TradingApp.Services.Core
 {
     public class OrderService : IOrderService
     {
-        private ApplicationDbContext _context;
-     
-        public OrderService(ApplicationDbContext context)
+        private readonly ISellOrderRepository _sellOrderRepository;
+        private readonly IProductRepository _productRepository;
+        private readonly IUserRepository _userRepository;
+
+        public OrderService(ISellOrderRepository sellOrderRepository, IProductRepository productRepository, IUserRepository userRepository)
         {
-            _context = context;            
+            _sellOrderRepository = sellOrderRepository;
+            _productRepository = productRepository;
+            _userRepository = userRepository;
         }
 
         public async Task<Result> CreateSellOrdersAsync(string creatorId, Guid productId, int ordersCount)
         {
             Result result = await CanUserCreateSellOrdersOfSpecificProductAsync(productId: productId, userId: creatorId, ordersCount: ordersCount);
 
-            if(result.Success == false)
+            if (result.Success == false)
             {
                 return result;
             }
@@ -32,7 +38,7 @@ namespace TradingApp.Services.Core
             DateTime sellOrderCreatedAt = DateTime.UtcNow;
 
             for (int i = 0; i < ordersCount; i++)
-            {  
+            {
                 SellOrder sellOrder = new SellOrder()
                 {
                     Status = ApplicationConstants.CreatedSellOrderDefaultStatus,
@@ -41,18 +47,18 @@ namespace TradingApp.Services.Core
                     ProductId = productId,
                 };
 
-                sellOrders.Add(sellOrder);                
+                sellOrders.Add(sellOrder);
             }
 
-            await _context.SellOrders.AddRangeAsync(sellOrders);
-            await _context.SaveChangesAsync();
+            await _sellOrderRepository.CreateSellOrdersAsync(sellOrders: sellOrders);
+
             return result;
         }
 
 
         public async Task<Result> CancelSellOrdersAsync(string creatorId, Guid productId, int ordersCount)
         {
-            Result result = await CanUserCancelSellOrdersOfSpecificProductAsync(productId: productId, userId: creatorId, ordersCount:ordersCount);
+            Result result = await CanUserCancelSellOrdersOfSpecificProductAsync(productId: productId, userId: creatorId, ordersCount: ordersCount);
 
             if (result.Success == false)
             {
@@ -61,21 +67,9 @@ namespace TradingApp.Services.Core
 
             ordersCount = int.Parse(result.SuccessMessage!);
 
-            List<SellOrder> sellOrders = await _context
-                .SellOrders
-                .Where(so => so.ProductId == productId && so.Status == GCommon.Enums.SellOrderStatus.active)
-                .OrderBy(so => so.CreatedAt)
-                .ToListAsync();
+            IEnumerable<SellOrder> sellOrders = await _sellOrderRepository.GetActiveSellOrdersOfProductAsync(productId: productId, ordersCount: ordersCount);
 
-           
-            foreach (SellOrder sellOrder in sellOrders)
-            {
-                if (ordersCount < 1) { break; }
-                sellOrder.Status = GCommon.Enums.SellOrderStatus.cancelled;
-                ordersCount--;
-            }
-
-            await _context.SaveChangesAsync();
+            await _sellOrderRepository.CancelSellOrdersAsync(sellOrders: sellOrders);
 
             return result;
         }
@@ -90,60 +84,8 @@ namespace TradingApp.Services.Core
             {
                 return result;
             }
-           
-            SellOrder sellOrder = (await _context
-                .SellOrders
-                .Include(so => so.Product)
-                .Where(so => so.ProductId == productId && so.Status == SellOrderStatus.active)
-                .OrderBy(so => so.CreatedAt)
-                .FirstOrDefaultAsync())!;
 
-            OrderRequest? orderRequest = await _context
-                .OrderRequests
-                .Include(or => or.SellOrderSuggestions)
-                .Where(or => or.CreatorId == buyerId && or.SellOrderSuggestions.Any(sos => sos.ProductId == productId))
-                .OrderBy(or => or.CreatedAt)
-                .FirstOrDefaultAsync();
-           
-            User buyer = (await _context
-                .Users
-                .Include(u => u.Balance)
-                .Where(u => u.Id == buyerId)
-                .SingleOrDefaultAsync())!;
-
-            User seller = (await _context
-                .Users
-                .Include(u => u.Balance)
-                .Where(u => u.Id == sellOrder.CreatorId)
-                .SingleOrDefaultAsync())!;
-
-            
-            decimal productPrice = sellOrder.Product.Price;
-            decimal platformFee = 0.1m * productPrice;
-            
-
-            CompletedOrder completedOrder = new CompletedOrder()
-            {
-                TitleForBuyer = $"Product {sellOrder.Product.Name} purchased successfully",
-                TitleForSeller = $"Product {sellOrder.Product.Name}  sold successfully",
-                PricePaid = productPrice,
-                PlatformFee = platformFee,
-                SellerRevenue = productPrice - platformFee,
-                CompletedAt = DateTime.UtcNow,
-
-                ProductId = sellOrder.Product.Id,
-                BuyerId = buyer.Id,
-                SellerId = seller.Id,
-            };
-
-            buyer.Balance.Amount -= completedOrder.PricePaid;
-            seller.Balance.Amount += completedOrder.SellerRevenue;
-            sellOrder.Status = SellOrderStatus.completed;
-            if (orderRequest != null) 
-            { orderRequest.Status = OrderRequestStatus.completed; }
-            _context.CompletedOrders.Add(completedOrder);
-
-            await _context.SaveChangesAsync();
+            await _sellOrderRepository.BuySellOrderAsync(productId: productId, buyerId: buyerId);
 
             return result;
         }
@@ -172,73 +114,44 @@ namespace TradingApp.Services.Core
 
             return newOrdersCount;
         }
-
-        private async Task<bool> DidUserBoughtProductAsync(Guid productId, string userId)
-        {
-            return await _context
-                .CompletedOrders
-                .AsNoTracking()
-                .AnyAsync(co => co.BuyerId == userId && co.ProductId == productId);
-        }
-
+       
         ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
         public async Task<Result> CanUserCreateSellOrdersOfSpecificProductAsync(Guid productId, string userId, int ordersCount)
         {
-            var product = await _context
-                .Products
-                .Include(p => p.SellOrders)
-                .AsNoTracking()
-                .Where(p => p.Id == productId)
-                .Select(p => new
-                {
-                    Name = p.Name,
-                    Status = p.Status,
-                    CreatorId = p.CreatorId,
-                    ActiveSellOrdersCount = p.SellOrders.Where(so => so.Status == SellOrderStatus.active).Count()
-                }).SingleOrDefaultAsync();
+            Product_CreateSellOrderEligibilityDto? product = await _productRepository.GetProductForCreateSellOrderAsync(productId: productId);
 
-            var user = await _context
-                .Users
-                .Include(u => u.SellOrders)
-                .AsNoTracking()
-                .Where(u => u.Id == userId)
-                .Select(u => new
-                {
-                    Id = u.Id,
-                    ActiveSellOrdersCount = u.SellOrders.Where(so => so.Status == SellOrderStatus.active).Count()
-                }).SingleOrDefaultAsync();
-
+            User_CreateSellOrderEligibilityDto? user = await _userRepository.GetUserForCreateSellOrderAsync(userId: userId);
 
             if (product == null)
             {
-                return new Result(errorCode: ProductErrorCodes.ProductNotFound);                
+                return new Result(errorCode: ProductErrorCodes.ProductNotFound);
             }
 
             if (user == null)
             {
-                return new Result(errorCode: UserErrorCodes.UserNotFound);                
+                return new Result(errorCode: UserErrorCodes.UserNotFound);
             }
 
-            if (user.Id != product.CreatorId)
+            if (user.UserId != product.CreatorId)
             {
-                return new Result(errorCode: ProductErrorCodes.ProductInvalidCreator);               
+                return new Result(errorCode: ProductErrorCodes.ProductInvalidCreator);
             }
 
             if (product.Status != ProductStatus.approved)
             {
-                return new Result(errorCode: ProductErrorCodes.ProductInvalidStatus);                
+                return new Result(errorCode: ProductErrorCodes.ProductInvalidStatus);
             }
 
             if (product.ActiveSellOrdersCount >= ApplicationConstants.ProductMaxActiveSellOrders)
             {
-                return new Result(errorCode: ProductErrorCodes.ProductMaxActiveSellOrdersReached);                
+                return new Result(errorCode: ProductErrorCodes.ProductMaxActiveSellOrdersReached);
             }
 
             if (user.ActiveSellOrdersCount >= ApplicationConstants.UserMaxActiveSellOrders)
             {
-                return new Result(errorCode: UserErrorCodes.UserMaxActiveSellOrdersReached);                
+                return new Result(errorCode: UserErrorCodes.UserMaxActiveSellOrdersReached);
             }
 
             //the success message is the number of sell orders which the user is allowed to create (this will always be either the input value of the orders count or the maximum number of sell orders which the user can create for the product)
@@ -248,57 +161,36 @@ namespace TradingApp.Services.Core
 
 
 
-        
+
         public async Task<Result> CanUserCancelSellOrdersOfSpecificProductAsync(Guid productId, string userId, int ordersCount)
         {
-            var product = await _context
-                .Products
-                .Include(p => p.SellOrders)
-                .AsNoTracking()
-                .Where(p => p.Id == productId)
-                .Select(p => new
-                {
-                    Name = p.Name,
-                    Status = p.Status,
-                    CreatorId = p.CreatorId,
-                    ActiveSellOrdersCount = p.SellOrders.Where(so => so.Status == SellOrderStatus.active).Count()
-                }).SingleOrDefaultAsync();
+            Product_CancelSellOrderEligibilityDto? product = await _productRepository.GetProductForCancelSellOrderAsync(productId: productId);
 
-            var user = await _context
-                .Users
-                .Include(u => u.SellOrders)
-                .AsNoTracking()
-                .Where(u => u.Id == userId)
-                .Select(u => new
-                {
-                    Id = u.Id,
-                    ActiveSellOrdersCount = u.SellOrders.Where(so => so.Status == SellOrderStatus.active).Count()
-                }).SingleOrDefaultAsync();
-
-
+            User_CancelSellOrderEligibilityDto? user = await _userRepository.GetUserForCancelSellOrderAsync(userId: userId);
+            
             if (product == null)
             {
-                return new Result(errorCode: ProductErrorCodes.ProductNotFound);                
+                return new Result(errorCode: ProductErrorCodes.ProductNotFound);
             }
 
             if (user == null)
             {
-                return new Result(errorCode: UserErrorCodes.UserNotFound);               
+                return new Result(errorCode: UserErrorCodes.UserNotFound);
             }
 
-            if (user.Id != product.CreatorId)
+            if (user.UserId != product.CreatorId)
             {
-                return new Result(errorCode: ProductErrorCodes.ProductInvalidCreator);                
+                return new Result(errorCode: ProductErrorCodes.ProductInvalidCreator);
             }
 
             if (product.Status != ProductStatus.approved)
             {
-                return new Result(errorCode: ProductErrorCodes.ProductInvalidStatus);                
+                return new Result(errorCode: ProductErrorCodes.ProductInvalidStatus);
             }
 
             if (product.ActiveSellOrdersCount < 1)
             {
-                return new Result(errorCode: ProductErrorCodes.ProductHasNoActiveSaleOrders);                
+                return new Result(errorCode: ProductErrorCodes.ProductHasNoActiveSaleOrders);
             }
 
             // the success message is the number of sell orders which the user is allowed to cancel(this will always be either the input value of the orders count or all active sell orders of the product)
@@ -309,74 +201,53 @@ namespace TradingApp.Services.Core
 
 
 
-        
+
         public async Task<Result> CanUserBuySellOrderOfSpecificProductAsync(Guid productId, string userId)
         {
-            var product = await _context
-                .Products
-                .Include(p => p.SellOrders)
-                .AsNoTracking()
-                .Where(p => p.Id == productId)
-                .Select(p => new
-                {
-                    Name = p.Name,
-                    Price = p.Price,
-                    Status = p.Status,
-                    CreatorId = p.CreatorId,
-                    ActiveSellOrdersCount = p.SellOrders.Where(so => so.Status == SellOrderStatus.active).Count()
-                }).SingleOrDefaultAsync();
 
-            var user = await _context
-                .Users
-                .Include(u => u.Balance)
-                .AsNoTracking()
-                .Where(u => u.Id == userId)
-                .Select(u => new
-                {
-                    Id = u.Id,
-                    Balance = u.Balance.Amount
-                }).SingleOrDefaultAsync();
+            Product_BuySellOrderEligibilityDto? product = await _productRepository.GetProductForBuySellOrderAsync(productId: productId);
 
+            User_BuySellOrderEligibilityDto? user = await _userRepository.GetUserForBuySellOrderAsync(userId: userId);
 
             if (product == null)
             {
-                return new Result(errorCode: ProductErrorCodes.ProductNotFound);                
+                return new Result(errorCode: ProductErrorCodes.ProductNotFound);
             }
 
             if (user == null)
             {
-                return new Result(errorCode: UserErrorCodes.UserNotFound);                
+                return new Result(errorCode: UserErrorCodes.UserNotFound);
             }
 
-            if (user.Id == product.CreatorId)
+            if (user.UserId == product.CreatorId)
             {
-                return new Result(errorCode: ProductErrorCodes.ProductInvalidCreator);                
+                return new Result(errorCode: ProductErrorCodes.ProductInvalidCreator);
             }
 
             if (product.Status != ProductStatus.approved)
             {
-                return new Result(errorCode: ProductErrorCodes.ProductInvalidStatus);                
+                return new Result(errorCode: ProductErrorCodes.ProductInvalidStatus);
             }
 
 
             if (product.ActiveSellOrdersCount < 1)
             {
-                return new Result(errorCode: ProductErrorCodes.ProductHasNoActiveSaleOrders);                
+                return new Result(errorCode: ProductErrorCodes.ProductHasNoActiveSaleOrders);
             }
 
-            if(user.Balance < product.Price)
+            if (user.Balance < product.Price)
             {
-                return new Result(errorCode: UserErrorCodes.UserInsufficientBalance);                
+                return new Result(errorCode: UserErrorCodes.UserInsufficientBalance);
             }
 
-            bool didUserBoughtProduct = await DidUserBoughtProductAsync(productId: productId, userId: userId);
-            if(didUserBoughtProduct == true)
+            bool didUserBoughtProduct = await _userRepository.DidUserBoughtProductAsync(productId: productId, userId: userId);
+            if (didUserBoughtProduct == true)
             {
-                return new Result(errorCode: ProductErrorCodes.ProductAlreadyPurchased);                
+                return new Result(errorCode: ProductErrorCodes.ProductAlreadyPurchased);
             }
 
             return new Result();
         }
-                
+
     }
 }
