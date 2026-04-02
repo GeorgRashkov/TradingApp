@@ -205,7 +205,7 @@ namespace TradingApp.Data.Repository
             int affectedEntities = await _context.SaveChangesAsync();
             if (affectedEntities != 1)
             {
-                throw new Exception("Failed to create sell order suggestion.");
+                throw new Exception("Failed to update order request.");
             }
         }
 
@@ -218,7 +218,7 @@ namespace TradingApp.Data.Repository
             int affectedEntities = await _context.SaveChangesAsync();
             if (affectedEntities != 1)
             {
-                throw new Exception("Failed to create sell order suggestion.");
+                throw new Exception("Failed to update the status of order request.");
             }
         }
         //operation methods>

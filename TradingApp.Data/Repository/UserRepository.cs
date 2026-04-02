@@ -6,7 +6,7 @@ using TradingApp.GCommon.Enums;
 
 namespace TradingApp.Data.Repository
 {
-    public class UserRepository: IUserRepository
+    public class UserRepository : IUserRepository
     {
         private readonly ApplicationDbContext _context;
         public UserRepository(ApplicationDbContext context)
@@ -28,6 +28,14 @@ namespace TradingApp.Data.Repository
                 .CompletedOrders
                 .AsNoTracking()
                 .AnyAsync(co => co.BuyerId == userId && co.ProductId == productId);
+        }
+
+        public async Task<bool> DoesCreatorHaveOtherProductsWithTheSameNameAsync(string productName, Guid productId, string creatorId)
+        {
+            return await _context
+                .Products
+                .AsNoTracking()
+                .AnyAsync(p => p.Name == productName && p.Id != productId && p.CreatorId == creatorId);
         }
         //bool methods>
 
@@ -69,7 +77,7 @@ namespace TradingApp.Data.Repository
             return creatorId;
         }
 
-        
+
 
 
         public async Task<string?> GetUserIdAsync(string userName)
@@ -87,7 +95,7 @@ namespace TradingApp.Data.Repository
 
 
         //<dto methods
-        public async Task<User_CreateSellOrderEligibilityDto?> GetUserForCreateSellOrderAsync(string userId) 
+        public async Task<User_CreateSellOrderEligibilityDto?> GetUserForCreateSellOrderAsync(string userId)
         {
             User_CreateSellOrderEligibilityDto? user = await _context
                 .Users
