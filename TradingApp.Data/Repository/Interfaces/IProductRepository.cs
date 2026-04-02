@@ -1,4 +1,6 @@
 ﻿
+using TradingApp.Data.Dtos.Product;
+
 namespace TradingApp.Data.Repository.Interfaces
 {
     public interface IProductRepository
@@ -12,5 +14,11 @@ namespace TradingApp.Data.Repository.Interfaces
         Task<bool> IsProductApprovedAsync(Guid productId);
         Task<bool> IsProductSuggestedToOrderRequestAsync(Guid productId, Guid orderRequestId);
         //bool methods>
+
+        //<dto methods
+        Task<Product_CreateSellOrderEligibilityDto?> GetProductForCreateSellOrderAsync(Guid productId);
+        Task<Product_CancelSellOrderEligibilityDto?> GetProductForCancelSellOrderAsync(Guid productId);
+        Task<Product_BuySellOrderEligibilityDto?> GetProductForBuySellOrderAsync(Guid productId);
+        //dto methods>
     }
 }

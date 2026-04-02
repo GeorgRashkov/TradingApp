@@ -1,6 +1,8 @@
 ﻿
 using Microsoft.EntityFrameworkCore;
+using TradingApp.Data.Dtos.Product;
 using TradingApp.Data.Repository.Interfaces;
+using TradingApp.GCommon.Enums;
 
 namespace TradingApp.Data.Repository
 {
@@ -57,5 +59,63 @@ namespace TradingApp.Data.Repository
                 .AnyAsync();
         }
         //bool methods>
+
+        //<dto methods
+        public async Task<Product_CreateSellOrderEligibilityDto?> GetProductForCreateSellOrderAsync(Guid productId)
+        {
+            Product_CreateSellOrderEligibilityDto? product = await _context
+                .Products
+                .Include(p => p.SellOrders)
+                .AsNoTracking()
+                .Where(p => p.Id == productId)
+                .Select(p => new Product_CreateSellOrderEligibilityDto
+                {
+                    Name = p.Name,
+                    Status = p.Status,
+                    CreatorId = p.CreatorId,
+                    ActiveSellOrdersCount = p.SellOrders.Where(so => so.Status == SellOrderStatus.active).Count()
+                }).SingleOrDefaultAsync();
+
+            return product;
+        }
+
+
+        public async Task<Product_CancelSellOrderEligibilityDto?> GetProductForCancelSellOrderAsync(Guid productId)
+        {
+            Product_CancelSellOrderEligibilityDto? product = await _context
+               .Products
+               .Include(p => p.SellOrders)
+               .AsNoTracking()
+               .Where(p => p.Id == productId)
+               .Select(p => new Product_CancelSellOrderEligibilityDto
+               {
+                   Name = p.Name,
+                   Status = p.Status,
+                   CreatorId = p.CreatorId,
+                   ActiveSellOrdersCount = p.SellOrders.Where(so => so.Status == SellOrderStatus.active).Count()
+               }).SingleOrDefaultAsync();
+
+            return product;
+        }
+
+        public async Task<Product_BuySellOrderEligibilityDto?> GetProductForBuySellOrderAsync(Guid productId)
+        {
+            Product_BuySellOrderEligibilityDto? product = await _context
+                .Products
+                .Include(p => p.SellOrders)
+                .AsNoTracking()
+                .Where(p => p.Id == productId)
+                .Select(p => new Product_BuySellOrderEligibilityDto
+                {
+                    Name = p.Name,
+                    Price = p.Price,
+                    Status = p.Status,
+                    CreatorId = p.CreatorId,
+                    ActiveSellOrdersCount = p.SellOrders.Where(so => so.Status == SellOrderStatus.active).Count()
+                }).SingleOrDefaultAsync();
+
+            return product;
+        }
+        //dto methods>
     }
 }
