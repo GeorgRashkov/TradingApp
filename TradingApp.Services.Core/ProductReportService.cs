@@ -1,7 +1,8 @@
 ﻿
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
-using TradingApp.Data;
+using TradingApp.Data.Dtos.ProductReport;
+using TradingApp.Data.Repository.Interfaces;
 using TradingApp.GCommon;
 using TradingApp.Services.Core.Interfaces;
 using TradingApp.ViewModels.ProductReport;
@@ -10,12 +11,15 @@ namespace TradingApp.Services.Core
 {
     public class ProductReportService : IProductReportService
     {
-        private ApplicationDbContext _context;
+        
+        
+        private readonly IProductReportRepository _productReportRepository;
         private int _productReportsPerPage;
-        public ProductReportService(ApplicationDbContext context) 
+        public ProductReportService(IProductReportRepository productReportRepository) 
         {
+            _productReportRepository = productReportRepository;
             _productReportsPerPage = ApplicationConstants.ProductReportsPerPage;
-            _context = context;
+            
         }
         public int ProductReportPageIndex { get; set; }
         private void SetReportPage(int pageIndex, int reportsCount)
@@ -27,59 +31,45 @@ namespace TradingApp.Services.Core
 
         public async Task<List<ProductReportViewModel>> GetReportsAsync(int pageIndex)
         {
-            int reportsCount = await _context
-                .ProductReports
-              .AsNoTracking()              
-              .CountAsync();
+            int reportsCount = await _productReportRepository.GetReportsCountAsync();
 
             if (reportsCount == 0)
             { return new List<ProductReportViewModel>(); }
 
             SetReportPage(pageIndex, reportsCount);
 
-            List<ProductReportViewModel> reports = await _context
-                .ProductReports
-                .AsNoTracking()               
-                .Skip(ProductReportPageIndex * _productReportsPerPage).Take(_productReportsPerPage)
-                .Select(pr => new ProductReportViewModel
-                {
-                    ReportId = pr.Id,                    
-                    Title = pr.Title,
-                    CreatedAt = pr.CreatedAt.ToString(ApplicationConstants.DateFormat, CultureInfo.InvariantCulture),
-                    Type = pr.Type.ToString(),
-                    Status = pr.Status.ToString()
-                }).ToListAsync();
+            IEnumerable<ProductReportDto> reportsDtos = await _productReportRepository.GetProductReportsAsync(skipCount: ProductReportPageIndex * _productReportsPerPage, takeCount: _productReportsPerPage);
+            List<ProductReportViewModel> reports = reportsDtos.Select(pr => new ProductReportViewModel
+            {
+                ReportId = pr.ReportId,
+                Title = pr.Title,
+                CreatedAt = pr.CreatedAt.ToString(ApplicationConstants.DateFormat, CultureInfo.InvariantCulture),
+                Type = pr.Type.ToString(),
+                Status = pr.Status.ToString()
+            }).ToList();
 
             return reports;
 
         }
         public async Task<List<ProductReportViewModel>> GetReportsForProductAsync(int pageIndex, Guid reportedProductId) 
         {
-            int reportsForProductCount = await _context
-                .ProductReports
-              .AsNoTracking()
-              .Where(pr => pr.ReportedProductId == reportedProductId)
-              .CountAsync();
+            int reportsForProductCount = await _productReportRepository.GetReportsCountForProductAsync(productId:reportedProductId);
 
             if (reportsForProductCount == 0)
             { return new List<ProductReportViewModel>(); }
 
             SetReportPage(pageIndex, reportsForProductCount);
 
-            List<ProductReportViewModel> reportsForProduct = await _context
-                .ProductReports
-                .AsNoTracking()
-                .Where(pr => pr.ReportedProductId == reportedProductId)
-                .Skip(ProductReportPageIndex * _productReportsPerPage).Take(_productReportsPerPage)
-                .Select(pr => new ProductReportViewModel
-                {
-                    ReportId = pr.Id,                    
-                    Title = pr.Title,
-                    CreatedAt = pr.CreatedAt.ToString(ApplicationConstants.DateFormat, CultureInfo.InvariantCulture),
-                    Type = pr.Type.ToString(),
-                    Status = pr.Status.ToString()
-                }).ToListAsync();
-
+            IEnumerable<ProductReportDto> reportsForProductDtos = await _productReportRepository.GetReportsForProductAsync(skipCount: ProductReportPageIndex * _productReportsPerPage, takeCount: _productReportsPerPage, reportedProductId: reportedProductId);
+            List<ProductReportViewModel> reportsForProduct = reportsForProductDtos.Select(pr => new ProductReportViewModel
+             {
+                 ReportId = pr.ReportId,
+                 Title = pr.Title,
+                 CreatedAt = pr.CreatedAt.ToString(ApplicationConstants.DateFormat, CultureInfo.InvariantCulture),
+                 Type = pr.Type.ToString(),
+                 Status = pr.Status.ToString()
+             }).ToList();
+                        
             return reportsForProduct;
 
         }
@@ -87,24 +77,21 @@ namespace TradingApp.Services.Core
 
         public async Task<ProductReportDetailsViewModel?> GetProductReportAsync(Guid reportId) 
         {
-            ProductReportDetailsViewModel? report = await _context
-                .ProductReports
-                .Include(pr => pr.Product)
-                .Include(pr => pr.Reporter)
-                .AsNoTracking()
-                .Where(pr => pr.Id == reportId)
-                .Select(pr => new ProductReportDetailsViewModel 
-                {
-                    ReportId = pr.Id,
-                    Title = pr.Title,
-                    CreatedAt = pr.CreatedAt.ToString(ApplicationConstants.DateTimeFormat, CultureInfo.InvariantCulture),
-                    Type = pr.Type.ToString(),
-                    Status = pr.Status.ToString(),
-                    ReportedProductId = pr.Product.Id,
-                    ReporterName = pr.Reporter.UserName,
-                    Message = pr.Message,
-                })
-                .FirstOrDefaultAsync();
+            ProductReportDetailsDto ? reportDto = await _productReportRepository.GetProductReportAsync(reportId: reportId);
+            if(reportDto == null) 
+            { return null; }
+
+            ProductReportDetailsViewModel report = new ProductReportDetailsViewModel
+            {
+                ReportId = reportDto.ReportId,
+                Title = reportDto.Title,
+                CreatedAt = reportDto.CreatedAt.ToString(ApplicationConstants.DateTimeFormat, CultureInfo.InvariantCulture),
+                Type = reportDto.Type.ToString(),
+                Status = reportDto.Status.ToString(),
+                ReportedProductId = reportDto.ReportedProductId,
+                ReporterName = reportDto.ReporterName,
+                Message = reportDto.Message,
+            };
 
             return report;
         }
