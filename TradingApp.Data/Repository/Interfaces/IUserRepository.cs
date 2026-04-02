@@ -8,6 +8,7 @@ namespace TradingApp.Data.Repository.Interfaces
         //<bool methods
         Task<bool> DoesUserExistAsync(string userId);
         Task<bool> DidUserBoughtProductAsync(Guid productId, string userId);
+        Task<bool> DoesCreatorHaveOtherProductsWithTheSameNameAsync(string productName, Guid productId, string creatorId);
         //bool methods>
 
         //<number methods

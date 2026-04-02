@@ -112,11 +112,7 @@ namespace TradingApp.Data.Repository
             { orderRequest.Status = OrderRequestStatus.completed; }
             await _context.CompletedOrders.AddAsync(completedOrder);
 
-            int affectedEntities = await _context.SaveChangesAsync();
-            if ((affectedEntities != 3 && orderRequest is null) || (affectedEntities != 4 && orderRequest is not null))
-            {
-                throw new Exception("Failed to buy sell order.");
-            }
+            await _context.SaveChangesAsync();            
         }
 
         //operation methods>

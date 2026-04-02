@@ -1,7 +1,6 @@
 ﻿
-using Microsoft.EntityFrameworkCore;
-using TradingApp.Data;
 using TradingApp.Data.Models;
+using TradingApp.Data.Repository.Interfaces;
 using TradingApp.GCommon;
 using TradingApp.GCommon.Enums;
 using TradingApp.GCommon.ErrorCodes;
@@ -11,28 +10,25 @@ namespace TradingApp.Services.Core
 {
     public class ProductOperationsService : IProductOperationsService
     {
-        private ApplicationDbContext _context;
-        private IProductBoolsService _productBoolsService;
-        private IProductService _productService;
-        private IUserService _userService;        
-        public ProductOperationsService(ApplicationDbContext context, IProductBoolsService productBoolsService, IProductService productService, IUserService userService)
+        private readonly IProductRepository _productRepository;
+        private readonly IUserRepository _userRepository;
+        public ProductOperationsService(IUserRepository userRepository, IProductRepository productRepository)
         {
-            _context = context;
-            _productBoolsService = productBoolsService;
-            _productService = productService;
-            _userService = userService;            
+            _userRepository = userRepository;
+            _productRepository = productRepository;
         }
+
 
         //saves the product in the database
         public async Task<Result> AddProductAsync(string name, string description, decimal price, string creatorId)
         {
-            bool doesUserExist = await _userService.DoesUserExistAsync(userId: creatorId);
+            bool doesUserExist = await _userRepository.DoesUserExistAsync(userId: creatorId);
             if (doesUserExist == false)
             {
                 return new Result(errorCode: UserErrorCodes.UserNotFound);
             }
 
-            bool doesProductCreatedByUserExist = await _productBoolsService.DoesProductCreatedByUserExistAsync(userId: creatorId, productName: name);
+            bool doesProductCreatedByUserExist = await _productRepository.DoesProductCreatedByUserExistAsync(userId: creatorId, productName: name);
             if (doesProductCreatedByUserExist == true)
             {
                 return new Result(errorCode: ProductErrorCodes.ProductWithSameNameAlreadyExists);
@@ -48,8 +44,7 @@ namespace TradingApp.Services.Core
                 Status = ApplicationConstants.CreatedProductDefaultStatus
             };
 
-            await _context.Products.AddAsync(product);
-            await _context.SaveChangesAsync();
+            await _productRepository.CreateProductAsync(product:product);          
 
             return new Result();
         }
@@ -57,10 +52,7 @@ namespace TradingApp.Services.Core
         //updates an existing product in the database
         public async Task<Result> UpdateProductAsync(Guid id, string name, string description, decimal price, string creatorId)
         {
-            Product? product = await _context
-                .Products                            
-                .Where(p => p.Id == id)
-                .SingleOrDefaultAsync();
+            Product? product = await _productRepository.GetProductByIdAsync(productId: id);
 
             if (product == null)
             {
@@ -71,39 +63,33 @@ namespace TradingApp.Services.Core
                 return new Result(errorCode: ProductErrorCodes.ProductInvalidCreator);
             }
 
-            bool doesCreatorHaveOtherProductsWithTheSameName = await _context.Products.AsNoTracking().AnyAsync(p => p.Name == name && p.Id != id && p.CreatorId == creatorId);
+            bool doesCreatorHaveOtherProductsWithTheSameName = await _userRepository.DoesCreatorHaveOtherProductsWithTheSameNameAsync(productName: name, productId:id, creatorId:creatorId);
             if(doesCreatorHaveOtherProductsWithTheSameName == true) 
             {
                 return new Result(errorCode: ProductErrorCodes.ProductWithSameNameAlreadyExists);
             }
 
-            bool doesProductHaveNonResolvedReports = await _context.ProductReports.AsNoTracking().AnyAsync(pr => pr.ReportedProductId == id && pr.Status != ProductReportStatus.resolved);
+            bool doesProductHaveNonResolvedReports = await _productRepository.DoesProductHaveNonResolvedReports(productId: id);
             if (doesProductHaveNonResolvedReports == true)
             {
                 return new Result(errorCode: ProductErrorCodes.ProductHasNonResolvedReports);
             }
 
-            int productActiveSellOrdersCount = await _productService.GetProductActiveSellOrdersCountAsync(productId: id);
+            int productActiveSellOrdersCount = await _productRepository.GetProductActiveSellOrdersCountAsync(productId: id);
             if (productActiveSellOrdersCount > 0)
             {
                 return new Result(errorCode: ProductErrorCodes.ProductHasActiveSaleOrders);
             }
 
-            //update the product
-            product.Name = name;
-            product.Description = description;
-            product.Price = price;
-            product.Status = ApplicationConstants.CreatedProductDefaultStatus;
-
-            //apply change to DB
-            await _context.SaveChangesAsync();
+            await _productRepository.UpdateProductAsync(product: product, newName: name, newDescription: description, newPrice:price);
+          
             return new Result();
         }
 
         //deletes an existing product in the database
         public async Task<Result> DeleteProductAsync(Guid id, string creatorId)
         {
-            Product? product = await _context.Products.FindAsync(id);
+            Product? product = await _productRepository.GetProductByIdAsync(productId: id);
 
             if (product == null)
             {
@@ -114,91 +100,36 @@ namespace TradingApp.Services.Core
                 return new Result(errorCode: ProductErrorCodes.ProductInvalidCreator);
             }
 
-            bool doesProductHaveNonResolvedReports = await _context.ProductReports.AsNoTracking().AnyAsync(pr => pr.ReportedProductId == id && pr.Status != ProductReportStatus.resolved);
-            if(doesProductHaveNonResolvedReports == true)
+            bool doesProductHaveNonResolvedReports = await _productRepository.DoesProductHaveNonResolvedReports(productId: id);
+
+            if (doesProductHaveNonResolvedReports == true)
             {
                 return new Result(errorCode: ProductErrorCodes.ProductHasNonResolvedReports);
             }
 
-
-            await DeleteSellOrdersOfProductAsync(id);
-            await DeleteSellOrderSuggestionsOfProductAsync(id);
-            await DeleteReportsOfProductAsync(id);
-            await SetFkToNullForCompletedOrdersOfProductAsync(id);
-
-            _context.Products.Attach(product);
-            _context.Products.Remove(product);
-            await _context.SaveChangesAsync();
+            await _productRepository.DeleteProductAsync(product: product);
 
             return new Result();
         }
 
         //changes the status of an existing product in the database
-        public async Task<Result> ChangeProductStatusAsync(Guid id, ProductStatus productStatus) 
+        public async Task<Result> ChangeProductStatusAsync(Guid id, ProductStatus productStatus)
         {
-            Product? product = await _context.Products.FindAsync(id);
+            Product? product = await _productRepository.GetProductByIdAsync(productId: id);
 
             if (product == null)
             {
                 return new Result(errorCode: ProductErrorCodes.ProductNotFound);
             }
-            else if (product.Status == productStatus) 
+            else if (product.Status == productStatus)
             {
                 return new Result(errorCode: ProductErrorCodes.ProductInvalidStatus);
             }
 
-            product.Status = productStatus;
-            await _context.SaveChangesAsync();
+            await _productRepository.ChangeProductStatusAsync(product: product, newStatus: productStatus);
 
             return new Result();
         }
 
-
-        private async Task DeleteSellOrdersOfProductAsync(Guid productId)
-        {
-            IEnumerable<SellOrder> sellOrders = await _context
-                .SellOrders
-                .Include(so => so.Product)
-                .Where(so => so.Product.Id == productId)
-                .ToListAsync();
-
-            _context.SellOrders.RemoveRange(sellOrders);
-        }
-
-        private async Task DeleteSellOrderSuggestionsOfProductAsync(Guid productId)
-        {
-            IEnumerable<SellOrderSuggestion> sellOrderSuggestions = await _context.
-                SellOrderSuggestions
-                .Where(sos => sos.ProductId == productId)
-                .ToListAsync();
-
-            _context.SellOrderSuggestions.RemoveRange(sellOrderSuggestions);
-        }
-
-        private async Task DeleteReportsOfProductAsync(Guid productId)
-        {
-            IEnumerable<ProductReport> productReports = await _context
-                .ProductReports
-                .Where(pr => pr.ReportedProductId == productId)
-                .ToListAsync();
-
-            _context.ProductReports.RemoveRange(productReports);
-        }
-
-        private async Task SetFkToNullForCompletedOrdersOfProductAsync(Guid productId)
-        {
-            IEnumerable<CompletedOrder> completedOrders = await _context
-                .CompletedOrders
-                .Include(so => so.Product)
-                .Where(so => so.Product.Id == productId)
-                .ToListAsync();
-
-            foreach (CompletedOrder completedOrder in completedOrders)
-            {
-                completedOrder.Product = null;
-            }
-        }
-
-        
     }
 }
