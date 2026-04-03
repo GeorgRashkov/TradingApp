@@ -1,10 +1,9 @@
 ﻿
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using TradingApp.Data;
 using TradingApp.Data.Models;
+using TradingApp.Data.Repository.Interfaces;
 using TradingApp.GCommon;
-using TradingApp.GCommon.Enums;
 using TradingApp.Services.Core.Interfaces;
 using TradingApp.ViewModels.InputUser;
 using TradingApp.ViewModels.User;
@@ -13,70 +12,41 @@ namespace TradingApp.Services.Core
 {
     public class UserService : IUserService
     {
-        private ApplicationDbContext _context;
+        private readonly IUserRepository _userRepository;
         private const int _usersPerPage = ApplicationConstants.UsersPerPage;
         private UserManager<User> _userManager;
         private RoleManager<IdentityRole> _roleManager;
 
-        public UserService(ApplicationDbContext context, UserManager<User> userManager, RoleManager<IdentityRole> roleManager)
+        public UserService(IUserRepository userRepository, UserManager<User> userManager, RoleManager<IdentityRole> roleManager)
         {
-            _context = context;
+            _userRepository = userRepository;
             _userManager = userManager;
             _roleManager = roleManager;
         }
         public int UserPageIndex { get; private set; }
-        public async Task<bool> DoesUserExistAsync(string userId)
-        {
-            return await _context.Users
-                    .AsNoTracking()
-                    .AnyAsync(u => u.Id == userId);
-        }
-
+       
         public async Task<string?> GetCreatorNameOfProductAsync(Guid productId)
         {
-            string? creatorName = await _context
-                .Products
-                .Include(p => p.Creator)
-                .AsNoTracking()
-                .Where(p => p.Id == productId)
-                .Select(p => p.Creator.UserName)
-                .SingleOrDefaultAsync();
-
+            string? creatorName = await _userRepository.GetCreatorNameOfProductAsync(productId: productId);
             return creatorName;
         }
 
         public async Task<string?> GetCreatorIdOfRequestAsync(Guid orderRequestId)
         {
-            string? creatorId = await _context
-                .OrderRequests
-                .AsNoTracking()
-                .Where(or => or.Id == orderRequestId)
-                .Select(or => or.CreatorId)
-                .SingleOrDefaultAsync();
-
+            string? creatorId = await _userRepository.GetCreatorIdOfRequestAsync(orderRequestId: orderRequestId);
             return creatorId;
         }
 
         public async Task<int> GetUserActiveSellOrdersCountAsync(string userId)
         {
-            int sellOrdersCount = await _context
-                .SellOrders
-                 .AsNoTracking()
-                 .Where(so => so.CreatorId == userId && so.Status == SellOrderStatus.active)
-                 .CountAsync();
+            int sellOrdersCount = await _userRepository.GetUserActiveSellOrdersCountAsync(userId: userId);
             return sellOrdersCount;
         }
 
 
         public async Task<string?> GetUserIdAsync(string userName)
         {
-            string? userId = await _context
-                .Users
-                .AsNoTracking()
-                .Where(u => u.UserName == userName)
-                .Select(u => u.Id)
-                .SingleOrDefaultAsync();
-
+            string? userId = await _userRepository.GetUserIdAsync(userName: userName);
             return userName;
         }
 
@@ -110,12 +80,9 @@ namespace TradingApp.Services.Core
         }
 
 
-        public async Task<IEnumerable<UsersViewModel>> GetUsers(int pageIndex)
+        public async Task<IEnumerable<UsersViewModel>> GetUsersAsync(int pageIndex)
         {
-            int usersCount = await _context
-                .Users
-               .AsNoTracking()
-               .CountAsync();
+            int usersCount = await _userRepository.GetUsersCountAsync();
 
             if (usersCount == 0)
             { return new List<UsersViewModel>(); }
@@ -123,11 +90,7 @@ namespace TradingApp.Services.Core
             SetUserPage(pageIndex, usersCount);
 
 
-            List<User> usersFromDB = await _context
-                .Users
-                .AsNoTracking()
-                .Skip(UserPageIndex * _usersPerPage).Take(_usersPerPage)
-                .ToListAsync();
+            IEnumerable<User> usersFromDB = await _userRepository.GetUsersAsync(skipCount: UserPageIndex * _usersPerPage, takeCount: _usersPerPage);
 
             List<UsersViewModel> users = new List<UsersViewModel>();
 

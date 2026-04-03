@@ -28,7 +28,7 @@ namespace TradingApp.Areas.Admin.Controllers
         [HttpGet]
         public async Task<IActionResult> Users(int pageIndex)
         {
-            IEnumerable<UsersViewModel> users = await _userService.GetUsers(pageIndex);
+            IEnumerable<UsersViewModel> users = await _userService.GetUsersAsync(pageIndex);
 
             if (users.Count() == 0)
             { return View(model: null); }
