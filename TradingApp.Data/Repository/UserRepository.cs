@@ -179,11 +179,7 @@ namespace TradingApp.Data.Repository
             user.LockoutEnabled = lockoutEnabled;
             user.LockoutEnd = lockoutEnd;
             
-            int affectedEntities = await _context.SaveChangesAsync();
-            if (affectedEntities != 1)
-            {
-                throw new Exception("Failed to change the user properties.");
-            }
+            await _context.SaveChangesAsync();            
         }
         //operations methods>
     }

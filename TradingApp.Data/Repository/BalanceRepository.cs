@@ -48,12 +48,7 @@ namespace TradingApp.Data.Repository
             Balance balance = await GetBalanceAsync(userId);
 
             balance.Amount += increasement;
-            int affectedEntities = await _context.SaveChangesAsync();
-
-            if (affectedEntities != 1)
-            {
-                throw new Exception("Failed to increase Balance.");
-            }
+            await _context.SaveChangesAsync();
         }
 
         public async Task DecreaseBalanceAsync(string userId, decimal decreasement)
@@ -61,12 +56,7 @@ namespace TradingApp.Data.Repository
             Balance balance = await GetBalanceAsync(userId);
 
             balance.Amount = balance.Amount >= decreasement ? balance.Amount - decreasement : 0;
-            int affectedEntities = await _context.SaveChangesAsync();
-
-            if (affectedEntities != 1)
-            {
-                throw new Exception("Failed to decrease Balance.");
-            }
+            await _context.SaveChangesAsync();
         }
         //operation methods>
     }
