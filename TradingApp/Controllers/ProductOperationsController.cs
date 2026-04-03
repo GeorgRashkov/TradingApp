@@ -10,16 +10,16 @@ namespace TradingApp.Controllers
 {
     public class ProductOperationsController : ControllerBase
     {
-        private IProductBoolsService _productBoolsService; 
+        
         private IProductOperationsService _productOperationsService;
         private IProductFileService _productFileService;
         private IProductService _productService;
         private IUserService _userService;
 
         private ILogger<InvoiceController> _logger;
-        public ProductOperationsController(ApplicationDbContext context, IProductBoolsService productBoolsService, IProductOperationsService productOperationsService, IProductFileService productFileService, IProductService productService, IUserService userService, ILogger<InvoiceController> logger)
+        public ProductOperationsController(ApplicationDbContext context, IProductOperationsService productOperationsService, IProductFileService productFileService, IProductService productService, IUserService userService, ILogger<InvoiceController> logger)
         {
-            _productBoolsService = productBoolsService;
+           
             _productOperationsService = productOperationsService;
             _productFileService = productFileService;
             _productService = productService;
@@ -100,7 +100,7 @@ namespace TradingApp.Controllers
         [HttpGet]
         public async Task<IActionResult> UpdateProduct(Guid productId)
         {
-            bool doesProductCreatedByCreatorExist = await _productBoolsService.DoesProductCreatedByUserExistAsync(userId: LoggedUserId, productId: productId);
+            bool doesProductCreatedByCreatorExist = await _productService.DoesProductCreatedByUserExistAsync(userId: LoggedUserId, productId: productId);
 
             if (doesProductCreatedByCreatorExist == false)
             {
@@ -197,7 +197,7 @@ namespace TradingApp.Controllers
         public async Task<IActionResult> DeleteProduct(Guid productId)
         {
             //product existance validation
-            bool doesProductCreatedByUserExist = await _productBoolsService.DoesProductCreatedByUserExistAsync(userId: LoggedUserId, productId: productId);
+            bool doesProductCreatedByUserExist = await _productService.DoesProductCreatedByUserExistAsync(userId: LoggedUserId, productId: productId);
 
             if (doesProductCreatedByUserExist == false)
             {

@@ -12,13 +12,13 @@ namespace TradingApp.Controllers
     public class ProductReportOperationsController : ControllerBase
     {
         private IProductReportOperationsService _productReportOperationsService;
-        private IProductBoolsService _productBoolsService;
+        private IProductService _productService;
 
         private ILogger<InvoiceController> _logger;
-        public ProductReportOperationsController(IProductReportOperationsService productReportOperationsService, IProductBoolsService productBoolsService, ILogger<InvoiceController> logger)
+        public ProductReportOperationsController(IProductReportOperationsService productReportOperationsService, IProductService productService, ILogger<InvoiceController> logger)
         {
             _productReportOperationsService = productReportOperationsService;
-            _productBoolsService = productBoolsService;
+            _productService = productService;
 
             _logger = logger;
         }
@@ -26,7 +26,7 @@ namespace TradingApp.Controllers
         [HttpGet]
         public async Task<IActionResult> Create_ProductReport(Guid reportedProductId)
         {
-            bool isReportedProductCreatedByCurrentUser = await _productBoolsService.DoesProductCreatedByUserExistAsync(userId: LoggedUserId, productId: reportedProductId);
+            bool isReportedProductCreatedByCurrentUser = await _productService.DoesProductCreatedByUserExistAsync(userId: LoggedUserId, productId: reportedProductId);
             if(isReportedProductCreatedByCurrentUser == true) 
             {
                 TempData["title"] = "Error";

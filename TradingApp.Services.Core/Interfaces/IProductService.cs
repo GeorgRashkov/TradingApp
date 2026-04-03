@@ -7,6 +7,7 @@ namespace TradingApp.Services.Core.Interfaces
 {
     public interface IProductService
     {
+        Task<bool> DoesProductCreatedByUserExistAsync(string userId, Guid productId);
         Task<IEnumerable<ProductViewModel>> GetApprovedProductsWithActiveSellOrdersAsync(int pageIndex, ProductFilter? productFilter);
         Task<IEnumerable<ProductViewModel>> GetProductsAsync(int pageIndex);        
         Task<Dictionary<string, string>> GetIdsAndNamesOfApprovedProductsWithActiveSaleOrdersCreatedByUserAsync(string userId);
