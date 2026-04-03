@@ -5,6 +5,7 @@ using TradingApp.Data.Models;
 using TradingApp.Data.Repository.Interfaces;
 using TradingApp.GCommon;
 using TradingApp.GCommon.Enums;
+using TradingApp.GCommon.Filters;
 
 namespace TradingApp.Data.Repository
 {
@@ -71,6 +72,27 @@ namespace TradingApp.Data.Repository
         //bool methods>
 
         //<number methods
+        public async Task<int> GetProductsCountAsync()
+        {
+            int productsCount = await _context
+                .Products
+               .AsNoTracking()
+               .CountAsync();
+
+            return productsCount;
+        }
+
+        public async Task<int> GetProductsCountCreatedByUserAsync(string userId)
+        {
+            int productsCount = await _context
+                .Products
+              .AsNoTracking()
+              .Where(p => p.CreatorId == userId)
+              .CountAsync();
+
+            return productsCount;
+        }
+
         public async Task<int> GetProductActiveSellOrdersCountAsync(Guid productId)
         {
             int sellOrdersCount = await _context.SellOrders
@@ -79,8 +101,34 @@ namespace TradingApp.Data.Repository
                 .CountAsync();
             return sellOrdersCount;
         }
+
+        public async Task<int> GetCountOf_ApprovedProductsWithActiveSellOrdersAsync(ProductFilter? productFilter)
+        {
+            IQueryable<Product> productsQuery = _context
+                .Products
+               .AsNoTracking()
+               .Where(p => p.Status == ProductStatus.approved && p.SellOrders.Any(so => so.Status == SellOrderStatus.active));
+
+            if (productFilter is not null)
+            { productsQuery = GetQueryForFilteringProducts(productFilter, productsQuery); }
+            int productsCount = await productsQuery.CountAsync();
+
+            return productsCount;
+        }
         //number methods>
 
+        //<text methods
+        public async Task<string?> GetProductNameAsync(Guid productId)
+        {
+            string? productName = await _context
+                .Products
+                .AsNoTracking()
+                .Where(p => p.Id == productId)
+                .Select(p => p.Name).SingleOrDefaultAsync();
+
+            return productName;
+        }
+        //text methods>
 
         //<entity methods
         public async Task<Product?> GetProductByIdAsync(Guid productId)
@@ -92,6 +140,174 @@ namespace TradingApp.Data.Repository
         //entity methods>
 
         //<dto methods
+        public async Task<IEnumerable<ProductDto>> GetDtosOf_ProductsAsync(int skipCount, int takeCount)
+        {
+            IEnumerable<ProductDto> products = await _context
+                .Products
+                .Include(p => p.Creator)
+              .AsNoTracking()
+              .Skip(skipCount).Take(takeCount)
+              .Select(p => new ProductDto
+              {
+                  Id = p.Id,
+                  CreatorName = p.Creator.UserName,
+                  Price = p.Price,
+                  ProductName = p.Name,
+                  Status = p.Status
+              }).ToListAsync();
+
+            return products;
+        }
+
+        public async Task<ProductDetailsDto?> GetProductDetailsDtoAsync(Guid productId)
+        {
+            ProductDetailsDto? product = await _context
+               .Products
+               .AsNoTracking()
+               .Where(p => p.Id == productId)
+               .Select(p => new ProductDetailsDto
+               {
+                   Id = p.Id,
+                   ProductName = p.Name,
+                   Description = p.Description,
+                   CreatorName = p.Creator.UserName,
+                   Price = p.Price,
+                   Status = p.Status,
+                   ActiveSellOrdersCount = p.SellOrders.Where(so => so.Status == SellOrderStatus.active).Count()
+               }).SingleOrDefaultAsync();
+
+            return product;
+        }
+
+
+        public async Task<ProductDetailsDto?> GetProductDetailsDtoOf_ApprovedProductWithActiveSellOrdersAsync(Guid productId)
+        {
+            ProductDetailsDto? product = await _context
+                .Products
+                .Include(p => p.Creator)
+                .AsNoTracking()
+                .Where(p => p.Id == productId && p.Status == ProductStatus.approved && p.SellOrders.Any(so => so.Status == SellOrderStatus.active))
+                .Select(p => new ProductDetailsDto
+                {
+                    Id = p.Id,
+                    ProductName = p.Name,
+                    Price = p.Price,
+                    CreatorName = p.Creator.UserName,
+                    Description = p.Description,
+                    FirstSellOrderCreationDate = p.SellOrders.Where(so => so.Status == SellOrderStatus.active).Select(so => so.CreatedAt).OrderBy(createdAt => createdAt).SingleOrDefault(),
+                    LastSellOrderCreationDate = p.SellOrders.Where(so => so.Status == SellOrderStatus.active).Select(so => so.CreatedAt).OrderByDescending(createdAt => createdAt).SingleOrDefault(),
+                    ActiveSellOrdersCount = p.SellOrders.Where(so => so.Status == SellOrderStatus.active).Count()
+                }).SingleOrDefaultAsync();
+
+            return product;
+        }
+
+        public async Task<IEnumerable<ProductDto>> GetDtosOf_ProductsCreatedByUserAsync(string userId, int skipCount, int takeCount)
+        {
+            IEnumerable<ProductDto> products = await _context
+               .Products
+               .Include(p => p.Creator)
+             .AsNoTracking()
+             .Where(p => p.CreatorId == userId)
+             .Skip(skipCount).Take(takeCount)
+             .Select(p => new ProductDto
+             {
+                 Id = p.Id,
+                 Price = p.Price,
+                 ProductName = p.Name,
+                 Status = p.Status,
+                 CreatorName = p.Creator.UserName
+             }).ToListAsync();
+
+            return products;
+        }
+
+        public async Task<IEnumerable<ProductListItemDto>> GetProductListItemDtosOf_ApprovedProductsWithActiveSaleOrdersCreatedByUserAsync(string userId)
+        {
+            IEnumerable<ProductListItemDto> productListItemDtos = await _context
+                .Products
+                .Include(p => p.SellOrders)
+                .AsNoTracking()
+                .Where(p => p.Status == ProductStatus.approved && p.SellOrders.Any(so => so.Status == SellOrderStatus.active) && p.CreatorId == userId)
+                .Select(p => new ProductListItemDto { Id = p.Id, ProductName = p.Name })
+                .ToListAsync();
+
+            return productListItemDtos;
+        }
+
+        public async Task<IEnumerable<ProductDto>> GetDtosOf_ApprovedProductsWithActiveSellOrdersAsync(ProductFilter? productFilter, int skipCount, int takeCount)
+        {
+            IQueryable<Product> productsQuery = _context
+                .Products
+               .AsNoTracking()
+               .Where(p => p.Status == ProductStatus.approved && p.SellOrders.Any(so => so.Status == SellOrderStatus.active));
+
+            if (productFilter is not null)
+            { productsQuery = GetQueryForFilteringProducts(productFilter, productsQuery); }
+
+            IEnumerable<ProductDto> products = await productsQuery
+            .Include(p => p.Creator)
+            .Skip(skipCount).Take(takeCount)
+            .Select(p => new ProductDto
+            {
+                Id = p.Id,
+                ProductName = p.Name,
+                Price = p.Price,
+                CreatorName = p.Creator.UserName,
+                Status = p.Status
+
+            }).ToListAsync();
+
+            return products;
+        }
+
+        public async Task<Product_UpdateProductDto?> GetProductToUpdateAsync(Guid productId)
+        {
+            Product_UpdateProductDto? product = await _context
+              .Products
+              .AsNoTracking()
+              .Where(p => p.Id == productId)
+              .Select(p => new Product_UpdateProductDto()
+              {
+                  Id = productId,
+                  Name = p.Name,
+                  Description = p.Description,
+                  Price = p.Price
+              }).SingleOrDefaultAsync();
+
+            return product;
+        }
+
+        public async Task<Product_DeleteProductDto?> GetProductToDeleteAsync(Guid productId)
+        {
+            Product_DeleteProductDto? product = await _context
+               .Products
+               .AsNoTracking()
+               .Where(p => p.Id == productId)
+               .Select(p => new Product_DeleteProductDto()
+               {
+                   Id = productId,
+                   Name = p.Name,
+               }).SingleOrDefaultAsync();
+
+            return product;
+        }
+        public async Task<Product_ManageProductDto?> GetProductToManageAsync(Guid productId)
+        {
+            Product_ManageProductDto? product = await _context
+               .Products
+               .AsNoTracking()
+               .Where(p => p.Id == productId)
+               .Select(p => new Product_ManageProductDto()
+               {
+                   Id = productId,
+                   Name = p.Name,
+                   Status = p.Status
+               }).SingleOrDefaultAsync();
+
+            return product;
+        }
+
         public async Task<Product_CreateSellOrderEligibilityDto?> GetProductForCreateSellOrderAsync(Guid productId)
         {
             Product_CreateSellOrderEligibilityDto? product = await _context
@@ -239,5 +455,36 @@ namespace TradingApp.Data.Repository
             }
         }
         //<operation methods>
+
+
+        //<filtering methods
+        private IQueryable<Product> GetQueryForFilteringProducts(ProductFilter productFilter, IQueryable<Product> productsQuery)
+        {
+            if (string.IsNullOrEmpty(productFilter.ProductName) == false)
+            { productsQuery = productsQuery.Where(p => p.Name.Contains(productFilter.ProductName)); }
+
+            if (string.IsNullOrEmpty(productFilter.CreatorName) == false)
+            {
+                productsQuery = productsQuery
+                    .Include(p => p.Creator)
+                    .Where(p => p.Creator.UserName.Contains(productFilter.CreatorName));
+            }
+
+            if (productFilter.MinPrice > EntityValidation.Product.PriceMinValue)
+            { productsQuery = productsQuery.Where(p => p.Price >= (decimal)productFilter.MinPrice); }
+
+            if (productFilter.MaxPrice < EntityValidation.Product.PriceMaxValue)
+            { productsQuery = productsQuery.Where(p => p.Price <= (decimal)productFilter.MaxPrice); }
+
+            if (productFilter.OrderRequestId != default(Guid))
+            {
+                productsQuery = productsQuery
+                    .Include(p => p.SellOrderSuggestions)
+                    .Where(p => p.SellOrderSuggestions.Any(sos => sos.OrderRequestId == productFilter.OrderRequestId));
+            }
+
+            return productsQuery;
+        }
+        //filtering methods>
     }
 }
