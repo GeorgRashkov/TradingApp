@@ -8,7 +8,7 @@ using TradingApp.GCommon.Enums;
 
 namespace TradingApp.Data.Repository
 {
-    public class ProductRepository: IProductRepository
+    public class ProductRepository : IProductRepository
     {
         private readonly ApplicationDbContext _context;
         public ProductRepository(ApplicationDbContext context)
@@ -170,11 +170,7 @@ namespace TradingApp.Data.Repository
             product.Price = newPrice;
             product.Status = ApplicationConstants.CreatedProductDefaultStatus;
 
-            int affectedEntities = await _context.SaveChangesAsync();
-            if (affectedEntities != 1)
-            {
-                throw new Exception("Failed to update product.");
-            }
+            await _context.SaveChangesAsync();
         }
 
         public async Task ChangeProductStatusAsync(Product product, ProductStatus newStatus)
@@ -182,33 +178,23 @@ namespace TradingApp.Data.Repository
             _context.Attach<Product>(product);
             product.Status = newStatus;
 
-            int affectedEntities = await _context.SaveChangesAsync();
-            if (affectedEntities != 1)
-            {
-                throw new Exception("Failed to change the status of a product.");
-            }
+            await _context.SaveChangesAsync();
         }
 
         public async Task DeleteProductAsync(Product product)
         {
-            int affectedEntitiesBeforeSaveChanges = 0;
+            await DeleteSellOrdersOfProductAsync(product.Id);
+            await DeleteSellOrderSuggestionsOfProductAsync(product.Id);
+            await DeleteReportsOfProductAsync(product.Id);
+            await SetFkToNullForCompletedOrdersOfProductAsync(product.Id);
 
-            affectedEntitiesBeforeSaveChanges += await DeleteSellOrdersOfProductAsync(product.Id);
-            affectedEntitiesBeforeSaveChanges += await DeleteSellOrderSuggestionsOfProductAsync(product.Id);
-            affectedEntitiesBeforeSaveChanges += await DeleteReportsOfProductAsync(product.Id);
-            affectedEntitiesBeforeSaveChanges += await SetFkToNullForCompletedOrdersOfProductAsync(product.Id);
-                        
             _context.Products.Remove(product);
-            affectedEntitiesBeforeSaveChanges++;
 
-            int affectedEntities = await _context.SaveChangesAsync();
-            if (affectedEntities != affectedEntitiesBeforeSaveChanges)
-            {
-                throw new Exception("Failed to delete product.");
-            }
+            await _context.SaveChangesAsync();
+
         }
 
-        private async Task<int> DeleteSellOrdersOfProductAsync(Guid productId)
+        private async Task DeleteSellOrdersOfProductAsync(Guid productId)
         {
             IEnumerable<SellOrder> sellOrders = await _context
                 .SellOrders
@@ -217,11 +203,9 @@ namespace TradingApp.Data.Repository
                 .ToListAsync();
 
             _context.SellOrders.RemoveRange(sellOrders);
-
-            return sellOrders.Count();
         }
 
-        private async Task<int> DeleteSellOrderSuggestionsOfProductAsync(Guid productId)
+        private async Task DeleteSellOrderSuggestionsOfProductAsync(Guid productId)
         {
             IEnumerable<SellOrderSuggestion> sellOrderSuggestions = await _context.
                 SellOrderSuggestions
@@ -229,11 +213,9 @@ namespace TradingApp.Data.Repository
                 .ToListAsync();
 
             _context.SellOrderSuggestions.RemoveRange(sellOrderSuggestions);
-
-            return sellOrderSuggestions.Count();
         }
 
-        private async Task<int> DeleteReportsOfProductAsync(Guid productId)
+        private async Task DeleteReportsOfProductAsync(Guid productId)
         {
             IEnumerable<ProductReport> productReports = await _context
                 .ProductReports
@@ -241,11 +223,9 @@ namespace TradingApp.Data.Repository
                 .ToListAsync();
 
             _context.ProductReports.RemoveRange(productReports);
-
-            return productReports.Count();
         }
 
-        private async Task<int> SetFkToNullForCompletedOrdersOfProductAsync(Guid productId)
+        private async Task SetFkToNullForCompletedOrdersOfProductAsync(Guid productId)
         {
             IEnumerable<CompletedOrder> completedOrders = await _context
                 .CompletedOrders
@@ -257,8 +237,6 @@ namespace TradingApp.Data.Repository
             {
                 completedOrder.Product = null;
             }
-
-            return completedOrders.Count();
         }
         //<operation methods>
     }

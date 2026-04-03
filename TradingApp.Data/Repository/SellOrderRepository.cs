@@ -51,11 +51,7 @@ namespace TradingApp.Data.Repository
                 sellOrder.Status = SellOrderStatus.cancelled;                
             }
 
-            int affectedEntities = await _context.SaveChangesAsync();
-            if (affectedEntities != sellOrders.Count())
-            {
-                throw new Exception("Failed to cancel sell orders.");
-            }
+            await _context.SaveChangesAsync();            
         }
 
         public async Task BuySellOrderAsync(Guid productId, string buyerId)

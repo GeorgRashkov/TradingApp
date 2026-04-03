@@ -202,11 +202,7 @@ namespace TradingApp.Data.Repository
             orderRequest.Description = newDescription;
             orderRequest.MaxPrice = newMaxPrice;
 
-            int affectedEntities = await _context.SaveChangesAsync();
-            if (affectedEntities != 1)
-            {
-                throw new Exception("Failed to update order request.");
-            }
+            await _context.SaveChangesAsync();            
         }
 
 
@@ -215,11 +211,7 @@ namespace TradingApp.Data.Repository
             _context.Attach<OrderRequest>(orderRequest);
             orderRequest.Status = newStatus;
 
-            int affectedEntities = await _context.SaveChangesAsync();
-            if (affectedEntities != 1)
-            {
-                throw new Exception("Failed to update the status of order request.");
-            }
+            await _context.SaveChangesAsync();            
         }
         //operation methods>
     }

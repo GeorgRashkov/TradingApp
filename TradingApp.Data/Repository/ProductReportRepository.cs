@@ -132,11 +132,7 @@ namespace TradingApp.Data.Repository
             _context.Attach<ProductReport>(report);
             report.Status = newReportStatus;
 
-            int affectedEntities = await _context.SaveChangesAsync();
-            if (affectedEntities != 1)
-            {
-                throw new Exception("Failed to change the status of a product report.");
-            }
+            await _context.SaveChangesAsync();           
         }
         //operation methods>
     }
