@@ -1,8 +1,8 @@
 ﻿
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using TradingApp.Data;
 using TradingApp.Data.Models;
+using TradingApp.Data.Repository.Interfaces;
 using TradingApp.GCommon;
 using TradingApp.GCommon.ErrorCodes;
 using TradingApp.Services.Core.Interfaces;
@@ -11,21 +11,21 @@ using TradingApp.ViewModels.InputUser;
 namespace TradingApp.Services.Core
 {
     public class UserOperationsService : IUserOperationsService
-    {
-        private ApplicationDbContext _context;
+    {        
         private RoleManager<IdentityRole> _roleManager;
         private UserManager<User> _userManager;
+        private IUserRepository _userRepository;
 
-        public UserOperationsService(ApplicationDbContext context, RoleManager<IdentityRole> roleManager, UserManager<User> userManager)
+        public UserOperationsService(IUserRepository userRepository, RoleManager<IdentityRole> roleManager, UserManager<User> userManager)
         {
-            _context = context;
+            _userRepository = userRepository;
             _roleManager = roleManager;
             _userManager = userManager;
         }
 
         public async Task<Result> ManageUserAsync(ManagedUserModel user)
         {
-            User? userFromDB = await _context.Users.FindAsync(user.UserId);
+            User? userFromDB = await _userManager.FindByIdAsync(userId: user.UserId);
 
             //<validations
 
@@ -56,14 +56,16 @@ namespace TradingApp.Services.Core
                 await _userManager.RemoveFromRoleAsync(user: userFromDB, role: userCurrentRole);
                 await _userManager.AddToRoleAsync(user: userFromDB, role: user.Role);
             }
+               
 
-            userFromDB.LockoutMessage = (user.DaysToSuspend > 0) ? user.LockoutMessage: null;
-            userFromDB.LockoutEnabled = true;//make sure the user can be locked (`LockoutEnd` makes no effect if `LockoutEnabled` is `false`)
-            userFromDB.LockoutEnd = new DateTimeOffset(DateTimeOffset.UtcNow.Date.AddDays(user.DaysToSuspend), TimeSpan.Zero);
+            string? lockoutMessage = (user.DaysToSuspend > 0) ? user.LockoutMessage: null;
+            bool lockoutEnabled = true;//make sure the user can be locked (`LockoutEnd` makes no effect if `LockoutEnabled` is `false`)
+            DateTimeOffset lockoutEnd = new DateTimeOffset(DateTimeOffset.UtcNow.Date.AddDays(user.DaysToSuspend), TimeSpan.Zero);
+
+            await _userRepository.ManageUserAsync(user: userFromDB, lockoutMessage: lockoutMessage, lockoutEnabled: lockoutEnabled, lockoutEnd:lockoutEnd);
+
             //update DB records>
-
-            await _context.SaveChangesAsync();
-
+                 
             return new Result();
         }
     }

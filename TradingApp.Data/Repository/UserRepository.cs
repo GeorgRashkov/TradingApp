@@ -1,6 +1,7 @@
 ﻿
 using Microsoft.EntityFrameworkCore;
 using TradingApp.Data.Dtos.User;
+using TradingApp.Data.Models;
 using TradingApp.Data.Repository.Interfaces;
 using TradingApp.GCommon.Enums;
 
@@ -40,6 +41,17 @@ namespace TradingApp.Data.Repository
         //bool methods>
 
         //<number methods
+        public async Task<int> GetUsersCountAsync()
+        {
+            int usersCount = await _context
+               .Users
+              .AsNoTracking()
+              .CountAsync();
+
+            return usersCount;
+        }
+
+
         public async Task<int> GetUserActiveSellOrdersCountAsync(string userId)
         {
             int sellOrdersCount = await _context
@@ -93,6 +105,19 @@ namespace TradingApp.Data.Repository
         }
         //text methods>
 
+        //<entity methods
+        public async Task<IEnumerable<User>> GetUsersAsync(int skipCount, int takeCount)
+        {
+            List<User> users = await _context
+                .Users
+                .AsNoTracking()
+                .Skip(skipCount).Take(takeCount)
+                .ToListAsync();
+
+            return users;
+        }
+        //entity methods>
+
 
         //<dto methods
         public async Task<User_CreateSellOrderEligibilityDto?> GetUserForCreateSellOrderAsync(string userId)
@@ -143,5 +168,23 @@ namespace TradingApp.Data.Repository
             return user;
         }
         //dto methods>
+
+
+        //<operations methods
+        public async Task ManageUserAsync(User user, string? lockoutMessage, bool lockoutEnabled, DateTimeOffset lockoutEnd)
+        {
+            _context.Attach<User>(user);
+
+            user.LockoutMessage = lockoutMessage;
+            user.LockoutEnabled = lockoutEnabled;
+            user.LockoutEnd = lockoutEnd;
+            
+            int affectedEntities = await _context.SaveChangesAsync();
+            if (affectedEntities != 1)
+            {
+                throw new Exception("Failed to change the user properties.");
+            }
+        }
+        //operations methods>
     }
 }

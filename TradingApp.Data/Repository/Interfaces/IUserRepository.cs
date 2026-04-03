@@ -1,5 +1,6 @@
 ﻿
 using TradingApp.Data.Dtos.User;
+using TradingApp.Data.Models;
 
 namespace TradingApp.Data.Repository.Interfaces
 {
@@ -12,6 +13,7 @@ namespace TradingApp.Data.Repository.Interfaces
         //bool methods>
 
         //<number methods
+        Task<int> GetUsersCountAsync();
         Task<int> GetUserActiveSellOrdersCountAsync(string userId);
         //number methods>
 
@@ -21,10 +23,18 @@ namespace TradingApp.Data.Repository.Interfaces
         Task<string?> GetUserIdAsync(string userName);
         //text methods>
 
+        //<entity methods
+        Task<IEnumerable<User>> GetUsersAsync(int skipCount, int takeCount);
+        //entity methods>
+
         //<dto methods
         Task<User_CreateSellOrderEligibilityDto?> GetUserForCreateSellOrderAsync(string userId);
         Task<User_CancelSellOrderEligibilityDto?> GetUserForCancelSellOrderAsync(string userId);
         Task<User_BuySellOrderEligibilityDto?> GetUserForBuySellOrderAsync(string userId);
         //dto methods>
+
+        //<operations methods
+        Task ManageUserAsync(User user, string? lockoutMessage, bool lockoutEnabled, DateTimeOffset lockoutEnd);
+        //operations methods>
     }
 }
