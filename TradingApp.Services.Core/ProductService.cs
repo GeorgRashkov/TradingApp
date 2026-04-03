@@ -23,6 +23,11 @@ namespace TradingApp.Services.Core
         public int ProductPageIndex { get; private set; }
 
 
+        public async Task<bool> DoesProductCreatedByUserExistAsync(string userId, Guid productId)
+        {
+            return await _productRepository.DoesProductCreatedByUserExistAsync(userId: userId, productId: productId);
+        }
+
         public async Task<IEnumerable<ProductViewModel>> GetApprovedProductsWithActiveSellOrdersAsync(int pageIndex, ProductFilter? productFilter)
         {
             int productsCount = await _productRepository.GetCountOf_ApprovedProductsWithActiveSellOrdersAsync(productFilter: productFilter);
