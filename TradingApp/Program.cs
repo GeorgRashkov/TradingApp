@@ -58,8 +58,7 @@ namespace TradingApp
             builder.Services.AddScoped<IOrderRequestRepository, OrderRequestRepository>();
             builder.Services.AddScoped<IProductReportRepository, ProductReportRepository>();
             builder.Services.AddScoped<IProductRepository, ProductRepository>();
-            builder.Services.AddScoped<ISellOrderRepository, SellOrderRepository>();
-            builder.Services.AddScoped<ISellOrderSuggestionRepository, SellOrderSuggestionRepository>();
+            builder.Services.AddScoped<ISellOrderRepository, SellOrderRepository>();            
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             
 
