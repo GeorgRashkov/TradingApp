@@ -33,7 +33,7 @@ namespace TradingApp.Services.Core
             { return new Result(errorCode: OrderRequestErrorCodes.RequestSuggestionSameCreator);}
 
             bool isOrderRequestActive = await _orderRequestRepository.IsOrderRequestActiveAsync(orderRequestId: requestId);
-            if (doesOrderRequestExist == false)
+            if (isOrderRequestActive == false)
             { return new Result(errorCode: OrderRequestErrorCodes.RequestInvalidStatus); }
             //request validations>
 
@@ -77,7 +77,7 @@ namespace TradingApp.Services.Core
         {
             bool doesUserExist = await _userRepository.DoesUserExistAsync(userId: creatorId);
             if (doesUserExist == false)
-            { return new Result(errorCode: ProductErrorCodes.ProductNotFound); }
+            { return new Result(errorCode: UserErrorCodes.UserNotFound); }
 
             bool doesOrderRequestCreatedByUserExist = await _orderRequestRepository.DoesOrderRequestCreatedByUserExistAsync(userId: creatorId, orderRequestTitle: title);
             if(doesOrderRequestCreatedByUserExist == true) 
