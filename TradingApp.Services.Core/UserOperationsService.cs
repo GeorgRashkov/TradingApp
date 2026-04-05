@@ -39,7 +39,7 @@ namespace TradingApp.Services.Core
             { return new Result(errorCode: RoleErrorCodes.ReadOnlyRole_UpdateAttempt); }
 
             //checking whether the role (which is about to be assigned to the user) exists in the DB
-            bool isRoleValid = await _roleManager.Roles.AnyAsync(r => r.Name == user.Role);
+            bool isRoleValid = _roleManager.Roles.Any(r => r.Name == user.Role);
             if (isRoleValid == false)
             { return new Result(errorCode: RoleErrorCodes.RoleNotFound); }
 
