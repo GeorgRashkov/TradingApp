@@ -28,7 +28,7 @@ This is the page where users can log in with their accounts.
 
 This is the main menu navigation bar which is displayed to each anonymous user
 
-![Visitor navigation bar](PagePictures/NavBar_visitor.jpg)
+![Visitor navigation bar](PagePictures/NavBar_Visitor.jpg)
 
 <br>
 
@@ -36,7 +36,7 @@ This is the main menu navigation bar which is displayed to each anonymous user
 
 This is the main menu navigation bar which is displayed to each logged user
 
-![Logged user navigation bar](PagePictures/NavBar_user.jpg)
+![Logged user navigation bar](PagePictures/NavBar_User.jpg)
 
 <br>
 
@@ -142,7 +142,7 @@ This page is supposed to represent a money transfer from the user's bank account
 
 This is the main menu navigation bar which is displayed to users with role `moderator`
 
-![Visitor navigation bar](PagePictures/NavBar_moderator.jpg)
+![Visitor navigation bar](PagePictures/NavBar_Moderator.jpg)
 
 <br>
 
@@ -150,7 +150,7 @@ This is the main menu navigation bar which is displayed to users with role `mode
 
 This is the main menu navigation bar which is displayed to users with role `admin`
 
-![Logged user navigation bar](PagePictures/NavBar_admin.jpg)
+![Logged user navigation bar](PagePictures/NavBar_Admin.jpg)
 
 <br>
 
