@@ -4,6 +4,8 @@
 @{
     ViewData["Title"] = "My Requests";
 
+    bool currentUserMaxSuggestionsCountReached = ViewData["currentUserMaxActiveRequestsCountReached"] is null ? false : (bool)ViewData["currentUserMaxActiveRequestsCountReached"];
+
     PaginationHelper paginationHelper = new PaginationHelper()
     {
         Controller = "OrderRequest",
@@ -18,9 +20,16 @@
     </div>
 
     <div style="text-align:right">
-        <a class="btn btn-sm btn-primary" asp-controller="OrderRequestOperations" asp-action="CreateOrderRequest">
-            Create request
-        </a>
+        @if (currentUserMaxSuggestionsCountReached == false)
+        {
+            <a class="btn btn-sm btn-primary" asp-controller="OrderRequestOperations" asp-action="CreateOrderRequest">
+                Create request
+            </a>
+        }
+        else
+        {
+            <p><b>Max requests count reached!</b></p>
+        }
     </div>
 
 

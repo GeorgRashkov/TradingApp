@@ -12,7 +12,7 @@ namespace TradingApp.GCommon
 
 
         public const int UserMaxActiveSellOrders = 5;
-        public const int UserMaxActiveOrderSuggetions = 10;
+        public const int UserMaxActiveRequests = 10;
         public const int ProductMaxActiveSellOrders = 3;        
 
         public const string DateFormat = "dd/MM/yyyy";

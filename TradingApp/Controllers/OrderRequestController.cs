@@ -54,6 +54,9 @@ namespace TradingApp.Controllers
 
             ViewData["page"] = _orderRequestService.RequestPageIndex;
 
+            int loggedUserActiveRequestsCount = await _orderRequestService.GetUserActiveRequestsCountAsync(LoggedUserId);
+            ViewData["currentUserMaxActiveRequestsCountReached"] = loggedUserActiveRequestsCount >= ApplicationConstants.UserMaxActiveRequests ? true : false;
+
             return View(model: orderRequests);
         }
 
@@ -64,9 +67,6 @@ namespace TradingApp.Controllers
 
             if (orderRequest == null)
             { return NotFound(); }
-
-            int loggedUserActiveOrderSuggestionsCount = await _orderRequestService.GetUserActiveRequestsCountAsync(LoggedUserId);
-            ViewData["currentUserMaxSuggestionsCountReached"] = loggedUserActiveOrderSuggestionsCount >= ApplicationConstants.UserMaxActiveOrderSuggetions ? true : false;
 
             return View(model: orderRequest);
         }
