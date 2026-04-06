@@ -23,7 +23,7 @@ public class ProductReportServiceTests
     //<GetReportsAsync tests
 
     [Test]
-    public async Task GetReportsAsync_MustReturnEmptyCollection_WheThereAreNoProductReports()
+    public async Task GetReportsAsync_MustReturnEmptyCollection_WhenThereAreNoProductReports()
     {
         //Arrange
         int pageIndex = 5;
@@ -46,7 +46,7 @@ public class ProductReportServiceTests
 
 
     [Test]
-    public async Task GetReportsAsync_MustReturnNonEmptyCollection_WheThereAreProductReports()
+    public async Task GetReportsAsync_MustReturnNonEmptyCollection_WhenThereAreProductReports()
     {
         //Arrange
         int reportsPerPage = ApplicationConstants.ProductReportsPerPage;
