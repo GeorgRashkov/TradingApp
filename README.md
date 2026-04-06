@@ -25,7 +25,7 @@ The project is a web application which allows users to trade 3D virtual models.
 
 ## 📖 About the Project
 
-This project is a simple web trading app built as a final project for the *ASP.NET Fundamentals* course. The app is focused on showing the main characteristics of an ASP.NET MVC layered architecture and database management. The main trading subject (3D models) is only an idea and the app will work with images (type *.jpg*) instead of actual 3D model files. The purpose for trading is that when a user buys a product he will be able to download the main trading subject on his PC while the product's creator balance will increase. 
+This project is a simple web trading app built as a final project for the *ASP.NET Advanced* course. The app is focused on showing the main characteristics of an ASP.NET MVC layered architecture and database management. The main trading subject (3D models) is only an idea and the app will work with images (type *.jpg*) instead of actual 3D model files. The purpose for trading is that when a user buys a product he will be able to download the main trading subject on his PC while the product's creator balance will increase. 
 
 ---
 <br>
@@ -102,11 +102,15 @@ TradingApp/
 │
 ├─├─Data                        #Data layer
 │  ├─TradingApp.Data                # DbContext, migrations, seeding data
+|  ├─TradingApp.Data.Dtos           # DTOs
 │  ├─TradingApp.Data.Models         # DB Entity models
 │
 ├─├─Services                    #Service layer
 │  ├─TradingApp.Services.Core       # Business logic
 │
+|─├─Tests                       #Unit tests
+|  ├─TradingApp.Services.Tests      #Service layer unit tests
+|
 ├─├─Web                         #Presentation layer
 │  ├─TradingApp                     # Main project folder
 │   ├─Controllers/                   # MVC Controllers
@@ -130,21 +134,39 @@ TradingApp/
 - CRUD operations for the Product entity 
 - Uploading and downloading files (.jpg files)
 - Input validation (server-side & client-side)
+- User roles (user, admin, moderator)
+- Admin panel for managing users and products
 
 ---
 <br>
 
 ## ⚡ User actions
 
+### User
 * Create products
 * Upload product image files
 * Create sell orders
 * Cancel sell orders
 * Edit products
 * Delete products
+* Report products
 * Browse and purchase products
 * Track history of completed orders
 * Download purchased products
+* Create requests
+* Edit requests
+* Cancel requests
+* Browse products for requests
+* Suggest products to requests
+
+### Admin
+* User management
+* Product management
+* Reports management
+
+### Moderator
+* Product management
+* Reports management
 
 ---
 <br>
@@ -197,4 +219,4 @@ Project Link: [https://github.com/GeorgRashkov/TradingApp](https://github.com/Ge
 ---
 <br>
 
-*Built as part of the **ASP.NET Fundamentals** course.*
+*Built as part of the **ASP.NET Advanced** course.*
