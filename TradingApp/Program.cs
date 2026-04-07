@@ -9,6 +9,7 @@ using TradingApp.Data.Seed;
 using TradingApp.GCommon;
 using TradingApp.Services.Core;
 using TradingApp.Services.Core.Interfaces;
+using Microsoft.AspNetCore.Mvc;
 
 namespace TradingApp
 {
@@ -31,7 +32,9 @@ namespace TradingApp
 
             builder.Services.AddDefaultIdentity<User>().AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
-            builder.Services.AddControllersWithViews();
+            builder.Services
+                .AddControllersWithViews()
+                .AddMvcOptions(options => options.Filters.Add(new AutoValidateAntiforgeryTokenAttribute()));
 
             //configure identity options
             builder.Services.Configure<IdentityOptions>(options =>
